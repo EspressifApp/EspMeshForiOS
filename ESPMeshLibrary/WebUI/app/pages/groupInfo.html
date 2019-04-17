@@ -1,0 +1,44 @@
+
+<div class="init-width">
+    <transition name="moves">
+        <div v-show="addFlag" class="add-info operate-way">
+            <div class="title-info">
+                <h4 class="app-title">
+                    <span @click="hide"><i class="icon-left back"></i></span>
+                    {{group.name}}
+                </h4>
+                <span v-show="!group.is_user" @click="save" class="right-top save-info"><i class="icon-checkmark-round"></i></span>
+            </div>
+            <div class="selected-radio">
+                <div>{{$t('selectDevice')}}({{selected}}/{{total}})</div>
+                <div @click="selectAllDevice($event)" class="select-small-radio flex flex-ac flex-jce"><span class="span-radio"
+                           :class="{'active': (selected == total && deviceList.length != 0)}"><span></span></span></div>
+            </div>
+            <div class="content-info flex-wrapper no-padding-bottom" :id="editDeviceId">
+                <div class="input-info">
+                    <i class="icon-search"></i>
+                    <input v-model="searchName" type="search" class="form-control" :placeholder="$t('search')">
+                </div>
+                <div class="overflow-touch overflow-wrapper">
+                    <div @click="selectMac(item.mac)" v-for="item in list" class="item">
+                        <div class="item-icon-circle">
+                            <i class="icon-light"></i>
+                        </div>
+                        <div class="item-name up-date padding-left-10">
+                            <span>{{getPosition(item.position)}}</span>
+                            <span :class="{'desc': showDesc(item.position)}">{{item.name}}
+                                <span v-show="showDesc(item.position)">({{item.version}})</span></span>
+                            <span class="desc" v-show="!showDesc(item.position)">{{item.version}}</span>
+                        </div>
+                        <div class="item-power-small">
+                        <span :data-value="item.mac"
+                              class="span-radio" :class="{'active': isSelected(item.mac)}"><span></span></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </transition>
+    <!--<v-operateDevice :device="deviceInfo" ref="operate"></v-operateDevice>-->
+</div>
