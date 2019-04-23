@@ -97,6 +97,8 @@
 - (void)deleteAllDeviceEventsPosition:(NSString *)message;
 //跳转系统设置页面
 - (void)gotoSystemSettings:(NSString *)message;
+//加载超链接
+- (void)openHyperlinks:(NSString *)message;
 @end
 
 @interface ESPNewWebViewController : UIViewController<QRCodeReaderDelegate>

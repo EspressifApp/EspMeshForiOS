@@ -583,7 +583,7 @@
         
         if (controlQueue==nil) {
             controlQueue = [[NSOperationQueue alloc] init];
-            controlQueue.maxConcurrentOperationCount=20;//1串行，>2并发
+            controlQueue.maxConcurrentOperationCount=1;//1串行，>2并发
         }
         [controlQueue addOperationWithBlock:^{
             [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:msg andSuccess:^(NSDictionary * _Nonnull dic) {
@@ -766,7 +766,7 @@
     NSString *app_Version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
     // app build版本
     NSString *app_build = [infoDictionary objectForKey:@"CFBundleVersion"];
-    NSString* json=[ESPDataConversion jsonFromObject:@{@"version_name":app_Version,@"version_code":app_build}];
+    NSString* json=[ESPDataConversion jsonFromObject:@{@"version_name":app_build,@"version_code":app_Version}];
     [self sendMsg:@"onGetAppInfo" param:json];
 }
 //获取配网记录
@@ -1292,7 +1292,7 @@
         }];
     }
 }
-//保存本地事件研究颇深
+//保存本地事件
 - (void)saveDeviceEventsPosition:(NSString *)message {
     id msg=[ESPDataConversion objectFromJsonString:message];
     if (msg==nil) {
@@ -1372,7 +1372,7 @@
 }
 //跳转系统设置页面
 - (void)gotoSystemSettings:(NSString *)message {
-        NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+    NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
     if ([[UIApplication sharedApplication] canOpenURL:url]) {
         if (@available(iOS 10.0, *)) {
             [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:^(BOOL success) {
@@ -1386,6 +1386,24 @@
             [[UIApplication sharedApplication] openURL:url];
         }
     }
+}
+
+//加载超链接
+- (void)openHyperlinks:(NSString *)message {
+    NSURL *urlStr = [NSURL URLWithString:message];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (@available(iOS 10.0, *)) {
+            [[UIApplication sharedApplication] openURL:urlStr options:@{} completionHandler:^(BOOL success) {
+                if (success) {
+                    NSLog(@"success");
+                }else{
+                    NSLog(@"fail");
+                }
+            }];
+        } else {
+            [[UIApplication sharedApplication] openURL:urlStr];
+        }
+    });
 }
 
 //发送消息给JS
@@ -1454,6 +1472,13 @@
         bssid=@"";
     }
     NSString* lastSSID=[[NSUserDefaults standardUserDefaults] valueForKey:@"lastSSID"];
+    NSString* lastBSSID=[[NSUserDefaults standardUserDefaults] valueForKey:@"lastBSSID"];
+    if (lastSSID==nil) {
+        lastSSID=@"";
+    }
+    if (lastBSSID==nil) {
+        lastBSSID=@"";
+    }
     if (![ssid isEqualToString:lastSSID]) {
         lastSSID=ssid;
     NSDictionary *wifidate = @{@"connected":@(isConnect),@"ssid":ssid,@"bssid":bssid,@"frequency":@""};
@@ -1466,6 +1491,11 @@
         [defaults removeObjectForKey:@"DevicesOfScanUDPValueArr"];
         [defaults synchronize];
         [[NSUserDefaults standardUserDefaults] setObject:ssid forKey:@"lastSSID"];
+        [[NSUserDefaults standardUserDefaults] setObject:bssid forKey:@"lastBSSID"];
+    }else {
+        NSDictionary *wifidate = @{@"connected":@(isConnect),@"ssid":lastSSID,@"bssid":lastBSSID,@"frequency":@""};
+        NSString* paramjson=[ESPDataConversion jsonFromObject:wifidate];
+        [self sendMsg:@"onWifiStateChanged" param:paramjson];
     }
 
 }
