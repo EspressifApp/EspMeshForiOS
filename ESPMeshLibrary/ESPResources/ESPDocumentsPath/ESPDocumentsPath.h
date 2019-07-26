@@ -47,6 +47,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray *)documentFileName;
 
+// 读取指定文件夹
+- (NSArray *)readFile:(NSString *)typeStr;
+
 @end
 
 NS_ASSUME_NONNULL_END

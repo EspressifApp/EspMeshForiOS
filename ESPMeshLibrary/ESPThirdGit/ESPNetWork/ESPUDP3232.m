@@ -78,7 +78,7 @@
 -(void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContex
 {
         NSString *dataStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"dataStr--->%@",dataStr);
+//        NSLog(@"dataStr--->%@",dataStr);
         if ([dataStr.lowercaseString containsString:@"mac"]&&[dataStr.lowercaseString containsString:@"\r\n"]) {
             NSArray* dataArr=[dataStr componentsSeparatedByString:@"\r\n"];
             NSString* newflag=[dataArr[1] componentsSeparatedByString:@"="][1];

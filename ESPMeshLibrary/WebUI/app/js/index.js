@@ -1,10 +1,10 @@
 define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./resetDevice",
 "./operateDevice", "./addGroup", "./load", "./aboutDevice", "./otaInfo", "./automation",
  "./ibeacon", "./scanDevice", "./remind", "./attr", "./setDevicePair", "./joinDevice", "./command",
- "./sendIP", "./blueFail", "./wifiFail"],
+ "./sendIP", "./blueFail", "./wifiFail", "./config", "./newVersion"],
     function(v, MINT, Util, index, footer, resetDevice, operateDevice, addGroup, load, aboutDevice,
         otaInfo, automation, ibeacon, scanDevice, remind, attr, setDevicePair, joinDevice, command,
-        sendIP, blueFail, wifiFail) {
+        sendIP, blueFail, wifiFail, config, newVersion) {
 
     var Index = v.extend({
 
@@ -29,6 +29,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 showAdd: false,
                 isWifiConnect: true,
                 blueEnable: true,
+                isDevice: true,
                 searchName: "",
                 otaMacs: [],
                 commandMacs: [],
@@ -125,6 +126,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     }, 100)
                 } else {
                     self.loadList = [];
+                    self.$store.commit("setTsfTime", "");
                 }
             }
         },
@@ -166,14 +168,26 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 }
             },
             addDevice: function (event) {
-                this.flag = false;
-                this.$store.commit("setShowScanBle", false);
-                this.$refs.device.show();
+                var self = this;
+                self.flag = false;
+                if (!self.isWifiConnect) {
+                    self.showWifiFail();
+                    return false;
+                }
+                if (!self.blueEnable) {
+                    self.showBlueFail();
+                    return false;
+                }
+                self.$store.commit("setShowScanBle", false);
+                self.$refs.device.show();
             },
             joinDevice: function (event) {
                 this.flag = false;
                 this.$store.commit("setShowScanBle", false);
                 this.$refs.join.show();
+            },
+            showVideo: function() {
+                 espmesh.newWebView(VIDEO_URL);
             },
             addGroup: function () {
                 var self = this;
@@ -215,6 +229,12 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             loadHWDevices: function() {
                 espmesh.loadHWDevices();
             },
+            getBxColor: function(layer, tsfTime) {
+                return Util.getBxColor(layer);
+            },
+            getRssiIcon: function(rssi) {
+                return Util.getWIFIRssiIcon(rssi);
+            },
             setPairs: function() {
                 var self = this, position = "", pairMacs = [],
                 pairs = self.$store.state.siteList;
@@ -234,7 +254,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                                 var data = '{"' + MESH_MAC + '": "' + item.mac +
                                         '","'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' + MESH_REQUEST + '": "' + SET_POSITION + '",' +
                                         '"position":"' + item.position + '"}';
-                                espmesh.requestDeviceAsync(data);
+                                espmesh.requestDevice(data);
                                 self.$store.commit("setList", self.deviceList);
                                 return  false;
                             }
@@ -261,7 +281,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                             var data = '{"' + MESH_MAC + '": "' + device.mac +
                                     '","'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' + MESH_REQUEST + '": "' + SET_POSITION + '",' +
                                     '"position":"' + device.position + '"}';
-                            espmesh.requestDeviceAsync(data);
+                            espmesh.requestDevice(data);
                             return  false;
                         }
                     });
@@ -313,6 +333,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                         });
                         var id = parseInt(item, 16),
                              name = "mesh_id(" + item + ")";
+                        if (id == 0) {
+                            id = parseInt("111111111111", 16);
+                        }
                         list.push({id: id, name: self.getGroupName(oldGroups, id, name),
                             is_user: true, is_mesh: true, device_macs: meshMacs})
                     })
@@ -502,6 +525,11 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 this.$store.commit("setShowScanBle", false);
                 this.$refs.auto.show();
             },
+            showConfig: function() {
+                this.infoShow = false;
+                this.$store.commit("setShowScanBle", false);
+                this.$refs.config.show();
+            },
             showCommand: function() {
                 var self = this;
                 self.infoShow = false;
@@ -520,14 +548,16 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     self.$refs.sendIP.show();
                 })
             },
-            showIbeacon: function() {
-                this.infoShow = false;
-                this.$store.commit("setShowScanBle", false);
-                this.$refs.ibeacon.show();
-            },
             showDel: function (e) {
                 $("#content-info .item").removeClass("active");
                 $(e.currentTarget).addClass("active");
+            },
+            isShowConfig: function(tid) {
+                var flag = false;
+                if (tid == BUTTON_SWITCH_14) {
+                    flag = true;
+                }
+                return flag;
             },
             hideDel: function (e) {
                 $("#content-info .item").removeClass("active");
@@ -621,7 +651,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                                 '","'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","' + MESH_REQUEST + '": "' + RESET_DEVICE + '","' +
                                 DEVICE_DELAY + '": ' + DELAY_TIME + ',"callback": "onDelDevice", "tag": { "mac": "'+
                                         mac +'"}}';
-                        espmesh.requestDeviceAsync(data);
+                        espmesh.requestDevice(data);
                     }, 1000);
 
                 }).catch(function(err){
@@ -653,7 +683,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 }
                 if (status == STATUS_ON) {
                     if (mode == MODE_CTB) {
-                        rgb = self.modeFun(temperature, brightness);
+                        rgb = Util.modeFun(temperature, brightness);
                     } else {
                         rgb = Raphael.hsb2rgb(hueValue / 360, saturation / 100, luminance / 100);
                         var v = luminance / 100;
@@ -671,32 +701,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 }
                 return rgb;
             },
-            modeFun: function(temperature, brightness) {
-                var r = 0,
-                    g = 0,
-                    b = 0,
-                    r1 = 248,
-                    g1 = 207,
-                    b1 = 109,
-                    r2 = 255,
-                    g2 = 255,
-                    b2 = 255,
-                    r3 = 164,
-                    g3 = 213,
-                    b3 = 255;
-                if (temperature < 50) {
-                    var num = temperature / 50;
-                    r = Math.floor((r2 - r1) * num) + r1;
-                    g = Math.floor((g2 - g1) * num) + g1;
-                    b = Math.floor((b2 - b1) * num) + b1;
-                } else {
-                    var num = (temperature - 50) / 50;
-                    r = r2 - Math.floor((r2 - r3) * num);
-                    g = g2 - Math.floor((g2 - g3) * num);
-                    b = b2 - Math.floor((b2 - b3) * num);
-                }
-                return "rgba("+r+", "+g+", "+b+", 1)";
-            },
+
             editName: function () {
                 var self = this;
                 self.cancelOperate();
@@ -710,7 +715,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                         '","'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","' + MESH_REQUEST + '": "' + RENAME_DEVICE + '",' +
                         '"name":' + JSON.stringify(obj.value) + ',"callback": "onEditName"}';
                     setTimeout(function(){
-                        espmesh.requestDeviceAsync(data);
+                        espmesh.requestDevice(data);
                     }, 600);
                 }).catch(function(err) {
                     self.onBackIndex();
@@ -727,7 +732,8 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 }
                 return (status == STATUS_ON ? true : false);
             },
-            close: function (mac, status) {
+            close: function (mac, status, e) {
+                Util.addBgClass(e);
                 var self = this, meshs = [], deviceStatus = 0, position = 0;
                 $.each(self.deviceList, function(i, item){
                     if (item.mac == mac) {
@@ -753,7 +759,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
 
                     self.deviceInfo.characteristics = characteristics;
                     self.deviceList.splice(position, 0, self.deviceInfo);
-                    espmesh.requestDeviceAsync(data);
+                    espmesh.requestDevice(data);
                 } else {
                     self.deviceList.splice(position, 0, self.deviceInfo);
                 }
@@ -764,9 +770,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 status = self.powerFlag ? STATUS_ON : STATUS_OFF;
                 self.close(mac, status);
             },
-            operateClose: function(mac, status) {
+            operateClose: function(mac, status, e) {
                 var self = this;
-                self.close(mac, status);
+                self.close(mac, status, e);
                 setTimeout(function() {
                     window.onBackPressed = self.hideOperate;
                 })
@@ -774,6 +780,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             showOperate: function (item) {
                 var self = this, status = 0;
                 self.stopBleScan();
+                console.log("显示");
                 self.$store.commit("setShowScanBle", false);
                 var mac = item.mac;
                 $.each(self.deviceList, function(i, item) {
@@ -1103,6 +1110,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 if (wifi.connected) {
                     self.isWifiConnect = wifi.connected;
                     wifi.ssid = decodeURIComponent(wifi.ssid);
+                    if (wifi.ssid == wifiInfo.ssid) {
+                        return false;
+                    }
                     if (self.wifiNum != 0) {
                         clearTimeout(WIFI_TIMER);
                         WIFI_TIMER = setTimeout(function() {
@@ -1123,6 +1133,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     self.$store.commit("setWifiInfo", wifi);
                 } else {
                     self.isWifiConnect = false;
+                    self.$store.commit("setWifiInfo", "");
                 }
             },
             onBluetoothStateChanged: function(blue) {
@@ -1139,6 +1150,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 }
             },
             onScanBLE: function (devices) {
+                console.log(devices);
                 var self = this,
                     scanList = [], rssiList = [], notExist = [],
                     rssiValue = self.$store.state.rssiInfo;
@@ -1146,7 +1158,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     var conScanDeviceList = self.$store.state.conScanDeviceList;
                     devices = JSON.parse(devices);
                     $.each(devices, function(i, item) {
-                        if (item.rssi >= rssiValue && Util.isMesh(item.name, item.version)) {
+                        if (item.rssi >= rssiValue && Util.isMesh(item.name, item.version, item.beacon)) {
                             rssiList.push(item);
                         }
                     })
@@ -1154,9 +1166,17 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                         var names = {};
                         $.each(devices, function(i, item) {
                             if (self.listMacs.indexOf(item.mac) == -1) {
-                                notExist.push(item.mac);
-                                names[item.mac] = item.name;
-                                self.listMacs.push(item.mac);
+                                if (!Util._isEmpty(item.beacon)) {
+                                    if (item.beacon == BEACON_MDF) {
+                                        notExist.push(item.mac);
+                                        names[item.mac] = item.name;
+                                        self.listMacs.push(item.mac);
+                                    }
+                                } else {
+                                    notExist.push(item.mac);
+                                    names[item.mac] = item.name;
+                                    self.listMacs.push(item.mac);
+                                }
                             }
                         })
                         if (Util._isEmpty(conScanDeviceList) || conScanDeviceList.length <= 0) {
@@ -1248,8 +1268,8 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                        self.onBackIndex();
                        self.wifiFlag = false;
                    }
-               }, 1000)
-               
+               }, 2000)
+
 
             },
             onDeviceScanning: function(devices) {
@@ -1270,17 +1290,19 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     }
                }
                self.$store.commit("setList", self.deviceList);
-
             },
             onCheckAppVersion: function(res) {
                 var self = this;
+                console.log(res);
                 var appInfo = self.$store.state.appInfo;
+                console.log(JSON.stringify(appInfo))
                 if (!Util._isEmpty(res)) {
                     res = JSON.parse(res)
                     if (res.status == 0) {
                         if (res.version > appInfo.version_code) {
                             self.$store.commit("setIsNewVersion", true);
                             self.$store.commit("setNewAppInfo", res);
+                            self.$refs.newVersion.show();
                         }
                     }
                 }
@@ -1323,7 +1345,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             "v-command": command,
             "v-sendIP": sendIP,
             "v-blueFail": blueFail,
-            "v-wifiFail": wifiFail
+            "v-wifiFail": wifiFail,
+            "v-config": config,
+            "v-newVersion": newVersion
         }
 
     });

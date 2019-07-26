@@ -16,6 +16,7 @@
 #import "ESPDocumentsPath.h"
 
 #define ValidDict(f) (f!=nil && [f isKindOfClass:[NSDictionary class]])
+#define ValidArray(f) (f!=nil && [f isKindOfClass:[NSArray class]] && [f count]>0)
 
 @interface ESPAPPResources ()
 {
@@ -99,11 +100,7 @@
 
 //蓝牙配网
 - (void)startConfigureBlufi:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
-//    messageDic = @{
-//                   @"ssid":@"",
-//                   @"password":@"",
-//                   @"ble_addr":@""
-//                   }
+    
     NSMutableDictionary* argsDic=[messageDic copy];
     //保存记录
     [dbStore createTableWithName:@"ap_table"];
@@ -300,14 +297,7 @@
 
 //发送多个设备命令
 - (void)requestDevicesMulticastAsync:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
-    //    messageDic = @{
-    //                   @"request":@"",
-    //                   @"callback":@"",
-    //                   @"tag":@"",
-    //                   @"mac":@"",
-    //                   @"host":@"",
-    //                   @"root_response":@""
-    //                   }
+        
     NSMutableDictionary* argsDic=[messageDic copy];
     
     NSString *requestStr = [argsDic objectForKey:@"request"];
@@ -323,6 +313,10 @@
     lastRequestDate=[NSDate date];
     NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[argsDic objectForKey:@"mac"]];
     NSArray *deviceIpArr = [deviceIpWithMacDic allKeys];
+    NSUInteger taskInt = deviceIpArr.count;
+    
+    NSMutableArray *resultAllArr = [NSMutableArray arrayWithCapacity:0];
+    
     for (int i = 0; i < deviceIpArr.count; i ++) {
         
         NSArray* macs = [deviceIpWithMacDic objectForKey:deviceIpArr[i]];
@@ -351,6 +345,7 @@
             [headers setObject:root_response forKey:@"rootResponse"];
         }
         [headers setObject:macsStr forKey:@"meshNodeMac"];
+        [headers setObject:[NSString stringWithFormat:@"%lu",(unsigned long)taskInt] forKey:@"taskStr"];
         
         if (callbackStr) {
             [argsDic removeObjectForKey:@"callback"];
@@ -368,16 +363,22 @@
         }
         [controlQueue addOperationWithBlock:^{
             espUploadHandleTool = [[ESPUploadHandleTool alloc]init];
-            [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:argsDic andSuccess:^(NSDictionary * _Nonnull dic) {
-                if (dic != nil && [[dic objectForKey:@"status_code"] intValue] == 0) {
+            [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:argsDic andSuccess:^(NSArray * _Nonnull resultArr) {
+                if (ValidArray(resultArr)) {
                     if (callbackStr == nil) {
                         return;
                     }
-                    NSMutableDictionary * jsonDic = [[NSMutableDictionary alloc]initWithDictionary:dic];
-                    if (tag) {
-                        jsonDic[@"tag"] = tag;
+                    if (taskInt > 1) {
+                        [resultAllArr addObjectsFromArray:resultArr];
+                    }else {
+                        [resultAllArr addObjectsFromArray:resultArr];
+                        NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                        jsonDic[@"result"] = resultAllArr;
+                        if (tag) {
+                            jsonDic[@"tag"] = tag;
+                        }
+                        success(jsonDic);
                     }
-                    success(jsonDic);
                 }
             } andFailure:^(int fail) {
                 failure(@{@"status_code":@"-100"});
@@ -390,14 +391,6 @@
 //发送单个设备命令
 - (void)requestDeviceAsync:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
     
-    //    messageDic = @{
-    //                   @"request":@"",
-    //                   @"callback":@"",
-    //                   @"tag":@"",
-    //                   @"mac":@"",
-    //                   @"host":@"",
-    //                   @"root_response":@""
-    //                   }
     NSMutableDictionary* argsDic=[messageDic copy];
     
     NSString *callbackStr = [argsDic objectForKey:@"callback"];
@@ -428,13 +421,16 @@
     [argsDic removeObjectForKey:@"root_response"];
     [argsDic removeObjectForKey:@"mac"];
     [argsDic removeObjectForKey:@"host"];
+    NSMutableArray *resultAllArr = [NSMutableArray arrayWithCapacity:0];
     espUploadHandleTool = [[ESPUploadHandleTool alloc]init];
-    [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:argsDic andSuccess:^(NSDictionary * _Nonnull dic) {
-        if ([[dic objectForKey:@"status_code"] intValue] == 0) {
+    [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:argsDic andSuccess:^(NSArray * _Nonnull resultArr) {
+        if ([[resultArr[0] objectForKey:@"status_code"] intValue] == 0) {
             if (callbackStr == nil) {
                 return;
             }
-            NSMutableDictionary *jsonDic = [[NSMutableDictionary alloc]initWithDictionary:dic];
+            [resultAllArr addObjectsFromArray:resultArr];
+            NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+            jsonDic[@"result"] = resultAllArr;
             if (tag) {
                 jsonDic[@"tag"] = tag;
             }
@@ -448,12 +444,6 @@
 
 //设备升级
 - (void)startOTA:(NSDictionary *)messageDic Success:(startOTASuccessBlock)success andFailure:(void (^)(int))failure {
-    //    messageDic = @{
-    //                   @"macs":@"",
-    //                   @"bin":@"",
-    //                   @"host":@"",
-    //                   @"type":@""
-    //                   }
     
     self.startOTASuccess = success;
     
@@ -575,13 +565,13 @@
     NSArray *macArr = requestOTAProgressDic[@"macArr"];
     NSString *port=@"80";
     NSString *urlStr=[NSString stringWithFormat:@"http://%@:%@/device_request",ip,port];
-    sessionTask = [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":requestOTAProgressDic[@"mac"],@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macArr.count]} withBodyContent:@{@"request":@"get_ota_progress"} andSuccess:^(NSDictionary * _Nonnull dic) {
-        NSLog(@"dic-->%@",dic);
-        if (dic==nil) {
+    sessionTask = [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":requestOTAProgressDic[@"mac"],@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macArr.count]} withBodyContent:@{@"request":@"get_ota_progress"} andSuccess:^(NSArray * _Nonnull resultArr) {
+        NSLog(@"resultArr-->%@",resultArr);
+        if (!ValidArray(resultArr)) {
             return ;
         }
         if (macArr.count == 1) {
-            NSDictionary *resultDic = [dic objectForKey:@"result"];
+            NSDictionary *resultDic = resultArr[0];
             NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
             if ([[resultDic objectForKey:@"code"] isEqualToString:[NSString stringWithFormat:@"200"]]) {
                 float totalSize = [[resultDic objectForKey:@"total_size"] floatValue];
@@ -604,7 +594,6 @@
             }
             
         }else {
-            NSArray *resultArr = [dic objectForKey:@"result"];
             NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
             NSMutableArray *jsonMacArr = [NSMutableArray arrayWithCapacity:0];
             for (int i = 0; i < resultArr.count; i ++) {
@@ -643,9 +632,7 @@
 
 //停止OTA升级
 - (void)stopOTA:(NSDictionary *)messageDic {
-    //    messageDic = @{
-    //                   @"host":@[]
-    //                   }
+        
     [sessionTask cancel];
     if (stopRequestIpArr) {
         for (int i = 0; i < stopRequestIpArr.count; i ++) {
@@ -662,10 +649,7 @@
 
 //重启设备命令
 - (void)reboot:(NSDictionary *)messageDic {
-    //    messageDic = @{
-    //                   @"macs":@[],
-    //                   @"host":@""
-    //                   }
+        
     NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[messageDic objectForKey:@"macs"]];
     NSArray *deviceIpArr = [deviceIpWithMacDic allKeys];
     for (int i = 0; i < deviceIpArr.count; i ++) {
@@ -680,8 +664,8 @@
         NSString *ip = deviceIpArr[i];
         NSString *port=@"80";
         NSString *urlStr=[NSString stringWithFormat:@"http://%@:%@/device_request",ip,port];
-        [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":macsStr,@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macs.count]} withBodyContent:@{@"request":@"reboot"} andSuccess:^(NSDictionary * _Nonnull dic) {
-            NSLog(@"%@",dic);
+        [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":macsStr,@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macs.count]} withBodyContent:@{@"request":@"reboot"} andSuccess:^(NSArray * _Nonnull resultArr) {
+            NSLog(@"%@",resultArr);
         } andFailure:^(int fail) {
             NSLog(@"%d",fail);
         }];

@@ -79,7 +79,7 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-all.html" ],
                     var data = '{"' + MESH_MAC + '": "' + self.deviceInfo.mac +
                         '","'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","' + MESH_REQUEST + '": "' +
                         GET_EVENT +'", "callback": "onGetAllEvent", "tag": '+JSON.stringify(obj)+'}';
-                    espmesh.requestDeviceAsync(data);
+                    espmesh.requestDevice(data);
 
                 },
                 getEventMacs: function(cid, deviceEvents) {
@@ -190,7 +190,7 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-all.html" ],
                     var data = '{"' + MESH_MAC + '": "' + parentMac +
                         '","'+DEVICE_IP+'": "'+this.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' + MESH_REQUEST + '": "' + REMOVE_EVENT + '",' +
                         '"events":' + JSON.stringify(this.eventNames) + '}';
-                    espmesh.requestDeviceAsync(data);
+                    espmesh.requestDevice(data);
 
                 },
                 selectMac: function(mac) {
@@ -238,8 +238,13 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-all.html" ],
                         if (!Util._isEmpty(res.result)) {
                             var result = res.result;
                             var tag = res.tag;
-                            if (!Util._isEmpty(result.trigger)) {
-                                var deviceEvents = result.trigger;
+                            if (!Util._isEmpty(result.trigger) || !Util._isEmpty(result.events)) {
+                                var deviceEvents = [];
+                                if(!Util._isEmpty(result.trigger)) {
+                                    deviceEvents = result.trigger;
+                                } else if(!Util._isEmpty(result.events)) {
+                                    deviceEvents = result.events;
+                                }
                                 if (!Util._isEmpty(deviceEvents)) {
                                     self.existEvent = true;
                                     var executeMacs = self.getEventMacs(tag.cid, deviceEvents);

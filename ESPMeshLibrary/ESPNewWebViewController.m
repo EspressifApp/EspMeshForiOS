@@ -27,14 +27,22 @@
 #import "ESPUploadHandleTool.h"
 #import "ESPCheckAppVersion.h"
 #import "ESPDataConversion.h"
+#import "ESPFBYDataBase.h"
 
 #import "HGBRSAEncrytor.h"
 #import "ESPDataConversion.h"
 #import "NSString+URL.h"
 
+#import "ESPLoadHyperlinksViewController.h"
+
+#import "EspBlockingQueue.h"
+
+#import "ESPSniffer.h"
+
 #define ESPMeshAppleID @"1420425921"
 #define ValidDict(f) (f!=nil && [f isKindOfClass:[NSDictionary class]])
 #define ValidArray(f) (f!=nil && [f isKindOfClass:[NSArray class]] && [f count]>0)
+#define ValidStr(f) (f!=nil && [f isKindOfClass:[NSString class]] && ![f isEqualToString:@""])
 
 @interface ESPNewWebViewController ()<UIWebViewDelegate,NativeApisProtocol>{
     
@@ -43,27 +51,28 @@
     NSMutableDictionary* DevicesOfScanUDP;
     NSMutableDictionary *requestOTAProgressDic;
     NSMutableArray *StaMacsForBleMacs;
-    YTKKeyValueStore *dbStore;
     ESPDocumentsPath *espDocumentPath;
     ESPUploadHandleTool *espUploadHandleTool;
     
     BOOL isUDPScan;
-    NSDate* lastRequestDate;
     NSTimer* BLETimer;
     NSTimer *OTATimer;
     NSTimer *UPDTimer;
     NSString* username;
     NSString* lastSSID;
-    NSOperationQueue* controlQueue;
+    BOOL isSendQueue;
     NSNumber* pairProgress;
     NSURLSessionTask *sessionTask;
     NSArray *stopRequestIpArr;
+    NSUInteger taskInt;
 }
 
 
 @property (weak,nonatomic) UIWebView *webView;
 @property (strong,nonatomic) JSContext *context;
 @property (strong, nonatomic)JSValue *callbacks;
+
+@property (strong, nonatomic)NSDate *lastRequestDate;
 
 @end
 
@@ -73,7 +82,10 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     [self settingUi];
-    espUploadHandleTool = [[ESPUploadHandleTool alloc]init];
+    isSendQueue = NO;
+//    espUploadHandleTool = [[ESPUploadHandleTool alloc]init];
+    espUploadHandleTool = [ESPUploadHandleTool shareInstance];
+    [espUploadHandleTool sendSessionInit];
     espDocumentPath = [[ESPDocumentsPath alloc]init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(layOutControllerViews) name:UIApplicationDidChangeStatusBarFrameNotification object:nil];
     //设备状态变化监视
@@ -82,6 +94,8 @@
             [self sendDeviceFoundOrLost:mac];
         } else if ([type containsString:@"status"]) {
             [self sendDeviceStatusChanged:mac];
+        } else if ([type containsString:@"sniffer"]) {
+            [self sendDeviceSnifferChanged:mac];
         }
     } failblock:^(int code) {}];
 }
@@ -113,8 +127,8 @@
 - (void)settingUi
 {
     username=@"guest";
-    dbStore = [[YTKKeyValueStore alloc] initDBWithName:[NSString stringWithFormat:@"%@.db",username]];
-    self.view.backgroundColor = [UIColor lightGrayColor];
+    [ESPFBYDataBase espDataBaseInit:username];
+    self.view.backgroundColor = [UIColor whiteColor];
     
     loadingImgView=[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
     loadingImgView.contentMode=UIViewContentModeScaleAspectFill;
@@ -177,15 +191,19 @@
 }
 //APP版本检测
 - (void)checkAppVersion {
-    NSString *number = [[ESPCheckAppVersion sharedInstance] checkAppVersionNumber:ESPMeshAppleID];
-    if (number == nil) {
-        NSString* paramjson=[ESPDataConversion jsonFromObject:@{@"status":@"-1"}];
-        [self sendMsg:@"onCheckAppVersion" param:paramjson];
-    }else {
-        NSString* paramjson=[ESPDataConversion jsonFromObject:@{@"status":@"0",@"name":ESPMeshAppleID,@"version":number}];
-        [self sendMsg:@"onCheckAppVersion" param:paramjson];
-    }
-    
+    dispatch_queue_t queue = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);
+    dispatch_async(queue, ^{
+        NSDictionary *appResultsDict = [[ESPCheckAppVersion sharedInstance] checkAppVersionNumber:ESPMeshAppleID];
+        if (!ValidDict(appResultsDict)) {
+            NSString* paramjson=[ESPDataConversion jsonFromObject:@{@"status":@"-1"}];
+            [self sendMsg:@"onCheckAppVersion" param:paramjson];
+        }else {
+            NSString *appStoreVersion = appResultsDict[@"version"];
+            NSString *releaseNotesStr = appResultsDict[@"releaseNotes"];
+            NSString* paramjson=[ESPDataConversion jsonConfigureFromObject:@{@"status":@"0",@"name":ESPMeshAppleID,@"version":appStoreVersion,@"notes":releaseNotesStr}];
+            [self sendMsg:@"onCheckAppVersion" param:paramjson];
+        }
+    });
 }
 //APP版本更新
 - (void)appVersionUpdate:(NSString *)message {
@@ -220,8 +238,7 @@
     NSDictionary*argsicp=[msg objectForKey:@"args"];
     if (argsicp[@"username"]!=nil){
         username=argsicp[@"username"];
-        NSString* dbName=[NSString stringWithFormat:@"%@.db",username.lowercaseString];
-        dbStore = [[YTKKeyValueStore alloc] initDBWithName:dbName];
+        [ESPFBYDataBase espDataBaseInit:username];
     }
     NSString* paramjson=[ESPDataConversion jsonFromObject:@{@"code":@"0"}];
     [self sendMsg:@"userLogin" param:paramjson];
@@ -246,6 +263,7 @@
             deviceDic[@"device"] = device;
             deviceDic[@"version"] = device.version;
             deviceDic[@"bssid"] = device.bssid;
+            deviceDic[@"beacon"] = device.ouiMDF;
             deviceDic[@"tid"] = device.deviceTid;
             deviceDic[@"only_beacon"] = @(device.onlyBeacon);
             self->ScanBLEDevices[device.bssid] = deviceDic;
@@ -287,18 +305,35 @@
 }
 //开启UDP扫描
 - (void)scanDevicesAsync {
-    dispatch_async(dispatch_get_main_queue(), ^(){
+    NSMutableArray *scanUDPArr = [NSMutableArray arrayWithCapacity:0];
+   
+    dispatch_queue_t queueT = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);//一个并发队列
+    dispatch_group_t grpupT = dispatch_group_create();//一个线程组
+    dispatch_group_enter(grpupT);
+    dispatch_group_async(grpupT, queueT, ^{
         [[ESPMeshManager share] starScanRootUDP:^(NSArray *devixe) {
-            [self obtainDeviceDetails:devixe];
+            [scanUDPArr addObjectsFromArray:devixe];
         } failblock:^(int code) {
+            
         }];
     });
-    dispatch_async(dispatch_get_main_queue(), ^(){
+    dispatch_group_async(grpupT, queueT, ^{
         [[ESPMeshManager share] starScanRootmDNS:^(NSArray * _Nonnull devixe) {
-            [self obtainDeviceDetails:devixe];
+            [scanUDPArr addObjectsFromArray:devixe];
         } failblock:^(int code) {
+            
         }];
     });
+    dispatch_group_async(grpupT, queueT, ^{
+        sleep(2);
+        [[ESPMeshManager share] cancelScanRootmDNS];
+    });
+    dispatch_group_notify(grpupT, queueT, ^{
+        NSSet *set = [NSSet setWithArray:scanUDPArr];
+        NSArray *allArray = [set allObjects];
+        [self obtainDeviceDetails:allArray];
+    });
+    dispatch_group_leave(grpupT);
 }
 
 - (void)obtainDeviceDetails:(NSArray *)dev {
@@ -312,7 +347,6 @@
         
         NSMutableArray* meshinfoArr = [NSMutableArray arrayWithCapacity:0];
         if (!ValidArray(dev)) {
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"LastScanRootDevice"];
             [UPDTimer invalidate];
             [self sendUDPResult];
             self->isUDPScan=false;
@@ -329,9 +363,7 @@
             for (int i = 0; i < meshItermArr.count; i ++) {
                 [meshinfoArr addObject:meshItermArr[i]];
             }
-            NSLog(@"meshinfoArr------> %lu",(unsigned long)meshinfoArr.count);
         }
-        NSLog(@"meshinfoArr------> %lu",(unsigned long)meshinfoArr.count);
         NSString *httpResponse = [ESPDataConversion fby_getNSUserDefaults:@"httpResponse"];
         if ([httpResponse intValue] != 200) {
             [UPDTimer invalidate];
@@ -348,14 +380,14 @@
                                       }];
         }
         if (tempInfosArr.count>0) {
-            NSString* tmpjson=[ESPDataConversion jsonFromObject:tempInfosArr];
-//            [self DevicesOfScanUDPData];
-//            [self sendUDPResult];
+            NSArray *deviceDetailsArr = [ESPDataConversion DeviceOfScanningUDPData:tempInfosArr];
+            NSSet *set = [NSSet setWithArray:deviceDetailsArr];
+            NSArray *allArray = [set allObjects];
+            NSString* tmpjson=[ESPDataConversion jsonFromObject:allArray];
             [self sendMsg:@"onDeviceScanning" param:tmpjson];
             
         }else{
             [UPDTimer invalidate];
-//            [self DevicesOfScanUDPData];
             [self sendUDPResult];
             self->isUDPScan=false;
             return ;
@@ -364,6 +396,7 @@
         NSMutableArray *DevicesOfScanUDPKeyArr = [NSMutableArray arrayWithCapacity:0];
         NSMutableArray *DevicesOfScanUDPHostArr = [NSMutableArray arrayWithCapacity:0];
         NSMutableArray *DevicesOfScanUDPValueArr = [NSMutableArray arrayWithCapacity:0];
+        NSMutableArray *DevicesOfScanUDPGroupArr = [NSMutableArray arrayWithCapacity:0];
         EspActionDeviceInfo* deviceinfoAction = [[EspActionDeviceInfo alloc] init];
         NSMutableDictionary* resps = [deviceinfoAction doActionGetDevicesInfoLocal:meshinfoArr];
         if (resps.count>0) {
@@ -376,46 +409,15 @@
                 EspHttpResponse *response = resps[newDevice.mac];
                 if (response != nil) {
                     NSDictionary* responDic=response.getContentJSON;
-                    NSMutableDictionary *mDic=[NSMutableDictionary dictionaryWithCapacity:0];
-                    mDic[@"mac"]=newDevice.mac;
-                    if (responDic[@"position"]) {
-                        mDic[@"position"]=responDic[@"position"];
-                    }else {
-                        mDic[@"position"]=@"";
-                    }
-                    mDic[@"state"]=@"local";
-                    mDic[@"meshLayerLevel"]=[NSString stringWithFormat:@"%d",newDevice.meshLayerLevel];
-                    mDic[@"meshID"]=newDevice.meshID;
-                    mDic[@"host"]=newDevice.host;
-                    mDic[@"tid"]=responDic[@"tid"];
-                    if (responDic[@"idf_version"]) {
-                        mDic[@"idf_version"]=responDic[@"idf_version"];
-                    }else {
-                        mDic[@"idf_version"]=@"";
-                    }
-                    if (responDic[@"mdf_version"]) {
-                        mDic[@"mdf_version"]=responDic[@"mdf_version"];
-                    }else {
-                        mDic[@"mdf_version"]=@"";
-                    }
-                    if (responDic[@"mlink_version"]) {
-                        mDic[@"mlink_version"]=responDic[@"mlink_version"];
-                    }else {
-                        mDic[@"mlink_version"]=@"";
-                    }
-                    if (responDic[@"mlink_trigger"]) {
-                        mDic[@"mlink_trigger"]=responDic[@"mlink_trigger"];
-                    }else {
-                        mDic[@"mlink_trigger"]=@"";
-                    }
-                    mDic[@"name"]=responDic[@"name"];
-                    mDic[@"version"]=responDic[@"version"];
-                    mDic[@"characteristics"]=[ESPDataConversion getJSCharacters:responDic[@"characteristics"]];
+//                    NSLog(@"responDic====%@",responDic);
+                    NSMutableDictionary *mDic = [ESPDataConversion deviceDetailData:responDic withEspDevice:newDevice];
+                    [DevicesOfScanUDPGroupArr addObject:mDic[@"group"]];
                     if (responDic[@"characteristics"] != nil) {
                         //self->ScanUDPDevices[newDevice.mac]=mDic;
                         [DevicesOfScanUDPHostArr addObject:newDevice.host];
                         [DevicesOfScanUDPKeyArr addObject:newDevice.mac];
                         [DevicesOfScanUDPValueArr addObject:mDic];
+                        
                         newDevice.sendInfo=mDic;
                         self->DevicesOfScanUDP[newDevice.mac]=newDevice;
                     }
@@ -425,16 +427,29 @@
             [defaults setValue:DevicesOfScanUDPHostArr forKey:@"DevicesOfScanUDPHostArr"];
             [defaults setValue:DevicesOfScanUDPKeyArr forKey:@"DevicesOfScanUDPKeyArr"];
             [defaults setValue:DevicesOfScanUDPValueArr forKey:@"DevicesOfScanUDPValueArr"];
+            [defaults setValue:DevicesOfScanUDPGroupArr forKey:@"DevicesOfScanUDPGroupArr"];
             [defaults synchronize];
+            
+            [UPDTimer invalidate];
+            [self sendUDPResult];
+            self->isUDPScan=false;
             
         }else {
             [self DevicesOfScanUDPData];
+            [UPDTimer invalidate];
+            [self sendUDPResult];
+            self->isUDPScan=false;
         }
-        
-        [UPDTimer invalidate];
-        [self sendUDPResult];
-        self->isUDPScan=false;
     }];
+}
+
+//更新房间信息
+- (void)updateDeviceGroup:(NSString *)message {
+    id msg=[ESPDataConversion objectFromJsonString:message];
+    if (msg==nil) {
+        return;
+    }
+    [ESPDataConversion updateGroupInformation:msg];
 }
 
 - (void)DevicesOfScanUDPData {
@@ -450,61 +465,20 @@
 
 //hwdevice_table表  保存本地配对信息
 - (void)saveHWDevice:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSDictionary* argsDic = msg;
-    [dbStore createTableWithName:@"hwdevice_table"];
-    NSString *key = argsDic[@"mac"];
-    [dbStore putObject:argsDic withId:key intoTable:@"hwdevice_table"];
+    [ESPFBYDataBase saveHWDevicefby:message];
 }
 - (void)saveHWDevices:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSArray* argsArr = msg;
-    [dbStore createTableWithName:@"hwdevice_table"];
-    
-    for (int i=0; i<argsArr.count; i++) {
-        NSDictionary* itemDic=argsArr[i];
-        NSString *key = itemDic[@"mac"];
-        [dbStore putObject:itemDic withId:key intoTable:@"hwdevice_table"];
-    }
+    [ESPFBYDataBase saveHWDevicesfby:message];
 }
 - (void)deleteHWDevice:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSString* mac = msg;
-    [dbStore createTableWithName:@"hwdevice_table"];
-    [dbStore deleteObjectById:mac fromTable:@"hwdevice_table"];
+    [ESPFBYDataBase deleteHWDevicefby:message];
 }
 - (void)deleteHWDevices:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSArray* argsDic = msg;
-    [dbStore createTableWithName:@"hwdevice_table"];
-    
-    for (int j=0; j<argsDic.count; j++) {
-        id mac = argsDic[j];
-        [dbStore deleteObjectById:mac fromTable:@"hwdevice_table"];
-    }
+    [ESPFBYDataBase deleteHWDevicesfby:message];
 }
 - (void)loadHWDevices {
-    [dbStore createTableWithName:@"hwdevice_table"];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:@"hwdevice_table"];
-    NSMutableArray* needArr=[NSMutableArray arrayWithCapacity:0];
-    for (int i=0; i<dataArr.count; i++) {
-        id item=((YTKKeyValueItem*)dataArr[i]).itemObject;
-        [needArr addObject:item];
-    }
-    NSString* json=[ESPDataConversion jsonFromObject:needArr];
-    [self sendMsg:@"onLoadHWDevices" param:json];
+    NSString *json = [ESPFBYDataBase loadHWDevicesfby];
+    [self sendMsg:@"onLoadHWDevices" param:json];    
 }
 
 //发送多个设备命令防止重复操作
@@ -513,62 +487,95 @@
     if (msg==nil) {
         return;
     }
-    if ([[msg objectForKey:@"method"] isEqualToString:[NSString stringWithFormat:@"requestDevicesMulticastAsync"]]) {
-        [self requestDevicesMulticastAsync:[msg objectForKey:@"argument"]];
+    isSendQueue = YES;
+    
+    if ([[msg objectForKey:@"method"] isEqualToString:[NSString stringWithFormat:@"requestDevicesMulticast"]]) {
+        [self requestDevicesMulticast:[msg objectForKey:@"argument"]];
+    } else if ([[msg objectForKey:@"method"] isEqualToString:[NSString stringWithFormat:@"requestDevice"]]) {
+        [self requestDevice:[msg objectForKey:@"argument"]];
     }
 }
 
 //发送多设备命令
-- (void)requestDevicesMulticastAsync:(NSString *)message {
+- (void)requestDevicesMulticast:(NSString *)message {
     id msg=[ESPDataConversion objectFromJsonString:message];
     if (msg==nil) {
         return;
     }
     NSString *requestStr = [msg objectForKey:@"request"];
     NSString *callbackStr = [msg objectForKey:@"callback"];
+    NSArray *groupArr = [msg objectForKey:@"group"];
     id tag = [msg objectForKey:@"tag"];
-    
-    if (lastRequestDate) {
-        NSLog(@"requestDevices两次请求时间间隔：%f",[[NSDate date] timeIntervalSinceDate:lastRequestDate]);
-        if ([[NSDate date] timeIntervalSinceDate:lastRequestDate]<0.5) {
-            return;//过滤频繁操作
-        }
+    id macArr = [msg objectForKey:@"mac"];
+    if (!ValidArray(macArr)) {
+        macArr = @[[msg objectForKey:@"mac"]];
     }
-    lastRequestDate=[NSDate date];
     
-    NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[msg objectForKey:@"mac"]];
-    if (deviceIpWithMacDic == nil) {
+    NSDictionary *deviceIpWithDic;
+    BOOL isGroupBool = [msg objectForKey:@"isGroup"];
+    NSString *isGroup;
+    NSArray *deviceIpArr;
+    if (isGroupBool) {
+        isGroup = @"1";
+    }else {
+        isGroup = @"0";
+    }
+    deviceIpWithDic = [ESPDataConversion deviceRequestIpWithMac:macArr];
+    deviceIpArr = [deviceIpWithDic allKeys];
+    if (!ValidArray(deviceIpArr)) {
+        if (callbackStr != nil) {
+            [self sendMsg:callbackStr param:@""];
+        }
         return;
     }
-    NSArray *deviceIpArr = [deviceIpWithMacDic allKeys];
+    
+    taskInt = deviceIpArr.count;
+    NSUInteger requestInt = deviceIpArr.count;
+    
+    NSMutableArray *resultAllArr = [NSMutableArray arrayWithCapacity:0];
+    
     for (int i = 0; i < deviceIpArr.count; i ++) {
         
-        NSArray* macs = [deviceIpWithMacDic objectForKey:deviceIpArr[i]];
-        if (macs.count==0) {
+        NSArray *macs;
+        NSMutableDictionary* headers = [NSMutableDictionary dictionary];
+        if ([isGroup integerValue] == 1) {
+            NSString* groupsStr=groupArr[0];
+            
+            for (int j=1; j<groupArr.count; j++) {
+                groupsStr=[NSString stringWithFormat:@"%@,%@",groupsStr,groupArr[j]];
+            }
+            [headers setObject:groupsStr forKey:@"meshNodeGroup"];
+        }
+        macs = [deviceIpWithDic objectForKey:deviceIpArr[i]];
+        if (!ValidArray(macs)) {
+            if (callbackStr != nil) {
+                [self sendMsg:callbackStr param:@""];
+            }
             return;
         }
         NSString* macsStr=macs[0];
         if ([requestStr isEqualToString:@"reset"]) {//重置设备
             [self->DevicesOfScanUDP removeObjectForKey:macsStr];
         }
-        for (int i=1; i<macs.count; i++) {
-            macsStr=[NSString stringWithFormat:@"%@,%@",macsStr,macs[i]];
+        for (int m=1; m<macs.count; m++) {
+            macsStr=[NSString stringWithFormat:@"%@,%@",macsStr,macs[m]];
             
             if ([requestStr isEqualToString:@"reset"]) {//重置设备
-                [self->DevicesOfScanUDP removeObjectForKey:macs[i]];
+                [self->DevicesOfScanUDP removeObjectForKey:macs[m]];
             }
         }
         
         NSString *port = @"80";
         NSString *urlStr = [NSString stringWithFormat:@"http://%@:%@/device_request",deviceIpArr[i],port];
         
-        NSMutableDictionary* headers = [NSMutableDictionary dictionary];
         [headers setObject:[NSString stringWithFormat:@"%lu",(unsigned long)macs.count] forKey:@"meshNodeNum"];
         if ([msg objectForKey:@"root_response"]) {
             NSString* root_response = [NSString stringWithFormat:@"%@", [msg objectForKey:@"root_response"]];
             [headers setObject:root_response forKey:@"rootResponse"];
         }
         [headers setObject:macsStr forKey:@"meshNodeMac"];
+        [headers setObject:isGroup forKey:@"isGroup"];
+        [headers setObject:[NSString stringWithFormat:@"%lu",(unsigned long)requestInt] forKey:@"taskStr"];
         
         if (callbackStr) {
             [msg removeObjectForKey:@"callback"];
@@ -576,188 +583,118 @@
         if (tag) {
             [msg removeObjectForKey:@"tag"];
         }
+        if ([isGroup integerValue] == 1) {
+            [msg removeObjectForKey:@"group"];
+        }
         [msg removeObjectForKey:@"root_response"];
         [msg removeObjectForKey:@"mac"];
         [msg removeObjectForKey:@"host"];
         
-        
-        if (controlQueue==nil) {
-            controlQueue = [[NSOperationQueue alloc] init];
-            controlQueue.maxConcurrentOperationCount=1;//1串行，>2并发
+        if (isSendQueue) {
+            dispatch_queue_t queue = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_SERIAL);
+            dispatch_sync(queue, ^{
+//                NSLog(@"%@----------%d",[NSThread currentThread], i);
+                [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:msg andSuccess:^(NSArray * _Nonnull resultArr) {
+                    if (ValidArray(resultArr)) {
+                        if (callbackStr == nil) {
+                            return;
+                        }
+                        if (taskInt > 1) {
+                            [resultAllArr addObjectsFromArray:resultArr];
+                        }else {
+                            [resultAllArr addObjectsFromArray:resultArr];
+                            NSSet *set = [NSSet setWithArray:resultAllArr];
+                            NSArray *allArray = [set allObjects];
+                            NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                            jsonDic[@"result"] = allArray;
+                            if (tag) {
+                                jsonDic[@"tag"] = tag;
+                            }
+                            NSString *json = [ESPDataConversion jsonFromObject:jsonDic];
+                            [self sendMsg:callbackStr param:json];
+                        }
+                        taskInt --;
+                        NSLog(@"taskInt ---> %lu",(unsigned long)taskInt);                    }
+                } andFailure:^(int fail) {
+                    NSLog(@"%d",fail);
+                    if (callbackStr != nil) {
+                        [self sendMsg:callbackStr param:@""];
+                    }
+                }];
+            });
+        }else {
+            dispatch_queue_t queueT = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);//一个并发队列
+            dispatch_async(queueT, ^{
+//                NSLog(@"%@----------%d",[NSThread currentThread], i);
+                [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:msg andSuccess:^(NSArray * _Nonnull resultArr) {
+                    if (ValidArray(resultArr)) {
+                        if (callbackStr == nil) {
+                            return;
+                        }
+                        if (taskInt > 1) {
+                            [resultAllArr addObjectsFromArray:resultArr];
+                        }else {
+                            [resultAllArr addObjectsFromArray:resultArr];
+                            NSSet *set = [NSSet setWithArray:resultAllArr];
+                            NSArray *allArray = [set allObjects];
+                            NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                            jsonDic[@"result"] = allArray;
+                            if (tag) {
+                                jsonDic[@"tag"] = tag;
+                            }
+                            NSString *json = [ESPDataConversion jsonFromObject:jsonDic];
+                            [self sendMsg:callbackStr param:json];
+                        }
+                        taskInt --;
+                        NSLog(@"taskInt ---> %lu",(unsigned long)taskInt);
+                    }
+                } andFailure:^(int fail) {
+                    NSLog(@"%d",fail);
+                    if (callbackStr != nil) {
+                        [self sendMsg:callbackStr param:@""];
+                    }
+                }];
+            });
         }
-        [controlQueue addOperationWithBlock:^{
-            [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:msg andSuccess:^(NSDictionary * _Nonnull dic) {
-                if (dic != nil && [[dic objectForKey:@"status_code"] intValue] == 0) {
-                    if (callbackStr == nil) {
-                        return;
-                    }
-                    NSMutableDictionary * jsonDic = [[NSMutableDictionary alloc]initWithDictionary:dic];
-                    if (tag) {
-                        jsonDic[@"tag"] = tag;
-                    }
-                    NSString *json = [ESPDataConversion jsonFromObject:jsonDic];
-                    [self sendMsg:callbackStr param:json];
-                }
-            } andFailure:^(int fail) {
-                NSLog(@"%d",fail);
-                NSString* json=[ESPDataConversion jsonFromObject:@{@"status_code":@"-100"}];
-                [self sendMsg:callbackStr param:json];
-            }];
-        }];
+        
     }
-    
-    
+    isSendQueue = NO;
 }
 //发送单个设备命令
-- (void)requestDeviceAsync:(NSString *)message {
-    
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSString *callbackStr = [msg objectForKey:@"callback"];
-    id tag = [msg objectForKey:@"tag"];
-    NSString *requestStr = [msg objectForKey:@"request"];
-    
-    NSString* macsStr=[msg objectForKey:@"mac"];
-    if ([requestStr isEqualToString:@"reset"]) {//重置设备
-        [self->DevicesOfScanUDP removeObjectForKey:macsStr];
-    }
-    NSMutableDictionary* headers = [NSMutableDictionary dictionary];
-    [headers setObject:@"1" forKey:@"meshNodeNum"];
-    if ([msg objectForKey:@"root_response"]) {
-        NSString* root_response = [NSString stringWithFormat:@"%@", [msg objectForKey:@"root_response"]];
-        [headers setObject:root_response forKey:@"rootResponse"];
-    }
-    [headers setObject:macsStr forKey:@"meshNodeMac"];
-    
-    NSString *port = @"80";
-    NSString *hostStr = [ESPDataConversion deviceRequestIp:macsStr];
-    if (hostStr == nil) {
-        return;
-    }
-    NSString *urlStr = [NSString stringWithFormat:@"http://%@:%@/device_request",hostStr,port];
-    if (callbackStr) {
-        [msg removeObjectForKey:@"callback"];
-    }
-    if (tag) {
-        [msg removeObjectForKey:@"tag"];
-    }
-    [msg removeObjectForKey:@"root_response"];
-    [msg removeObjectForKey:@"mac"];
-    [msg removeObjectForKey:@"host"];
-    
-    [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:msg andSuccess:^(NSDictionary * _Nonnull dic) {
-        if ([[dic objectForKey:@"status_code"] intValue] == 0) {
-            if (callbackStr == nil) {
-                return;
-            }
-            NSMutableDictionary *jsonDic = [[NSMutableDictionary alloc]initWithDictionary:dic];
-            if (tag) {
-                jsonDic[@"tag"] = tag;
-            }
-            NSString* json=[ESPDataConversion jsonFromObject:jsonDic];
-            [self sendMsg:callbackStr param:json];
-        }
-        NSLog(@"dic-->%@",dic);
-    } andFailure:^(int fail) {
-        NSLog(@"%d",fail);
-    }];
-    
+- (void)requestDevice:(NSString *)message {
+    [self requestDevicesMulticast:message];
 }
 
 //表  Group组
 - (void)saveGroup:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
+    id key = [ESPFBYDataBase saveGroupfby:message];
+    if (key == nil) {
         return;
     }
-    NSMutableDictionary* argsDic = msg;
-    [dbStore createTableWithName:@"group_table"];
-    id key = argsDic[@"id"];
-    if (key==nil) {
-        key=[ESPDataConversion getRandomStringWithLength];
-        argsDic[@"id"]=key;
-    }
-    [dbStore putObject:argsDic withId:key intoTable:@"group_table"];
-    
     [self sendMsg:@"onSaveGroup" param:key];
 }
 - (void)saveGroups:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if ([msg isEqual:[NSNull null]]) {
-        return;
-    }
-//    NSLog(@"%@",msg);
-    if (msg==nil) {
-        return;
-    }
-    NSArray* argsDic = msg;
-    [dbStore createTableWithName:@"group_table"];
-    
-    for (int j=0; j<argsDic.count; j++) {
-        NSMutableDictionary* itemDic=argsDic[j];
-        id key = itemDic[@"id"];
-        if (key==nil) {
-            key=[ESPDataConversion getRandomStringWithLength];
-            itemDic[@"id"]=key;
-        }
-        [dbStore putObject:itemDic withId:key intoTable:@"group_table"];
-    }
+    [ESPFBYDataBase saveGroupsfby:message];
 }
 - (void)loadGroups {
-    [dbStore createTableWithName:@"group_table"];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:@"group_table"];
-    NSMutableArray* needArr=[NSMutableArray arrayWithCapacity:0];
-    for (int i=0; i<dataArr.count; i++) {
-        id item=((YTKKeyValueItem*)dataArr[i]).itemObject;
-        [needArr addObject:item];
-    }
-    NSString* json=[ESPDataConversion jsonFromObject:needArr];
+    NSString *json = [ESPFBYDataBase loadGroupsfby];
     [self sendMsg:@"onLoadGroups" param:json];
 }
 - (void)deleteGroup:(NSString *)message {
-    if (message==nil) {
-        return;
-    }
-    dbStore = [[YTKKeyValueStore alloc] initDBWithName:[NSString stringWithFormat:@"%@.db",username]];
-    [dbStore createTableWithName:@"group_table"];
-    id key = message;
-    [dbStore deleteObjectById:key fromTable:@"group_table"];
+    [ESPFBYDataBase deleteGroupfby:message];
 }
 //Mac  Mac表
 - (void)saveMac:(NSString *)message {
-    NSString* mac = message;
-    [dbStore createTableWithName:@"mac_table"];
-    [dbStore putObject:@{@"mac":mac} withId:mac intoTable:@"mac_table"];
+    [ESPFBYDataBase saveMacfby:message];
 }
 - (void)deleteMac:(NSString *)message {
-    NSString* mac = message;
-    [dbStore createTableWithName:@"mac_table"];
-    [dbStore deleteObjectById:mac fromTable:@"mac_table"];
+    [ESPFBYDataBase deleteMacfby:message];
 }
 - (void)deleteMacs:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSArray* argsDic = msg;
-    [dbStore createTableWithName:@"mac_table"];
-    
-    for (int j=0; j<argsDic.count; j++) {
-        id mac = argsDic[j];
-        [dbStore deleteObjectById:mac fromTable:@"mac_table"];
-    }
+    [ESPFBYDataBase deleteMacsfby:message];
 }
 - (void)loadMacs {
-    [dbStore createTableWithName:@"mac_table"];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:@"mac_table"];
-    NSMutableArray* needArr=[NSMutableArray arrayWithCapacity:0];
-    for (int i=0; i<dataArr.count; i++) {
-        id item=((YTKKeyValueItem*)dataArr[i]).itemObject[@"mac"];
-        [needArr addObject:item];
-    }
-    NSString* json=[ESPDataConversion jsonFromObject:needArr];
+    NSString* json=[ESPFBYDataBase loadMacsfby];
     [self sendMsg:@"onLoadMacs" param:json];
 }
 // 获取APP版本信息
@@ -765,13 +702,13 @@
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     NSString *app_Version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
     // app build版本
-    NSString *app_build = [infoDictionary objectForKey:@"CFBundleVersion"];
-    NSString* json=[ESPDataConversion jsonFromObject:@{@"version_name":app_build,@"version_code":app_Version}];
+//    NSString *app_build = [infoDictionary objectForKey:@"CFBundleVersion"];
+    NSString* json=[ESPDataConversion jsonFromObject:@{@"version_name":app_Version,@"version_code":app_Version}];
     [self sendMsg:@"onGetAppInfo" param:json];
 }
 //获取配网记录
 - (void)loadAPs {
-    NSArray* dataArr=[dbStore getAllItemsFromTable:@"ap_table"];
+    NSArray* dataArr=[ESPFBYDataBase getAllItemsFromTablefby:@"ap_table"];
     NSMutableArray* needArr=[NSMutableArray arrayWithCapacity:0];
     for (int i=0; i<dataArr.count; i++) {
         id item=((YTKKeyValueItem*)dataArr[i]).itemObject;
@@ -788,15 +725,11 @@
     }
     NSMutableDictionary* argsDic=[msg copy];
     //保存记录
-    [dbStore createTableWithName:@"ap_table"];
     NSString* ssid=argsDic[@"ssid"];
     NSString* password=argsDic[@"password"];
     NSDictionary* objItem=@{@"ssid":ssid,@"password":password};
-    [dbStore putObject:objItem withId:ssid intoTable:@"ap_table"];
+    [ESPFBYDataBase saveObject:objItem withNameTable:@"ap_table" withId:ssid];
     //开始配网
-    //EspDevice* device=_deviceDic.allValues[0];
-    //        NSArray *whiteListArr = argsDic[@"whiteList"];
-    //        for (int i = 0; i < whiteListArr.count; i ++) {
     NSMutableDictionary* deviceInfo = self->ScanBLEDevices[argsDic[@"ble_addr"]];
     if (deviceInfo ==nil ) {
         NSString* json=[ESPDataConversion jsonFromObject:@{@"progress":@"0",@"code":@0,@"message":@"配网失败"}];
@@ -833,7 +766,6 @@
             
         }];
     }
-    //        }
     
 }
 - (void)stopConfigureBlufi {
@@ -841,42 +773,18 @@
 }
 //meshId表
 - (void)saveMeshId:(NSString *)message {
-    NSString* meshid = message;
-    [dbStore createTableWithName:@"meshid_table"];
-    [dbStore putObject:@{@"meshid":meshid} withId:meshid intoTable:@"meshid_table"];
+    [ESPFBYDataBase saveMeshIdfby:message];
 }
 - (void)deleteMeshId:(NSString *)message {
-    NSString* meshid = message;
-    [dbStore createTableWithName:@"meshid_table"];
-    [dbStore deleteObjectById:meshid fromTable:@"meshid_table"];
+    [ESPFBYDataBase deleteMeshIdfby:message];
 }
 - (void)loadLastMeshId {
-    [dbStore createTableWithName:@"meshid_table"];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:@"meshid_table"];
-    NSString* meshid=@"";
-    if (dataArr.count>0) {
-        meshid=((YTKKeyValueItem*)dataArr[0]).itemObject[@"meshid"];
-        NSDate* oldDate=((YTKKeyValueItem*)dataArr[0]).createdTime;
-        for (int i=1; i<dataArr.count; i++) {
-            NSDate* itemDate=((YTKKeyValueItem*)dataArr[i]).createdTime;
-            if (([itemDate timeIntervalSince1970]-[oldDate timeIntervalSince1970])>0) {
-                oldDate=itemDate;
-                meshid=((YTKKeyValueItem*)dataArr[i]).itemObject[@"meshid"];
-            }
-        }
-    }
-    //NSString* json=[ESPDataConversion jsonFromObject:meshid];
+    
+    NSString *meshid = [ESPFBYDataBase loadLastMeshIdfby];
     [self sendMsg:@"onLoadLastMeshId" param:meshid];
 }
 - (void)loadMeshIds {
-    [dbStore createTableWithName:@"meshid_table"];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:@"meshid_table"];
-    NSMutableArray* needArr=[NSMutableArray arrayWithCapacity:0];
-    for (int i=0; i<dataArr.count; i++) {
-        id item=((YTKKeyValueItem*)dataArr[i]).itemObject[@"meshid"];
-        [needArr addObject:item];
-    }
-    NSString* json=[ESPDataConversion jsonFromObject:needArr];
+    NSString* json=[ESPFBYDataBase loadMeshIdsfby];
     [self sendMsg:@"onLoadMeshIds" param:json];
 }
 //扫描二维码
@@ -1033,13 +941,13 @@
     NSArray *macArr = requestOTAProgressDic[@"macArr"];
     NSString *port=@"80";
     NSString *urlStr=[NSString stringWithFormat:@"http://%@:%@/device_request",ip,port];
-    sessionTask = [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":requestOTAProgressDic[@"mac"],@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macArr.count]} withBodyContent:@{@"request":@"get_ota_progress"} andSuccess:^(NSDictionary * _Nonnull dic) {
-        NSLog(@"dic-->%@",dic);
-        if (dic==nil) {
+    sessionTask = [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":requestOTAProgressDic[@"mac"],@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macArr.count]} withBodyContent:@{@"request":@"get_ota_progress"} andSuccess:^(NSArray * _Nonnull resultArr) {
+        NSLog(@"resultArr-->%@",resultArr);
+        if (!ValidArray(resultArr)) {
             return ;
         }
         if (macArr.count == 1) {
-            NSDictionary *resultDic = [dic objectForKey:@"result"];
+            NSDictionary *resultDic = resultArr[0];
             if ([[resultDic objectForKey:@"code"] isEqualToString:[NSString stringWithFormat:@"200"]]) {
                 float totalSize = [[resultDic objectForKey:@"total_size"] floatValue];
                 float writtenSize = [[resultDic objectForKey:@"total_size"] floatValue];
@@ -1061,7 +969,6 @@
             }
             
         }else {
-            NSArray *resultArr = [dic objectForKey:@"result"];
             NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
             NSMutableArray *jsonMacArr = [NSMutableArray arrayWithCapacity:0];
             for (int i = 0; i < resultArr.count; i ++) {
@@ -1109,9 +1016,6 @@
     }
     [ESPHomeService downloadWithURL:@"https://raw.githubusercontent.com/XuXiangJun/test/master/light.bin" fileDir:@"" progress:^(NSProgress * _Nonnull downloadProgress) {
         NSLog(@"进度= %f",downloadProgress.fractionCompleted * 100);
-//        NSString *downloadProgressStr = [NSString stringWithFormat:@"%f",downloadProgress.fractionCompleted * 100];
-//        NSString *paramjson=[ESPDataConversion jsonFromObject:@{@"status":@"0",@"message":@"下载进度",@"downloadProgress":downloadProgressStr}];
-//        [self sendMsg:@"onDownloadLatestRom" param:paramjson];
     } success:^(NSString * _Nonnull success) {
         NSLog(@"success download fild path--->%@",success);
         NSString *paramjson=[ESPDataConversion jsonFromObject:@{@"download":@(true),@"file":success}];
@@ -1137,17 +1041,20 @@
 
 //JS 注册系统通知
 - (void)registerPhoneStateChange {
-    //注册蓝牙变化通知
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(appBleStateCallBack:) name:@"appBleStateNotification" object:nil];
-    [self isBluetoothEnable];
-    //程序进入前台并处于活动状态调用
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendWifiStatus) name:UIApplicationDidBecomeActiveNotification object:nil];
-    //注册Wi-Fi变化通知
-    AFNetworkReachabilityManager *manager = [AFNetworkReachabilityManager sharedManager];
-    [manager startMonitoring];
-    [manager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-        [self sendWifiStatus];
-    }];
+    dispatch_queue_t queue = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);
+    dispatch_async(queue, ^{
+        //注册蓝牙变化通知
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(appBleStateCallBack:) name:@"appBleStateNotification" object:nil];
+        [self isBluetoothEnable];
+        //程序进入前台并处于活动状态调用
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendWifiStatus) name:UIApplicationDidBecomeActiveNotification object:nil];
+        //注册Wi-Fi变化通知
+        AFNetworkReachabilityManager *manager = [AFNetworkReachabilityManager sharedManager];
+        [manager startMonitoring];
+        [manager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+            [self sendWifiStatus];
+        }];
+    });
 }
 //判断手机蓝牙是否打开
 - (void)isBluetoothEnable {
@@ -1164,75 +1071,26 @@
 }
 //文件 Key - Value 增删改查
 - (void)saveValuesForKeysInFile:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSString *tableName = [msg objectForKey:@"name"];
-    NSArray *contentArr = [msg objectForKey:@"content"];
-    for (int i = 0; i < contentArr.count; i ++) {
-        NSDictionary *contentDic = contentArr[i];
-        NSString *keyStr = [contentDic objectForKey:@"key"];
-        NSString *valueStr = [contentDic objectForKey:@"value"];
-        [dbStore putObject:@{keyStr:valueStr} withId:keyStr intoTable:tableName];
-    }
+    [ESPFBYDataBase saveValuesForKeysInFilefby:message];
 }
 - (void)removeValuesForKeysInFile:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSString *tableName=[msg objectForKey:@"name"];
-    NSArray *keysArr=[msg objectForKey:@"keys"];
-    [dbStore createTableWithName:tableName];
-    for (int i = 0; i < keysArr.count; i ++) {
-        [dbStore deleteObjectById:keysArr[i] fromTable:tableName];
-    }
+    [ESPFBYDataBase removeValuesForKeysInFilefby:message];
 }
 - (void)loadValueForKeyInFile:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
+    NSString* json=[ESPFBYDataBase loadValueForKeyInFilefby:message];
+    if (json == nil) {
         return;
     }
-    NSString *tableName=[msg objectForKey:@"name"];
-    NSString *tableKey=[msg objectForKey:@"key"];
-    [dbStore createTableWithName:tableName];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:tableName];
-    NSMutableDictionary* needDic=[NSMutableDictionary dictionaryWithCapacity:0];
-    NSMutableDictionary* contetDic=[NSMutableDictionary dictionaryWithCapacity:0];
-    for (int i=0; i<dataArr.count; i++) {
-        NSString *itemId = ((YTKKeyValueItem*)dataArr[i]).itemId;
-        if ([tableKey isEqualToString:[NSString stringWithFormat:@"%@",itemId]]) {
-            id item=((YTKKeyValueItem*)dataArr[i]).itemObject;
-            contetDic[itemId] = [item objectForKey:itemId];
-        }
-    }
-    needDic[@"name"] = tableName;
-    needDic[@"content"] = contetDic;
-    NSString* json=[ESPDataConversion jsonFromObject:needDic];
     [self sendMsg:@"onLoadValueForKeyInFile" param:json];
 }
 - (void)loadAllValuesInFile:(NSString *)message {
-    if (message==nil) {
+    NSString* json=[ESPFBYDataBase loadAllValuesInFilefby:message];
+    if (json == nil) {
         return;
     }
-    NSString *tableName=message;
-    [dbStore createTableWithName:tableName];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:tableName];
-    NSMutableDictionary* needDic=[NSMutableDictionary dictionaryWithCapacity:0];
-    NSMutableDictionary* contetDic=[NSMutableDictionary dictionaryWithCapacity:0];
-    NSString *firstItemKey = @"";
-    for (int i=0; i<dataArr.count; i++) {
-        id item=((YTKKeyValueItem*)dataArr[i]).itemObject;
-        NSString *itemId = ((YTKKeyValueItem*)dataArr[i]).itemId;
-        firstItemKey = itemId;
-        contetDic[itemId] = [item objectForKey:itemId];
-    }
-    needDic[@"name"] = tableName;
-    needDic[@"content"] = contetDic;
-    needDic[@"latest_key"] = firstItemKey;
-    NSString* json=[ESPDataConversion jsonFromObject:needDic];
-    [self sendMsg:@"onLoadAllValuesInFile" param:json];
+    id msg=[ESPDataConversion objectFromJsonString:message];
+    NSString *callBack = [msg objectForKey:@"callback"];
+    [self sendMsg:callBack param:json];
 }
 
 - (void)clearBleCache {
@@ -1285,90 +1143,40 @@
         NSString *ip = deviceIpArr[i];
         NSString *port=@"80";
         NSString *urlStr=[NSString stringWithFormat:@"http://%@:%@/device_request",ip,port];
-        [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":macsStr,@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macs.count]} withBodyContent:@{@"request":@"reboot"} andSuccess:^(NSDictionary * _Nonnull dic) {
-            NSLog(@"%@",dic);
+        [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":macsStr,@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macs.count]} withBodyContent:@{@"request":@"reboot"} andSuccess:^(NSArray * _Nonnull resultArr) {
+            NSLog(@"%@",resultArr);
         } andFailure:^(int fail) {
             NSLog(@"%d",fail);
         }];
     }
 }
 //保存本地事件
-- (void)saveDeviceEventsPosition:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSString *tableName = @"localEvents";
-    NSString *keyStr = [msg objectForKey:@"mac"];
-    [dbStore putObject:@{keyStr:msg} withId:keyStr intoTable:tableName];
+- (void)saveDeviceEventsCoordinate:(NSString *)message {
+    [ESPFBYDataBase saveDeviceEventsCoordinatefby:message];
 }
-- (void)loadDeviceEventsPositioin:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
+- (void)loadDeviceEventsCoordinate:(NSString *)message {
+    NSString* json=[ESPFBYDataBase loadDeviceEventsCoordinatefby:message];
+    if (json == nil) {
         return;
     }
-    NSString *tableName=@"localEvents";
-    NSString *tableKey=[msg objectForKey:@"mac"];
+    id msg=[ESPDataConversion objectFromJsonString:message];
     NSString *callback=[msg objectForKey:@"callback"];
-    NSString *tag=[msg objectForKey:@"tag"];
-    [dbStore createTableWithName:tableName];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:tableName];
-    NSMutableDictionary* contetDic=[NSMutableDictionary dictionaryWithCapacity:0];
-    for (int i=0; i<dataArr.count; i++) {
-        NSString *itemId = ((YTKKeyValueItem*)dataArr[i]).itemId;
-        if ([tableKey isEqualToString:[NSString stringWithFormat:@"%@",itemId]]) {
-            id item=((YTKKeyValueItem*)dataArr[i]).itemObject;
-            contetDic = [item objectForKey:itemId];
-        }
-    }
-    contetDic[@"tag"] = tag;
-    NSString* json=[ESPDataConversion jsonFromObject:contetDic];
     [self sendMsg:callback param:[json URLEncodedString]];
 }
-- (void)loadAllDeviceEventsPosition:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
+- (void)loadAllDeviceEventsCoordinate:(NSString *)message {
+    NSString* json=[ESPFBYDataBase loadAllDeviceEventsCoordinatefby:message];
+    if (json == nil) {
         return;
     }
-    NSString *tableName=@"localEvents";
+    id msg=[ESPDataConversion objectFromJsonString:message];
     NSString *callback=[msg objectForKey:@"callback"];
-    NSString *tag=[msg objectForKey:@"tag"];
-    [dbStore createTableWithName:tableName];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:tableName];
-    NSMutableDictionary* needDic=[NSMutableDictionary dictionaryWithCapacity:0];
-    NSMutableArray* contetArr=[NSMutableArray arrayWithCapacity:0];
-    for (int i=0; i<dataArr.count; i++) {
-        NSString *itemId = ((YTKKeyValueItem*)dataArr[i]).itemId;
-        id item=((YTKKeyValueItem*)dataArr[i]).itemObject;
-        [contetArr addObject:[item objectForKey:itemId]];
-    }
-    needDic[@"tag"] = tag;
-    needDic[@"content"] = [[ESPDataConversion jsonFromObject:contetArr] URLEncodedString];
-    NSString* json=[ESPDataConversion jsonFromObject:needDic];
     [self sendMsg:callback param:json];
 }
-- (void)deleteDeviceEventsPosition:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSString *tableName=@"localEvents";
-    NSString *keyStr=[msg objectForKey:@"keys"];
-    [dbStore createTableWithName:tableName];
-    [dbStore deleteObjectById:keyStr fromTable:tableName];
+- (void)deleteDeviceEventsCoordinate:(NSString *)message {
+    [ESPFBYDataBase deleteDeviceEventsCoordinatefby:message];
 }
-- (void)deleteAllDeviceEventsPosition:(NSString *)message {
-    id msg=[ESPDataConversion objectFromJsonString:message];
-    if (msg==nil) {
-        return;
-    }
-    NSString *tableName=@"localEvents";
-    [dbStore createTableWithName:tableName];
-    NSArray* dataArr=[dbStore getAllItemsFromTable:tableName];
-    for (int i=0; i<dataArr.count; i++) {
-        NSString *itemId = ((YTKKeyValueItem*)dataArr[i]).itemId;
-        [dbStore deleteObjectById:itemId fromTable:tableName];
-    }
+- (void)deleteAllDeviceEventsCoordinate {
+    [ESPFBYDataBase deleteAllDeviceEventsCoordinatefby];
 }
 //跳转系统设置页面
 - (void)gotoSystemSettings:(NSString *)message {
@@ -1389,23 +1197,35 @@
 }
 
 //加载超链接
-- (void)openHyperlinks:(NSString *)message {
-    NSURL *urlStr = [NSURL URLWithString:message];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (@available(iOS 10.0, *)) {
-            [[UIApplication sharedApplication] openURL:urlStr options:@{} completionHandler:^(BOOL success) {
-                if (success) {
-                    NSLog(@"success");
-                }else{
-                    NSLog(@"fail");
-                }
-            }];
-        } else {
-            [[UIApplication sharedApplication] openURL:urlStr];
-        }
-    });
+- (void)newWebView:(NSString *)message {
+    ESPLoadHyperlinksViewController *loadHyperlinks = [[ESPLoadHyperlinksViewController alloc]init];
+    loadHyperlinks.webURL = message;
+    [self presentViewController:loadHyperlinks animated:YES completion:nil];
 }
 
+//table信息存储(ipad)
+- (void)saveDeviceTable:(NSString *)message {
+    [ESPFBYDataBase saveDeviceTablefby:message];
+}
+- (void)loadDeviceTable {
+    NSString *itemStr = [ESPFBYDataBase loadDeviceTablefby];
+    [self sendMsg:@"onLoadDeviceTable" param:itemStr];
+}
+
+//table设备信息存储(ipad)
+- (void)saveTableDevices:(NSString *)message {
+    [ESPFBYDataBase saveTableDevicesfby:message];
+}
+- (void)loadTableDevices {
+    NSString *json = [ESPFBYDataBase loadTableDevicesfby];
+    [self sendMsg:@"onLoadTableDevices" param:json];
+}
+- (void)removeTableDevices:(NSString *)message {
+    [ESPFBYDataBase removeTableDevicesfby:message];
+}
+- (void)removeAllTableDevices {
+    [ESPFBYDataBase removeAllTableDevicesfby];
+}
 //发送消息给JS
 //NSOperationQueue* operaSend;
 -(void)sendMsg:(NSString*)methodName param:(id)params{
@@ -1431,8 +1251,11 @@
         }
         NSMutableArray* sendArr = [NSMutableArray arrayWithCapacity:0];
         for (int i=0; i<tmpArr.count; i++) {
+            
             if (ValidDict(tmpArr[i])) {
-                [sendArr addObject:@{@"mac":tmpArr[i][@"mac"],@"name":tmpArr[i][@"name"],@"rssi":tmpArr[i][@"rssi"],@"version":tmpArr[i][@"version"],@"bssid":tmpArr[i][@"bssid"],@"tid":tmpArr[i][@"tid"],@"only_beacon":tmpArr[i][@"only_beacon"]}];
+                NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithDictionary:tmpArr[i]];
+                [dict removeObjectForKey:@"device"];
+                [sendArr addObject:dict];
             }
         }
         NSString* json=[ESPDataConversion jsonFromObject:sendArr];
@@ -1443,8 +1266,8 @@
 //UDP Scan超时或者失败反馈
 -(void)sendUDPResult{
     
-    [[ESPMeshManager share] cancelScanRootUDP];
-    [[ESPMeshManager share] cancelScanRootmDNS];
+//    [[ESPMeshManager share] cancelScanRootUDP];
+//    [[ESPMeshManager share] cancelScanRootmDNS];
     if (DevicesOfScanUDP.count>0) {
         NSMutableArray* sendInfo=[NSMutableArray arrayWithCapacity:0];
         for (EspDevice* item in DevicesOfScanUDP.allValues) {
@@ -1489,6 +1312,7 @@
         [defaults removeObjectForKey:@"DevicesOfScanUDPHostArr"];
         [defaults removeObjectForKey:@"DevicesOfScanUDPKeyArr"];
         [defaults removeObjectForKey:@"DevicesOfScanUDPValueArr"];
+        [defaults removeObjectForKey:@"DevicesOfScanUDPGroupArr"];
         [defaults synchronize];
         [[NSUserDefaults standardUserDefaults] setObject:ssid forKey:@"lastSSID"];
         [[NSUserDefaults standardUserDefaults] setObject:bssid forKey:@"lastBSSID"];
@@ -1505,13 +1329,14 @@
     if (isUDPScan) {
         return;
     }
-    if (lastRequestDate) {
-        NSLog(@"sendDeviceStatus两次请求时间间隔：%f",[[NSDate date] timeIntervalSinceDate:lastRequestDate]);
-        if ([[NSDate date] timeIntervalSinceDate:lastRequestDate]<0.5) {
+    isUDPScan=true;
+    if (self.lastRequestDate) {
+        NSLog(@"sendDeviceStatus两次请求时间间隔：%f",[[NSDate date] timeIntervalSinceDate:self.lastRequestDate]);
+        if ([[NSDate date] timeIntervalSinceDate:self.lastRequestDate]<0.5) {
             return;//过滤频繁操作
         }
     }
-    lastRequestDate= [NSDate date];
+    self.lastRequestDate= [NSDate date];
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSArray *ScanUDPKeyArr = [defaults objectForKey:@"DevicesOfScanUDPKeyArr"];
@@ -1520,11 +1345,13 @@
     NSMutableArray *DevicesOfScanUDPHostArr = [NSMutableArray arrayWithArray:ScanUDPHostArr];
     NSArray *ScanUDPValueArr = [defaults objectForKey:@"DevicesOfScanUDPValueArr"];
     NSMutableArray *DevicesOfScanUDPValueArr = [NSMutableArray arrayWithArray:ScanUDPValueArr];
+    NSArray *ScanUDPGroupArr = [defaults objectForKey:@"DevicesOfScanUDPGroupArr"];
+    NSMutableArray *DevicesOfScanUDPGroupArr = [NSMutableArray arrayWithArray:ScanUDPGroupArr];
     
     NSArray *macsArray = [mac componentsSeparatedByString:@","];
     NSSet *set = [NSSet setWithArray:macsArray];
     NSArray * macArray = [set allObjects];
-    NSLog(@"macArray个数：%@,ee%@",macsArray,macArray);
+//    NSLog(@"macArray个数：%@,ee%@",macsArray,macArray);
     NSMutableArray *DevicesArr = [NSMutableArray arrayWithCapacity:0];
     for (int i = 0; i < macArray.count; i ++) {
         EspDevice *newDevice = DevicesOfScanUDP[macArray[i]];
@@ -1545,32 +1372,8 @@
                 EspHttpResponse *response = resps[device.mac];
                 if (response != nil) {
                     NSDictionary* responDic=response.getContentJSON;
-                    NSMutableDictionary *mDic=[NSMutableDictionary dictionaryWithCapacity:0];
-                    mDic[@"mac"]=device.mac;
-                    if (responDic[@"position"]) {
-                        mDic[@"position"]=responDic[@"position"];
-                    }else {
-                        mDic[@"position"]=@"";
-                    }
-                    mDic[@"state"]=@"local";
-                    mDic[@"meshLayerLevel"]=[NSString stringWithFormat:@"%d",device.meshLayerLevel];
-                    mDic[@"meshID"]=device.meshID;
-                    mDic[@"host"]=device.host;
-                    if (responDic[@"idf_version"]) {
-                        mDic[@"idf_version"]=responDic[@"idf_version"];
-                    }else {
-                        mDic[@"idf_version"]=@"";
-                    }
-                    if (responDic[@"mdf_version"]) {
-                        mDic[@"mdf_version"]=responDic[@"mdf_version"];
-                    }else {
-                        mDic[@"mdf_version"]=@"";
-                    }
-                    mDic[@"tid"]=responDic[@"tid"];
-                    mDic[@"name"]=responDic[@"name"];
-                    mDic[@"version"]=responDic[@"version"];
-                    
-                    mDic[@"characteristics"]=[ESPDataConversion getJSCharacters:responDic[@"characteristics"]];
+                    NSMutableDictionary *mDic = [ESPDataConversion deviceDetailData:responDic withEspDevice:device];
+                    [DevicesOfScanUDPGroupArr addObject:mDic[@"group"]];
                     if (responDic[@"characteristics"] != nil) {
                         [DevicesOfScanUDPHostArr addObject:device.host];
                         [DevicesOfScanUDPKeyArr addObject:device.mac];
@@ -1580,12 +1383,14 @@
                     }
                     NSString* json=[ESPDataConversion jsonFromObject:mDic];
                     [self sendMsg:@"onDeviceStatusChanged" param:json];
+                    isUDPScan=false;
                 }
             }
             
             [defaults setValue:DevicesOfScanUDPHostArr forKey:@"DevicesOfScanUDPHostArr"];
             [defaults setValue:DevicesOfScanUDPKeyArr forKey:@"DevicesOfScanUDPKeyArr"];
             [defaults setValue:DevicesOfScanUDPValueArr forKey:@"DevicesOfScanUDPValueArr"];
+            [defaults setValue:DevicesOfScanUDPGroupArr forKey:@"DevicesOfScanUDPGroupArr"];
             [defaults synchronize];
             
         }
@@ -1599,14 +1404,16 @@
     if (isUDPScan) {
         return;
     }
-    
-    if (lastRequestDate) {
-        NSLog(@"sendDeviceFound两次请求时间间隔：%f",[[NSDate date] timeIntervalSinceDate:lastRequestDate]);
-        if ([[NSDate date] timeIntervalSinceDate:lastRequestDate]<0.5) {
+    isUDPScan=true;
+    if (self.lastRequestDate) {
+        NSLog(@"sendDeviceFound两次请求时间间隔：%f",[[NSDate date] timeIntervalSinceDate:self.lastRequestDate]);
+        if ([[NSDate date] timeIntervalSinceDate:self.lastRequestDate]<0.5) {
             return;//过滤频繁操作
         }
     }
-    lastRequestDate= [NSDate date];
+    self.lastRequestDate= [NSDate date];
+    
+    NSLog(@"%@",mac);
     
     [[ESPMeshManager share] starScanRootUDP:^(NSArray *devixe) {
         
@@ -1638,6 +1445,8 @@
             NSMutableArray *DevicesOfScanUDPHostArr = [NSMutableArray arrayWithArray:ScanUDPHostArr];
             NSArray *ScanUDPValueArr = [defaults objectForKey:@"DevicesOfScanUDPValueArr"];
             NSMutableArray *DevicesOfScanUDPValueArr = [NSMutableArray arrayWithArray:ScanUDPValueArr];
+            NSArray *ScanUDPGroupArr = [defaults objectForKey:@"DevicesOfScanUDPGroupArr"];
+            NSMutableArray *DevicesOfScanUDPGroupArr = [NSMutableArray arrayWithArray:ScanUDPGroupArr];
             
             EspActionDeviceInfo* deviceinfoAction = [[EspActionDeviceInfo alloc] init];
             NSMutableDictionary* resps = [deviceinfoAction doActionGetDevicesInfoLocal:meshinfoArr];
@@ -1651,31 +1460,8 @@
                 EspHttpResponse *response = resps[newDevice.mac];
                 if (response != nil) {
                     NSDictionary* responDic=response.getContentJSON;
-                    NSMutableDictionary *mDic=[NSMutableDictionary dictionaryWithCapacity:0];
-                    mDic[@"mac"]=newDevice.mac;
-                    if (responDic[@"position"]) {
-                        mDic[@"position"]=responDic[@"position"];
-                    }else {
-                        mDic[@"position"]=@"";
-                    }
-                    mDic[@"state"]=@"local";
-                    mDic[@"meshLayerLevel"]=[NSString stringWithFormat:@"%d",newDevice.meshLayerLevel];
-                    mDic[@"meshID"]=newDevice.meshID;
-                    mDic[@"host"]=newDevice.host;
-                    if (responDic[@"idf_version"]) {
-                        mDic[@"idf_version"]=responDic[@"idf_version"];
-                    }else {
-                        mDic[@"idf_version"]=@"";
-                    }
-                    if (responDic[@"mdf_version"]) {
-                        mDic[@"mdf_version"]=responDic[@"mdf_version"];
-                    }else {
-                        mDic[@"mdf_version"]=@"";
-                    }
-                    mDic[@"tid"]=responDic[@"tid"];
-                    mDic[@"name"]=responDic[@"name"];
-                    mDic[@"version"]=responDic[@"version"];
-                    mDic[@"characteristics"]=[ESPDataConversion getJSCharacters:responDic[@"characteristics"]];
+                    NSMutableDictionary *mDic = [ESPDataConversion deviceDetailData:responDic withEspDevice:newDevice];
+                    [DevicesOfScanUDPGroupArr addObject:mDic[@"group"]];
                     if (responDic[@"characteristics"] != nil) {
                         [DevicesOfScanUDPHostArr addObject:newDevice.host];
                         [DevicesOfScanUDPKeyArr addObject:newDevice.mac];
@@ -1688,6 +1474,7 @@
             [defaults setValue:DevicesOfScanUDPHostArr forKey:@"DevicesOfScanUDPHostArr"];
             [defaults setValue:DevicesOfScanUDPKeyArr forKey:@"DevicesOfScanUDPKeyArr"];
             [defaults setValue:DevicesOfScanUDPValueArr forKey:@"DevicesOfScanUDPValueArr"];
+            [defaults setValue:DevicesOfScanUDPGroupArr forKey:@"DevicesOfScanUDPGroupArr"];
             [defaults synchronize];
             NSArray* oldMacs=self->DevicesOfScanUDP.allKeys;
             NSArray* newMacs=newDevices.allKeys;
@@ -1698,6 +1485,7 @@
                     NSLog(@"设备上线：%@",tmpDevice.sendInfo);
                     NSString* json=[ESPDataConversion jsonFromObject:tmpDevice.sendInfo];
                     [self sendMsg:@"onDeviceFound" param:json];
+                    isUDPScan=false;
                 }
             }
             for (int i=0; i<oldMacs.count; i++) {
@@ -1706,6 +1494,7 @@
                     NSLog(@"设备下线：%@",oldMacs[i]);
                     NSString* json=oldMacs[i];
                     [self sendMsg:@"onDeviceLost" param:json];
+                    isUDPScan=false;
                 }
             }
             if (newDevices.count>0) {
@@ -1718,6 +1507,70 @@
         
     }];
 }
+
+//设备Sniffer变化上报
+- (void)sendDeviceSnifferChanged:(NSString*)mac{
+    
+    if (self.lastRequestDate) {
+//        NSLog(@"sendDeviceStatus两次请求时间间隔：%f",[[NSDate date] timeIntervalSinceDate:lastRequestDate]);
+        if ([[NSDate date] timeIntervalSinceDate:self.lastRequestDate]<0.5) {
+            return;//过滤频繁操作
+        }
+    }
+    self.lastRequestDate= [NSDate date];
+    
+    NSArray *macArr=[mac componentsSeparatedByString:@","];
+    NSDictionary *deviceIpWithDic = [ESPDataConversion deviceRequestIpWithMac:macArr];
+    NSArray *deviceIpArr = [deviceIpWithDic allKeys];
+    if (!ValidArray(deviceIpArr)) {
+        return;
+    }
+    NSLog(@"%@,%lu",deviceIpArr[0],(unsigned long)deviceIpArr.count);
+    for (int i = 0; i < deviceIpArr.count; i ++) {
+        [espUploadHandleTool getSnifferInfo:deviceIpArr[i] withDeviceMacs:mac andSuccess:^(NSArray * _Nonnull dic) {
+            NSLog(@"%@",dic);
+            NSString *nameStr;
+            NSMutableArray *resultArr = [NSMutableArray arrayWithCapacity:0];
+            for (int i = 0; i < dic.count; i ++) {
+                ESPSniffer *espsniffer = [dic objectAtIndex:i];
+                NSMutableDictionary *resultDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                if (ValidStr(espsniffer.manufacturerId)) {
+                    NSArray *fileArr = [espDocumentPath readFile:@"wifi"];
+                    for (int j = 0; j < fileArr.count; j ++) {
+                        if ([fileArr[j] containsString:espsniffer.manufacturerId]) {
+                            NSArray *contentArr = [fileArr[j] componentsSeparatedByString:@":"];
+                            nameStr = contentArr[1];
+                        }
+                    }
+                }else {
+                    NSArray *fileArr = [espDocumentPath readFile:@"ble"];
+                    for (int j = 0; j < fileArr.count; j ++) {
+                        NSString *macStr = [espsniffer.meshMac substringToIndex:5];
+                        if ([fileArr[j] containsString:macStr]) {
+                            NSArray *contentArr = [fileArr[j] componentsSeparatedByString:@":"];
+                            nameStr = contentArr[1];
+                        }
+                    }
+                }
+                resultDic[@"type"] = [NSString stringWithFormat:@"%d",espsniffer.snifferType];
+                resultDic[@"mac"] = espsniffer.meshMac;
+                resultDic[@"channel"] = [NSString stringWithFormat:@"%d",espsniffer.channel];
+                resultDic[@"time"] = [NSString stringWithFormat:@"%lu",espsniffer.time];
+                resultDic[@"rssi"] = [NSString stringWithFormat:@"%d",espsniffer.rssi];
+                resultDic[@"mac"] = espsniffer.name;
+                resultDic[@"org"] = nameStr;
+                
+                [resultArr addObject:resultDic];
+            }
+            NSString* json=[ESPDataConversion jsonConfigureFromObject:resultArr];
+            [self sendMsg:@"onSniffersDiscovered" param:json];
+        } andFailure:^(int fail) {
+            
+        }];
+    }
+}
+
+
 
 //扫码代理
 - (void)reader:(QRCodeReaderViewController *)reader didScanResult:(NSString *)result
@@ -1747,6 +1600,7 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 
 /*
 #pragma mark - Navigation

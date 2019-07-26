@@ -106,7 +106,7 @@
 
 +(void)requestOTAStatus:(NSArray<EspDevice *> *)devices binPath:(NSString *)binPath callback:(NetWorkCallBack)callback{
     if (devices.count==0) {
-        callback(@"error:设备数为0",nil);
+        callback(@"error:设备数为0",@{});
         return;
     }
     EspDevice* device=devices[0];

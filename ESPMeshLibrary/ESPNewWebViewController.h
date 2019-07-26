@@ -33,6 +33,8 @@
 - (void)scanTopo;
 //开启UDP扫描
 - (void)scanDevicesAsync;
+//更新房间信息
+- (void)updateDeviceGroup:(NSString *)message;
 //hwdevice_table表  保存本地配对信息
 - (void)saveHWDevice:(NSString *)message;
 - (void)saveHWDevices:(NSString *)message;
@@ -40,9 +42,9 @@
 - (void)deleteHWDevices:(NSString *)message;
 - (void)loadHWDevices;
 //发送多个设备命令
-- (void)requestDevicesMulticastAsync:(NSString *)message;
+- (void)requestDevicesMulticast:(NSString *)message;
 //发送单个设备命令
-- (void)requestDeviceAsync:(NSString *)message;
+- (void)requestDevice:(NSString *)message;
 //发送多个设备命令防止重复操作
 - (void)addQueueTask:(NSString *)message;
 //表  Group组
@@ -90,15 +92,26 @@
 //重启设备命令
 - (void)reboot:(NSString *)message;
 //保存本地事件
-- (void)saveDeviceEventsPosition:(NSString *)message;
-- (void)loadDeviceEventsPositioin:(NSString *)message;
-- (void)loadAllDeviceEventsPosition:(NSString *)message;
-- (void)deleteDeviceEventsPosition:(NSString *)message;
-- (void)deleteAllDeviceEventsPosition:(NSString *)message;
+- (void)saveDeviceEventsCoordinate:(NSString *)message;
+- (void)loadDeviceEventsCoordinate:(NSString *)message;
+- (void)loadAllDeviceEventsCoordinate:(NSString *)message;
+- (void)deleteDeviceEventsCoordinate:(NSString *)message;
+- (void)deleteAllDeviceEventsCoordinate;
 //跳转系统设置页面
 - (void)gotoSystemSettings:(NSString *)message;
 //加载超链接
-- (void)openHyperlinks:(NSString *)message;
+- (void)newWebView:(NSString *)message;
+
+//table信息存储(ipad)
+- (void)saveDeviceTable:(NSString *)message;
+- (void)loadDeviceTable;
+
+//table设备信息存储(ipad)
+- (void)saveTableDevices:(NSString *)message;
+- (void)loadTableDevices;
+- (void)removeTableDevices:(NSString *)message;
+- (void)removeAllTableDevices;
+
 @end
 
 @interface ESPNewWebViewController : UIViewController<QRCodeReaderDelegate>

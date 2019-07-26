@@ -126,9 +126,9 @@
     }
 }
 
-- (void)centralManager:(CBCentralManager *)central willRestoreState:(NSDictionary *)dict {
-    
-}
+//- (void)centralManager:(CBCentralManager *)central willRestoreState:(NSDictionary *)dict {
+//    
+//}
 
 //扫描到Peripherals
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI {

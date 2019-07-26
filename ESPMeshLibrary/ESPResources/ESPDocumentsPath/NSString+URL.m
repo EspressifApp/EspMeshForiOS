@@ -16,12 +16,13 @@
 {
     
     NSString *unencodedString = self;
-    NSString *encodedString = (NSString *)
-    CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
-                                                              (CFStringRef)unencodedString,
-                                                              NULL,
-                                                              (CFStringRef)@"!*'();:@&=+$,/?%#[]",
-                                                              kCFStringEncodingUTF8));
+//    NSString *encodedString = (NSString *)
+//    CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
+//                                                              (CFStringRef)unencodedString,
+//                                                              NULL,
+//                                                              (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+//                                                              kCFStringEncodingUTF8));
+    NSString *encodedString = (NSString *)CFBridgingRelease((__bridge CFTypeRef _Nullable)([[unencodedString description] stringByAddingPercentEncodingWithAllowedCharacters:[[NSCharacterSet characterSetWithCharactersInString:@"!*'();:@&=+$,/?%#[]"] invertedSet]]));
     
     return encodedString;
 }
@@ -32,10 +33,11 @@
 -(NSString *)URLDecodedString
 {
     NSString *encodedString = self;
-    NSString *decodedString  = (__bridge_transfer NSString *)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL,
-                                                                                                                     (__bridge CFStringRef)encodedString,
-                                                                                                                     CFSTR(""),
-                                                                                                                     CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+//    NSString *decodedString  = (__bridge_transfer NSString *)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL,
+//                                                                                                                     (__bridge CFStringRef)encodedString,
+//                                                                                                                     CFSTR(""),
+//                                                                                                                     CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+    NSString *decodedString  = (NSString *)CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapes(kCFAllocatorDefault, (CFStringRef)encodedString, CFSTR("")));
     return decodedString;
 }
 @end

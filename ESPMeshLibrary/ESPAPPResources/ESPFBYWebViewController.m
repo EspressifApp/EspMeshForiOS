@@ -12,6 +12,7 @@
 #import "ESPDocumentsPath.h"
 #import "ESPHomeService.h"
 #import "ESPUploadHandleTool.h"
+#import "ESPFBYBLECBPeripheral.h"
 
 #define FBYDeviceWidth ([UIScreen mainScreen].bounds.size.width)
 #define FBYDeviceHeight ([UIScreen mainScreen].bounds.size.height)
@@ -21,6 +22,8 @@
 @property (strong, nonatomic) UITextView *peripheralText;
 
 @property(nonatomic,strong)ESPFBYBLEHelper *bleHelper;
+
+@property(nonatomic,strong)ESPFBYBLECBPeripheral *BLECBPeripheral;
 
 @end
 
@@ -37,6 +40,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
+    self.BLECBPeripheral = [ESPFBYBLECBPeripheral shared];
     self.bleHelper = [[ESPFBYBLEHelper alloc]init];
     [self.bleHelper initBle];
     
@@ -67,7 +71,19 @@
         [self.view addSubview:upgradesBtn];
     }
     
-    self.peripheralText = [[UITextView alloc]initWithFrame:CGRectMake(10, 64, FBYDeviceWidth-20, FBYDeviceHeight-170)];
+    NSArray *bluetoothArr = @[@"初始化",@"添加服务",@"开始广播"];
+    for (int i = 0; i < bluetoothArr.count; i ++) {
+        int count = FBYDeviceWidth*i/3;
+        UIButton *bluetoothBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-152, (FBYDeviceWidth-2)/3, 50)];
+        bluetoothBtn.backgroundColor = [UIColor whiteColor];
+        [bluetoothBtn setTitleColor:[UIColor lightGrayColor] forState:0];
+        bluetoothBtn.tag = 8000 + i;
+        [bluetoothBtn setTitle:bluetoothArr[i] forState:0];
+        [bluetoothBtn addTarget:self action:@selector(bluetoothBtn:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:bluetoothBtn];
+    }
+    
+    self.peripheralText = [[UITextView alloc]initWithFrame:CGRectMake(10, 64, FBYDeviceWidth-20, FBYDeviceHeight-220)];
     [self.view addSubview:_peripheralText];
 }
 
@@ -96,6 +112,16 @@
         [self downloadFile];
     }else if (sender.tag == 7002) {
         [self uploadFile];
+    }
+}
+
+- (void)bluetoothBtn:(UIButton *)sender {
+    if (sender.tag == 8000) {
+        [self.BLECBPeripheral setup];
+    }else if (sender.tag == 8001) {
+        [self.BLECBPeripheral addSe];
+    }else if (sender.tag == 8002) {
+        [self.BLECBPeripheral adv];
     }
 }
 
@@ -145,11 +171,11 @@
     NSString *ip=@"192.168.0.22";
     NSString *port=@"80";
     NSString *urlStr=[NSString stringWithFormat:@"http://%@:%@/device_request",ip,port];
-    [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":@"240ac4286448",@"meshNodeNum":@"1"} withBodyContent:@{@"request":@"get_ota_progress"} andSuccess:^(NSDictionary * _Nonnull dic) {
-        if ([[dic objectForKey:@"status_code"] intValue] == 0) {
+    [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":@"240ac4286448",@"meshNodeNum":@"1"} withBodyContent:@{@"request":@"get_ota_progress"} andSuccess:^(NSArray * _Nonnull resultArr) {
+        if ([[resultArr[0] objectForKey:@"status_code"] intValue] == 0) {
             [self->BLETimer invalidate];
         }
-        NSLog(@"dic-->%@",dic);
+        NSLog(@"resultArr-->%@",resultArr);
     } andFailure:^(int fail) {
         NSLog(@"%d",fail);
         [self->BLETimer invalidate];

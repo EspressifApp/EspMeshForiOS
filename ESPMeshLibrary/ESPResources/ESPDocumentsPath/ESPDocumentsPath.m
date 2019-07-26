@@ -166,4 +166,21 @@
     return allArr;
 }
 
+- (NSArray *)readFile:(NSString *)typeStr {
+    NSArray* dataArr;
+    if ([typeStr isEqualToString:@"wifi"]) {
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"mac_org_list" ofType:@"txt"];
+        NSString *UTF8txtString = [[NSString alloc] initWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+        
+        dataArr=[UTF8txtString componentsSeparatedByString:@"\n"];
+    }else {
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"bt_org_list" ofType:@"txt"];
+        NSString *UTF8txtString = [[NSString alloc] initWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+        
+        dataArr = [UTF8txtString componentsSeparatedByString:@"\n"];
+    }
+    NSLog(@"dataArr ====> %@",dataArr);
+    return dataArr;
+}
+
 @end

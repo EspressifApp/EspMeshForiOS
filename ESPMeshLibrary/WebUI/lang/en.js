@@ -1,6 +1,7 @@
 define(function(){
     var m = {
         "appName": "Mesh",
+        "httpUrlShow": "www.espressif.com",
         "httpUrl": "https://www.espressif.com",
         "email":"Email address",
         "password":"Password",
@@ -28,6 +29,7 @@ define(function(){
         "loadCon": "Networking...",
         "search": "Search name or location",
         "searchMAC": "Search mac or location",
+        "searchByMac": "Search mac",
         "searchGroup": "Search name",
         "editName": "Name the device",
         "edit": "Edit Location",
@@ -40,7 +42,8 @@ define(function(){
         "editGroup": "Edit the group",
         "addDevice": "Add device",
         "addGroup": "Add group",
-        "addPair": "Add Location",
+        "addPair": "Add location",
+        "addRoom": "Create room",
         "deleteDevice": "Delete device",
         "deviceOnline": "Device online",
         "deviceOffline": "Device offline",
@@ -113,6 +116,7 @@ define(function(){
         "onOff": "On/Off",
         "brightMode": "BrightMode",
         "blinkMode": "BlinkMode",
+        "configMode": "Mode",
         "glitterMode": "GlitterMode",
         "readMode": "ReadMode",
         "cozyMode": "CozyMode",
@@ -132,10 +136,22 @@ define(function(){
         "hue": "Hue",
         "temp": "Color temp",
         "brightness": "Brightness",
+        "luminance": "Luminance",
+        "saturation": "Saturation",
+        "openLight": "ON",
+        "closeLight": "OFF",
+        "colorLight": "Color light",
+        "whiteLight": "White light",
 
         "editNameDesc": "Edit the device name",
         "editNameInput": "Enter the new device name",
-        "listDesc": "All configured devices will be displayed here:",
+        "noAddDeviceDesc": "No devices found yet!",
+        "noAddGroupDesc": "No groups found yet!",
+        "noAddPairDesc": "No location found yet!",
+        "noAddRoomDesc": "No rooms found yet!",
+        "listDesc": "Click the button on the top right or the below one to add",
+        "videoDesc": "If you are not aware of the devices' functions, please check the introduction video",
+        "clickVideoDesc": "View video introduction",
         "pairListDesc": "All location information will be displayed here:",
         "remindDesc": "Found new devices, Please click to Add.",
         "forgotDesc": "Please enter your email address to reset the password",
@@ -236,6 +252,7 @@ define(function(){
         "processCutover": "Cutover",
         "selectDeviceDesc": "Please select devices",
         "selectEventDesc": "Please select events",
+        "selectPairDesc": "Please select information",
         "noConfigDesc": "The selected device can only be used as a leaf node. Please use it with other Mesh devices.",
         "isExistGroupDesc": "Group name already exists",
 
@@ -277,7 +294,8 @@ define(function(){
             "recent":"Recent",
             "device":"Devices",
             "group":"Group",
-            "user":"User"
+            "user":"User",
+            "room":"Room"
         }
     }
     return {

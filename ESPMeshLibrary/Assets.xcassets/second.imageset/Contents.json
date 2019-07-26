@@ -1,8 +1,17 @@
 {
   "images" : [
     {
-      "idiom" : "universal",
-      "filename" : "second.pdf"
+      "idiom" : "iphone",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "iphone",
+      "filename" : "second.pdf",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "iphone",
+      "scale" : "3x"
     }
   ],
   "info" : {

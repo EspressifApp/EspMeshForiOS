@@ -53,15 +53,15 @@
     
 }
 
-- (NSString *)checkAppVersionNumber:(NSString *)appId
+- (NSDictionary *)checkAppVersionNumber:(NSString *)appId
 {
     NSURL *appUrl = [NSURL URLWithString:[NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%@",appId]];
-    NSString *appMsg = [NSString stringWithContentsOfURL:appUrl encoding:NSUTF8StringEncoding error:nil];
+    id appMsg = [NSString stringWithContentsOfURL:appUrl encoding:NSUTF8StringEncoding error:nil];
+//    NSLog(@"%@",appMsg);
     NSDictionary *appMsgDict = [self jsonStringToDictionary:appMsg];
     NSDictionary *appResultsDict = [appMsgDict[@"results"] lastObject];
-    NSString *appStoreVersion = appResultsDict[@"version"];
     
-    return appStoreVersion;
+    return appResultsDict;
 }
 
 - (BOOL)appVersionUpdate {

@@ -168,9 +168,13 @@ static NSString * const kWriteCharacteristicUUID = @"FF01";
  */
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary<NSString *,id> *)advertisementData RSSI:(NSNumber *)RSSI
 {
+    
     NSLog(@"%@",[NSString stringWithFormat:@"发现设备,设备名:%@",peripheral.name]);
     if (peripheral.name == nil) {
         return;
+    }else if ([peripheral.name isEqualToString:@"XXJTEST"]) {
+        NSData *ManufacturerData = [advertisementData objectForKey:@"kCBAdvDataManufacturerData"];//没有这个字段
+        NSLog(@"%@",ManufacturerData);
     }
     __weak typeof(self) weakSelf = self;
     NSData *macData = nil;

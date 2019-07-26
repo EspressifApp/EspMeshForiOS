@@ -33,7 +33,7 @@
 + (NSString *)jsonFromObject:(id)objdata
 {
     
-    NSError *error;
+    NSError *error = nil;
     
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:objdata options:NSJSONWritingPrettyPrinted error:&error];
     
@@ -171,6 +171,38 @@
     return fbyVersion;
 }
 
++ (NSDictionary *)deviceRequestIpWithGroup:(NSArray *)groupArr {
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSArray *keyData = [defaults objectForKey:@"DevicesOfScanUDPGroupArr"];
+    NSArray *hostData = [defaults objectForKey:@"DevicesOfScanUDPHostArr"];
+    
+    NSMutableDictionary *deviceIpDic = [NSMutableDictionary dictionaryWithCapacity:0];
+    
+    
+    if (keyData.count != hostData.count) {
+        return @{};
+    }
+    
+    for (int i = 0; i < groupArr.count; i ++) {
+        for (int j = 0; j < keyData.count; j ++) {
+            if ([groupArr[i] isEqual:keyData[j]]) {
+                NSMutableArray *deviceGroupArr = [NSMutableArray arrayWithCapacity:0];
+                if (deviceIpDic[hostData[j]] == nil) {
+                    [deviceGroupArr addObject:keyData[j]];
+                    deviceIpDic[hostData[j]] = deviceGroupArr;
+                }else {
+                    NSArray *valueArr = deviceIpDic[hostData[j]];
+                    [deviceGroupArr addObject:keyData[j]];
+                    [deviceGroupArr addObjectsFromArray:valueArr];
+                    deviceIpDic[hostData[j]] = deviceGroupArr;
+                }
+                
+            }
+        }
+    }
+    return deviceIpDic;
+}
 
 + (NSDictionary *)deviceRequestIpWithMac:(NSArray *)macArr {
     
@@ -179,7 +211,7 @@
     NSArray *hostData = [defaults objectForKey:@"DevicesOfScanUDPHostArr"];
     
     NSMutableDictionary *deviceIpDic = [NSMutableDictionary dictionaryWithCapacity:0];
-    NSMutableArray *deviceMacArr = [NSMutableArray arrayWithCapacity:0];
+    
     
     if (keyData.count != hostData.count) {
         return @{};
@@ -188,8 +220,17 @@
     for (int i = 0; i < macArr.count; i ++) {
         for (int j = 0; j < keyData.count; j ++) {
             if ([macArr[i] isEqual:keyData[j]]) {
-                [deviceMacArr addObject:keyData[j]];
-                deviceIpDic[hostData[j]] = deviceMacArr;
+                NSMutableArray *deviceMacArr = [NSMutableArray arrayWithCapacity:0];
+                if (deviceIpDic[hostData[j]] == nil) {
+                    [deviceMacArr addObject:keyData[j]];
+                    deviceIpDic[hostData[j]] = deviceMacArr;
+                }else {
+                    NSArray *valueArr = deviceIpDic[hostData[j]];
+                    [deviceMacArr addObject:keyData[j]];
+                    [deviceMacArr addObjectsFromArray:valueArr];
+                    deviceIpDic[hostData[j]] = deviceMacArr;
+                }
+                
             }
         }
     }
@@ -211,6 +252,124 @@
         }
     }
     return ipStr;
+}
+
+
++ (NSArray *)DeviceOfScanningUDPData:(NSMutableArray *)macArr {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSArray *keyData = [[defaults objectForKey:@"DevicesOfScanUDPKeyArr"] copy];
+    NSArray *valueData = [[defaults objectForKey:@"DevicesOfScanUDPValueArr"] copy];
+    
+    NSMutableArray *deviceMacArr = [NSMutableArray arrayWithCapacity:0];
+    
+    if (keyData.count != valueData.count) {
+        return @[];
+    }
+    
+    for (int i = 0; i < macArr.count; i ++) {
+        for (int j = 0; j < keyData.count; j ++) {
+            NSString *macStr = [macArr[i] objectForKey:@"mac"];
+            if ([macStr isEqual:keyData[j]]) {
+                [deviceMacArr addObject:valueData[j]];
+            }
+        }
+    }
+    
+    return deviceMacArr;
+}
+
++ (void)updateGroupInformation:(id)msg {
+    NSDictionary *msgDic = msg;
+    NSArray *msgAllRoom = [msgDic allKeys];
+    NSArray *msgAllMac = [msgDic allValues];
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSArray *keyData = [defaults objectForKey:@"DevicesOfScanUDPKeyArr"];
+    NSArray *valueData = [defaults objectForKey:@"DevicesOfScanUDPValueArr"];
+    NSMutableArray *valueDataArr = [NSMutableArray arrayWithArray:valueData];
+    
+    for (int i = 0; i < msgAllMac.count; i ++) {
+        NSArray *msgMacArr = msgAllMac[i];
+        NSString *roomStr = msgAllRoom[i];
+        for (int j = 0; j < msgMacArr.count; j ++) {
+            for (int m = 0; m < keyData.count; m ++) {
+                if ([msgMacArr[j] isEqual:keyData[m]]) {
+                    NSMutableDictionary *deviceDetailDic = [NSMutableDictionary dictionaryWithDictionary:valueData[m]];
+                    NSArray *roomArr = @[roomStr];
+                    [deviceDetailDic setObject:roomArr forKey:@"group"];
+                    [valueDataArr replaceObjectAtIndex:m withObject:deviceDetailDic];
+                }
+            }
+        }
+    }
+    [defaults setValue:valueDataArr forKey:@"DevicesOfScanUDPValueArr"];
+}
+
++ (NSMutableDictionary *)deviceDetailData:(NSDictionary *)responDic withEspDevice:(EspDevice *)newDevice {
+    NSMutableDictionary *mDic=[NSMutableDictionary dictionaryWithCapacity:0];
+    mDic[@"mac"]=newDevice.mac;
+    if (responDic[@"position"]) {
+        mDic[@"position"]=responDic[@"position"];
+    }else {
+        mDic[@"position"]=@"";
+    }
+    mDic[@"state"]=@"local";
+    mDic[@"meshLayerLevel"]=[NSString stringWithFormat:@"%d",newDevice.meshLayerLevel];
+    mDic[@"meshID"]=newDevice.meshID;
+    mDic[@"host"]=newDevice.host;
+    mDic[@"tid"]=responDic[@"tid"];
+    if (responDic[@"idf_version"]) {
+        mDic[@"idf_version"]=responDic[@"idf_version"];
+    }else {
+        mDic[@"idf_version"]=@"";
+    }
+    if (responDic[@"mdf_version"]) {
+        mDic[@"mdf_version"]=responDic[@"mdf_version"];
+    }else {
+        mDic[@"mdf_version"]=@"";
+    }
+    if (responDic[@"mlink_version"]) {
+        mDic[@"mlink_version"]=responDic[@"mlink_version"];
+    }else {
+        mDic[@"mlink_version"]=@"";
+    }
+    if (responDic[@"mlink_trigger"]) {
+        mDic[@"mlink_trigger"]=responDic[@"mlink_trigger"];
+    }else {
+        mDic[@"mlink_trigger"]=@"";
+    }
+    if (responDic[@"mesh_id"]) {
+        mDic[@"mesh_id"]=responDic[@"mesh_id"];
+    }else {
+        mDic[@"mesh_id"]=@"";
+    }
+    //                    ,@"cloud"
+    mDic[@"state"]=@[@"local"];
+    if (responDic[@"rssi"]) {
+        mDic[@"rssi"]=responDic[@"rssi"];
+    }else {
+        mDic[@"rssi"]=@"";
+    }
+    if (responDic[@"layer"]) {
+        mDic[@"layer"]=responDic[@"layer"];
+    }else {
+        mDic[@"layer"]=@"";
+    }
+    if (responDic[@"tsf_time"]) {
+        mDic[@"tsf_time"]=responDic[@"tsf_time"];
+    }else {
+        mDic[@"tsf_time"]= @0;
+    }
+    if (responDic[@"group"]) {
+        mDic[@"group"] = responDic[@"group"];
+    }else {
+        mDic[@"group"] = @[];
+    }
+    mDic[@"name"]=responDic[@"name"];
+    mDic[@"version"]=responDic[@"version"];
+    mDic[@"characteristics"]=[ESPDataConversion getJSCharacters:responDic[@"characteristics"]];
+    
+    return mDic;
 }
 
 @end

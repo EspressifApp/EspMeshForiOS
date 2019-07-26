@@ -4,7 +4,7 @@
         <div v-show="addFlag" class="add-info operate-way bgcolor add-device-wrapper">
             <h4 class="app-title no-bg"><span @click="hide"><i class="icon-left back"></i></span>{{$t('confirmWIFI')}}</h4>
             <div class="register-wraaper add-device">
-                <div class="content">
+                <div class="content" :class="{'content-bottom': isMore}">
                     <div class="position-relative">
                         {{currentWifi}}
                         <span class="add-wifi-desc">{{$t('currentWIFI')}}:</span>
@@ -16,10 +16,10 @@
                     </div>
                     <div class="position-relative more-wrapper flex flex-ac flex-jce" @click="selectMore">
                         <div class="more-radio">
-                            <a>ESp-Mesh Config</a>
+                            <a>ESP-Mesh Config</a>
                         </div>
                     </div>
-                    <div class="more-info" v-show="isMore">
+                    <div class="more-info config-content" v-show="isMore">
                         <div class="position-relative">
                             <span class="add-wifi-desc">Mesh ID:</span>
                             <input readonly type="text"
@@ -40,8 +40,8 @@
                             <input placeholder="Mesh password" v-model="meshPwd"  class="form-control" >
                         </div>
                         <mt-navbar v-model="selected">
-                            <mt-tab-item id="1">Mesh Config</mt-tab-item>
                             <mt-tab-item id="2">Custom Data</mt-tab-item>
+                            <mt-tab-item id="1">Mesh Config</mt-tab-item>
                         </mt-navbar>
                         <mt-tab-container v-model="selected">
                             <mt-tab-container-item id="2">
@@ -156,7 +156,7 @@
                         </mt-tab-container>
                     </div>
                 </div>
-                <div class="position-relative btn-register-wrapper">
+                <div class="position-relative btn-register-wrapper flex flex-jcc" :class="{'config-btn': isMore}">
                     <button type="submit" class="btn register-btn" @click="nextStep">{{$t('next')}}</button>
                 </div>
             </div>

@@ -110,6 +110,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/joinDevice.html", "./importDevic
             getIcon: function (tid) {
                 return Util.getIcon(tid);
             },
+            getRssiIcon: function(rssi) {
+                return Util.getRssiIcon(rssi);
+            },
             getPair: function() {
                 this.resetPairList = this.$store.state.siteList;
             },
@@ -227,7 +230,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/joinDevice.html", "./importDevic
                         var data = '{"' + MESH_MAC + '": ' + JSON.stringify(macs) +
                             ',"'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' + MESH_REQUEST + '": "' + ADD_DEVICE + '","'+
                             'whitelist": '+JSON.stringify(conMacs)+'}';
-                        espmesh.requestDevicesMulticastAsync(data);
+                        espmesh.requestDevicesMulticast(data);
                         self.$store.commit("setScanDeviceList", []);
                         MINT.Indicator.close();
                         self.hide();
@@ -285,10 +288,11 @@ define(["vue", "MINT", "Util", "txt!../../pages/joinDevice.html", "./importDevic
             setScanList: function(devices) {
                 var self = this;
                 $.each(devices, function(i, item) {
-                    if(Util.isMesh(item.name, item.version)) {
+                    if(Util.isMesh(item.name, item.version, item.beacon)) {
                         var flag = true,
-                            obj = {mac: item.mac, name: item.name, rssi: item.rssi, bssid: item.bssid,
-                                position: self.getPairInfo(item.mac), tid: item.tid};
+                            obj = {mac: item.mac, name: Util.setName(item.name, item.bssid),
+                                rssi: item.rssi, bssid: item.bssid, position: self.getPairInfo(item.mac),
+                                tid: item.tid};
                         $.each(self.scanDeviceList, function(j, itemSub) {
                             if (item.mac == itemSub.mac) {
                                 if (item.rssi >= self.rssiValue) {

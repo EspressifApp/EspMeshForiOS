@@ -20,7 +20,7 @@ typedef enum
 
 + (ESPCheckAppVersion *)sharedInstance;
 - (ESPVersionStatus)checkAppVersion:(NSString *)appId;
-- (NSString *)checkAppVersionNumber:(NSString *)appId;
+- (NSDictionary *)checkAppVersionNumber:(NSString *)appId;
 - (BOOL)appVersionUpdate;
 @end
 

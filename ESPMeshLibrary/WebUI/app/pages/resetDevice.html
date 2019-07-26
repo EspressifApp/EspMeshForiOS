@@ -49,7 +49,7 @@
                         </div>
                         <div class="item-name">
                             <span>{{item.name}}({{getPosition(item.position)}})</span>
-                            <span class="desc">Mac: {{item.bssid}}&nbsp;&nbsp;&nbsp;Rssi: {{item.rssi}}</span>
+                            <span class="desc"><img class="item-img" :src="getRssiIcon(item.rssi)"/>&nbsp;&nbsp;&nbsp;Mac: {{item.bssid}}</span>
                         </div>
                         <div class="item-power-small">
                             <span :data-value="item.mac" class="span-radio" :class="{'active': isSelected(item.mac)}"><span></span></span>
@@ -94,8 +94,9 @@
                         <li>3. {{$t('less20Meters')}}</li>
                         <li>4. {{$t('devicesWell')}}</li>
                         <li>5. {{$t('blueMal')}}&emsp;<span @click="setBluetooth" class="green">{{$t('goReboot')}}</span></li>
+                        <li v-show="systemInfo">6. {{$t('locationEnabled')}}&emsp;<span @click="setLocation" class="green">{{$t('goEnable')}}</span></li>
                     </ul>
-                    <div class="result-flex">
+                    <div class="result-flex flex flex-ac flex-jcc">
                         <button @click="hideDescInfo" class="btn register-btn">{{$t('gotIt')}}</button>
                     </div>
                 </div>

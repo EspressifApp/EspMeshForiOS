@@ -8,10 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "EspDevice.h"
+NS_ASSUME_NONNULL_BEGIN
 @interface ESPNetWorking : NSObject
 typedef void (^NetWorkCallBack)(NSString* msg,NSDictionary*data);
 + (void) httpRequest:(NSString *)urlStr method:(NSString *)method body:(NSDictionary *)body headers:(NSDictionary *)headers timeOut:(NSTimeInterval)timeOut callback:(nullable void (^)(NSString *msg, NSDictionary *data))callback;
 + (NSMutableArray*)getMeshInfoFromHost:(EspDevice *)device;
 + (NSString *)getLocalUrlForProtocol:(NSString *)protocol host:(NSString *)host port:(NSString *)port file:(NSString *)file;
 +(void)requestOTAStatus:(NSArray<EspDevice *> *)devices binPath:(NSString *)binPath callback:(NetWorkCallBack)callback;
+NS_ASSUME_NONNULL_END
 @end

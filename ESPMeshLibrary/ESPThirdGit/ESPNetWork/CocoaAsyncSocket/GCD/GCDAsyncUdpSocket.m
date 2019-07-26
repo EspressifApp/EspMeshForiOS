@@ -1178,7 +1178,8 @@ enum GCDAsyncUdpSocketConfig
 	dispatch_queue_t globalConcurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 	dispatch_async(globalConcurrentQueue, ^{ @autoreleasepool {
 		
-		NSMutableArray *addresses = [NSMutableArray arrayWithCapacity:2];
+//        NSMutableArray *addresses = [NSMutableArray arrayWithCapacity:2];
+        NSMutableArray *addresses = [NSMutableArray arrayWithCapacity:0];
 		NSError *error = nil;
 		
 		if ([host isEqualToString:@"localhost"] || [host isEqualToString:@"loopback"])

@@ -15,6 +15,8 @@ typedef void (^UDPScanSccessBlock)(NSArray *devixe);//type:http  https
 typedef void (^UDPScanFailedBlock)(int code);
 @property (nonatomic, copy) UDPScanSccessBlock successBlock;
 @property (nonatomic, copy) UDPScanFailedBlock failBlock;//1:蓝牙未打开
+
+@property (strong, nonatomic)NSMutableArray *deviceArr;
 /**
  * 单例构造方法
  * @return BabyBluetooth共享实例

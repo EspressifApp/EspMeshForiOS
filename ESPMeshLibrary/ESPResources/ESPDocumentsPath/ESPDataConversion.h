@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "EspDevice.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,28 +25,48 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)getRandomAESKey;
 //characters格式转换
 + (NSMutableArray*)getJSCharacters:(NSMutableArray*)oldCharas;
+
 /**
- *  keychain存
- *
- *  @param key   要存的对象的key值
- *  @param value 要保存的value值
- *  @return 保存结果
+ keychain存
+
+ @param value 要存的对象的key值
+ @param key 要保存的value值
+ @return 保存结果
  */
 + (BOOL)fby_saveNSUserDefaults:(id)value withKey:(NSString *)key;
-/**
- *  keychain取
- *
- *  @param key 对象的key值
- *
- *  @return 获取的对象
- */
 
+/**
+ keychain取
+
+ @param key 对象的key值
+ @return 获取的对象
+ */
 + (id)fby_getNSUserDefaults:(NSString *)key;
 
-//多个mac地址分类获取对应本地存储的IP地址
+// 多个mac地址分类获取对应本地存储的IP地址
 + (NSDictionary *)deviceRequestIpWithMac:(NSArray *)macArr;
-//单个mac地址分类获取对应本地存储的IP地址
++ (NSDictionary *)deviceRequestIpWithGroup:(NSArray *)groupArr;
+// 单个mac地址分类获取对应本地存储的IP地址
 + (NSString *)deviceRequestIp:(NSString *)macStr;
+
+// 设备扫描中通过Mac地址获取本地缓存数据
++ (NSArray *)DeviceOfScanningUDPData:(NSMutableArray *)macArr;
+
+/**
+ 更新房间信息
+
+ @param msg 页面调用方法传送信息
+ */
++ (void)updateGroupInformation:(id)msg;
+
+/**
+ 设备详细信息获取后重新封装
+
+ @param responDic 网络请求获取到的设备详细信息
+ @param newDevice 设备存储的基本信息
+ @return 重新封装后的设备信息
+ */
++ (NSMutableDictionary *)deviceDetailData:(NSDictionary *)responDic withEspDevice:(EspDevice *)newDevice;
 
 @end
 

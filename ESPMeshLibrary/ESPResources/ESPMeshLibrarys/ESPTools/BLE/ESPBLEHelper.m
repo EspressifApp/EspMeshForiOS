@@ -86,7 +86,7 @@
     //设置扫描到设备的委托
     [baby setBlockOnDiscoverToPeripherals:^(CBCentralManager *central, CBPeripheral *peripheral, NSDictionary *advertisementData, NSNumber *RSSI) {
         
-        NSString *ouiStr = nil;
+        NSString *ouiStr = @"";
         NSString *versionStr = nil;
         NSString *tid = nil;
         NSString *bssid = nil;
@@ -97,9 +97,12 @@
             if (ManufacturerData.length == 14) {
                 NSData *macDataoui = [ManufacturerData subdataWithRange:NSMakeRange(2, 3)];
                 ouiStr  =[[NSString alloc] initWithData:macDataoui encoding:NSUTF8StringEncoding];
+            }else if (ManufacturerData.length == 12) {
+                NSData *macDataoui = [ManufacturerData subdataWithRange:NSMakeRange(2, 3)];
+                ouiStr  =[[NSString alloc] initWithData:macDataoui encoding:NSUTF8StringEncoding];
             }
         }
-        if (!ManufacturerData || ![ouiStr isEqualToString:[NSString stringWithFormat:@"MDF"]])
+        if (!ManufacturerData || [ouiStr isEqualToString:@""] )
         {
             NSString* mac=[peripheral.name componentsSeparatedByString:@"_"].lastObject;
             if (mac.length==6) {

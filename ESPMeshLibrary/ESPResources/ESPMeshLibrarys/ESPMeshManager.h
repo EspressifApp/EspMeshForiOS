@@ -13,10 +13,10 @@
 #import "EspDevice.h"
 #import "ESPRootScanmDNS.h"
 
-
+NS_ASSUME_NONNULL_BEGIN
 @interface ESPMeshManager : NSObject
 
-typedef void (^MeshManagerCallBack)(NSString* msg);
+typedef void (^MeshManagerCallBack)(NSString *msg);
 #pragma mark - 工具方法
 
 /**
@@ -60,5 +60,5 @@ typedef void (^MeshManagerCallBack)(NSString* msg);
 -(void)StarOTA:(NSArray<EspDevice *> *)devices binPath:(NSString *)binPath callback:(MeshManagerCallBack)callback;
 //JS发送方法
 //JS返回方法
-
+NS_ASSUME_NONNULL_END
 @end

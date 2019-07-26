@@ -9,6 +9,7 @@
 #import "ESPRootScanmDNS.h"
 #include <arpa/inet.h>
 
+#define ValidArray(f) (f!=nil && [f isKindOfClass:[NSArray class]] && [f count]>0)
 @interface ESPRootScanmDNS()<NSNetServiceBrowserDelegate,NSNetServiceDelegate>
 
 {
@@ -53,11 +54,15 @@
 -(void)cancelmDNSScan{
     [self.netService stop];
     
-    NSArray *deviceArrs = [[NSUserDefaults standardUserDefaults] valueForKey:@"LastScanRootDevice"];
-    if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
-        hasSended=true;
-        _successBlock(deviceArrs);
-        _successBlock=nil;
+    NSArray *deviceArrs = [[NSUserDefaults standardUserDefaults] valueForKey:@"LastScanRootDevicemDNS"];
+    if (ValidArray(deviceArrs)) {
+        if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
+            hasSended=true;
+            _successBlock(deviceArrs);
+            _successBlock=nil;
+        }
+    }else {
+        _failBlock(8004);
     }
 }
 
@@ -98,7 +103,7 @@
 {
     _service = service;
     self.service.delegate = self;
-    [self.service resolveWithTimeout:5];
+    [self.service resolveWithTimeout:1];
 }
 /*
  * 解析成功
@@ -133,40 +138,28 @@
         device.httpType = type;
         device.port = addressArr[1];
         
-//        if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
-//            hasSended = true;
-//            _successBlock(device);
-//            _successBlock = nil;
-//            [self.netService stop];
-//            NSString* lastDeviceInfo=[NSString stringWithFormat:@"%@:%@:%@:%@",device.mac,device.host,device.httpType,device.port];
-//            [[NSUserDefaults standardUserDefaults] setObject:lastDeviceInfo forKey:@"LastScanMDNSRootDevice"];
-//        }
-        NSString* lastDeviceInfo=[NSString stringWithFormat:@"%@:%@:%@:%@",device.mac,device.host,device.httpType,device.port];
-        if (deviceArr.count == 0) {
-            [deviceArr addObject:lastDeviceInfo];
-            [[NSUserDefaults standardUserDefaults] setObject:deviceArr forKey:@"LastScanRootDevice"];
-        }else {
-            BOOL isbool = NO;
-            for (int i = 0; i < deviceArr.count; i ++) {
-                NSArray *macArr=[deviceArr[i] componentsSeparatedByString:@":"];
-                if ([macArr[0] isEqual:mac]) {
-                    isbool = YES;
-                }
+        NSString* lastDeviceInfo=[NSString stringWithFormat:@"lastDeviceInfo---->%@:%@:%@:%@",device.mac,device.host,device.httpType,device.port];
+        [deviceArr addObject:lastDeviceInfo];
+        
+        BOOL isbool = NO;
+        for (int i = 0; i < deviceArr.count; i ++) {
+            NSArray *macArr=[deviceArr[i] componentsSeparatedByString:@":"];
+            if ([macArr[0] isEqual:mac]) {
+                isbool = YES;
             }
-            if (!isbool) {
-                [deviceArr addObject:lastDeviceInfo];
-                [[NSUserDefaults standardUserDefaults] setObject:deviceArr forKey:@"LastScanRootDevice"];
-            }
-            if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
-                hasSended=true;
-                _successBlock(deviceArr);
-                _successBlock=nil;
-                [self.netService stop];
-            }
-            
+        }
+        if (!isbool) {
+            [self cancelmDNSScan];
+        }
+        if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
+            hasSended=true;
+            _successBlock(deviceArr);
+            _successBlock=nil;
+            [[NSUserDefaults standardUserDefaults] setObject:deviceArr forKey:@"LastScanRootDevicemDNS"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+            [self.netService stop];
         }
         
-        NSLog(@"deviceArr---->%@",deviceArr);
     }
 }
 -(NSString*)IPFromData:(NSData*)data

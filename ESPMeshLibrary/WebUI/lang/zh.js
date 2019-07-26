@@ -1,6 +1,7 @@
 define(function(){
     var m = {
         "appName": "Mesh",
+        "httpUrlShow": "www.espressif.com",
         "httpUrl": "https://www.espressif.com",
         "email":"邮箱",
         "password":"密码",
@@ -29,6 +30,7 @@ define(function(){
         "loadCon": "设备组网中...",
         "search": "搜索名称或位置",
         "searchMAC": "搜索mac或位置",
+        "searchByMac": "搜索mac",
         "searchGroup": "搜索名称",
         "editName": "编辑名称",
         "edit": "编辑配对",
@@ -42,6 +44,7 @@ define(function(){
         "addDevice": "添加设备",
         "addGroup": "添加群组",
         "addPair": "添加配对",
+        "addRoom": "创建房间",
         "deleteDevice": "删除设备",
         "deviceOnline": "设备上线",
         "deviceOffline": "设备离线",
@@ -116,6 +119,7 @@ define(function(){
         "blinkMode": "闪烁模式",
         "glitterMode": "流光模式",
         "readMode": "阅读模式",
+        "configMode": "模式",
         "cozyMode": "温馨模式",
         "bedtime": "自然就寝",
         "delayedOn": "延时开",
@@ -133,10 +137,22 @@ define(function(){
         "hue": "颜色",
         "temp": "色温",
         "brightness": "亮度",
+        "luminance": "亮度",
+        "saturation": "饱和度",
+        "openLight": "开灯",
+        "closeLight": "关灯",
+        "colorLight": "彩光",
+        "whiteLight": "白光",
 
         "editNameDesc": "修改设备名称",
         "editNameInput": "请输入新的名称",
-        "listDesc": "所有添加的智能设备将集中显示在这个列表",
+        "noAddDeviceDesc": "暂时还没有设备哦！",
+        "noAddGroupDesc": "暂时还没有群组哦！",
+        "noAddPairDesc": "暂时还没有位置信息哦！",
+        "noAddRoomDesc": "暂时还没有房间哦！",
+        "listDesc": "点击右上角或下方按钮进行添加吧",
+        "videoDesc": "如果你还不了解设备功能，你可以",
+        "clickVideoDesc": "查看视频介绍",
         "pairListDesc": "所有添加的配对信息将集中显示在这个列表",
         "remindDesc": "发现新设备，请点击添加。",
         "forgotDesc": "请输入你的邮箱，接受重置密码的邮件",
@@ -237,6 +253,7 @@ define(function(){
         "processCutover": "切换",
         "selectDeviceDesc": "请选择设备",
         "selectEventDesc": "请选择事件",
+        "selectPairDesc": "请选择信息",
         "noConfigDesc": "选中的设备只能做叶子节点，请配合其他Mesh设备使用。",
         "isExistGroupDesc": "群组名称已存在",
 
@@ -278,7 +295,8 @@ define(function(){
             "recent":"最近",
             "device":"设备",
             "group":"群组",
-            "user":"我的"
+            "user":"我的",
+            "room":"房间"
         }
     }
     return {

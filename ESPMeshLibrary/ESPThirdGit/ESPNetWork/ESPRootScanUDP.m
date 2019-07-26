@@ -10,13 +10,15 @@
 #import "ESPTools.h"
 //#import "EspDevice.h"
 
-@interface ESPRootScanUDP()<GCDAsyncUdpSocketDelegate>{
-    
-    NSMutableArray *deviceArr;
-    NSTimer* timer;
-    BOOL hasSended;
-}
+#define ValidArray(f) (f!=nil && [f isKindOfClass:[NSArray class]] && [f count]>0)
+@interface ESPRootScanUDP()<GCDAsyncUdpSocketDelegate>
+
+@property (strong, nonatomic)NSTimer* timer;
+@property (assign, nonatomic)BOOL hasSended;
 @property (strong, nonatomic)GCDAsyncUdpSocket * udpCLientSoket;
+
+@property (strong, nonatomic)NSDate* lastRequestDate;
+
 @end
 #define udpPort 1025
 #define udpHost @"255.255.255.255"
@@ -48,22 +50,22 @@
 -(void)starScan:(UDPScanSccessBlock)successBlock failblock:(UDPScanFailedBlock)failBlock{
    
     
-    hasSended=false;
+    _hasSended=false;
     _successBlock=successBlock;
     _failBlock=failBlock;
-    [timer invalidate];
-    timer = nil;
+    [_timer invalidate];
+    _timer = nil;
     [_udpCLientSoket beginReceiving:nil];
-    deviceArr = [NSMutableArray arrayWithCapacity:0];
+    _deviceArr = [NSMutableArray arrayWithCapacity:0];
     
     NSOperationQueue* op=[NSOperationQueue mainQueue];
     [op addOperationWithBlock:^{
-        self->timer =  [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(sendMsg) userInfo:nil repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:self->timer forMode:NSDefaultRunLoopMode];
+        _timer =  [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(sendMsg) userInfo:nil repeats:YES];
+        [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSDefaultRunLoopMode];
         
         NSArray *deviceArrs=[[NSUserDefaults standardUserDefaults] valueForKey:@"LastScanRootDevice"];
-        //超时
-        NSTimer* tmpTimer=[NSTimer scheduledTimerWithTimeInterval:deviceArrs? 2:3 target:self selector:@selector(cancelScan) userInfo:nil repeats:false];
+//        超时
+        NSTimer* tmpTimer=[NSTimer scheduledTimerWithTimeInterval:deviceArrs? 1:1.5 target:self selector:@selector(cancelScan) userInfo:nil repeats:false];
         [[NSRunLoop currentRunLoop] addTimer:tmpTimer forMode:NSDefaultRunLoopMode];
     }];
     
@@ -72,14 +74,19 @@
 -(void)cancelScan{
     [_udpCLientSoket pauseReceiving];
     //取消定时器
-    [timer invalidate];
-    timer = nil;
+    [_timer invalidate];
+    _timer = nil;
     NSArray *deviceArrs = [[NSUserDefaults standardUserDefaults] valueForKey:@"LastScanRootDevice"];
-    if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
-        hasSended=true;
-        _successBlock(deviceArrs);
-        _successBlock=nil;
+    if (ValidArray(deviceArrs)) {
+        if (_successBlock&&_successBlock!=NULL&&_hasSended==false) {
+            _hasSended=true;
+            _successBlock(deviceArrs);
+            _successBlock=nil;
+        }
+    }else {
+        _failBlock(8004);
     }
+    
 }
 
 
@@ -111,48 +118,45 @@
     if ([deviceAddress isEqualToString:curDevice]==false) {//不是当前设备发的消息
         NSString *dataStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         if ([dataStr.lowercaseString containsString:@"esp"] && [dataStr.lowercaseString containsString:@"http"]) {
-            NSLog(@"接收到%@的消息:%@",deviceAddress,dataStr);
+//            NSLog(@"接收到%@的消息:%@",deviceAddress,dataStr);
             NSArray* dataArr=[dataStr componentsSeparatedByString:@" "];
-            EspDevice* device=[[EspDevice alloc] init];
-            device.mac=dataArr[2];
-            device.host=deviceAddress;
-            device.httpType=dataArr[3];
-            device.port=dataArr[4];
+            if (ValidArray(dataArr)) {
+                EspDevice* device=[[EspDevice alloc] init];
+                device.mac=dataArr[2];
+                device.host=deviceAddress;
+                device.httpType=dataArr[3];
+                device.port=dataArr[4];
             
-            NSString* lastDeviceInfo=[NSString stringWithFormat:@"%@:%@:%@:%@",device.mac,device.host,device.httpType,device.port];
-            if (deviceArr.count == 0) {
-                [deviceArr addObject:lastDeviceInfo];
-                [[NSUserDefaults standardUserDefaults] setObject:deviceArr forKey:@"LastScanRootDevice"];
-            }else {
-                BOOL isbool = NO;
-                for (int i = 0; i < deviceArr.count; i ++) {
-                    NSArray *macArr=[deviceArr[i] componentsSeparatedByString:@":"];
-                    if (![macArr[0] isEqual:dataArr[2]]) {
-//                        isbool = NO;
-                    }else {
-                        isbool = YES;
+                if (device.mac != nil && device.host != nil && device.httpType != nil && device.port != nil) {
+                    @synchronized (self) {
+                        NSString* lastDeviceInfo=[NSString stringWithFormat:@"%@:%@:%@:%@",device.mac,device.host,device.httpType,device.port];
+                        if (![self isNull:lastDeviceInfo]) {
+                            [_deviceArr addObject:lastDeviceInfo];
+                        }
+                        NSSet *set = [NSSet setWithArray:_deviceArr];
+                        NSArray *deviceAllArray = [set allObjects];
+//                        [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"LastScanRootDevice"];
+                        [[NSUserDefaults standardUserDefaults] setObject:deviceAllArray forKey:@"LastScanRootDevice"];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
                     }
                 }
-                if (!isbool) {
-                    [deviceArr addObject:lastDeviceInfo];
-                    [[NSUserDefaults standardUserDefaults] setObject:deviceArr forKey:@"LastScanRootDevice"];
-                }
-                if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
-                    hasSended=true;
-                    _successBlock(deviceArr);
-                    _successBlock=nil;
-                    [_udpCLientSoket pauseReceiving];
-                    //取消定时器
-                    [timer invalidate];
-                    timer = nil;
-                }
-                
             }
-            
-            NSLog(@"deviceArr---->%@",deviceArr);
-            
         }
+    }
+}
 
+- (BOOL)isNull:(NSObject *)object {
+    if (object == nil ||
+        [object isEqual:[NSNull null]] ||
+        [object isEqual:@""] ||
+        [object isEqual:@" "] ||
+        [object isEqual:@"null"] ||
+        [object isEqual:@"<null>"] ||
+        [object isEqual:@"(null)"] ){
+
+        return YES;
+    } else {
+        return NO;
     }
 }
 

@@ -30,6 +30,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
                 showHeight: false,
                 isSelectedMacs: [],
                 showFooterInfo: true,
+                systemInfo: true,
             }
         },
         computed: {
@@ -81,6 +82,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
             show: function() {
                 var self = this;
                 window.onLoadMacs = self.onLoadMacs;
+                if (self.$store.state.systemInfo != "Android") {
+                    self.systemInfo = false;
+                }
                 self.getLoadMacs();
                 self.getPair();
                 self.scanDeviceList = [];
@@ -131,8 +135,14 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
             setBluetooth: function() {
                 espmesh.gotoSystemSettings("bluetooth");
             },
+            setLocation: function() {
+                 espmesh.gotoSystemSettings("location");
+            },
             getIcon: function (tid) {
                 return Util.getIcon(tid);
+            },
+            getRssiIcon: function(rssi) {
+                return Util.getRssiIcon(rssi);
             },
             hideFlag: function() {
                 if (this.flagUl) {
@@ -315,7 +325,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
             startBleScan: function() {
                 var self = this;
                 if (self.$store.state.blueInfo) {
-                    espmesh.startBleScan();
+                    espmesh.startBleScan(JSON.stringify({"settings":{"scan_mode":2}}));
                 } else {
                     MINT.Toast({
                         message: self.$t('bleConDesc'),
@@ -328,9 +338,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
                 var self = this;
                 $.each(devices, function(i, item) {
                     var name = item.name;
-                    if(Util.isMesh(name, item.version)) {
+                    if(Util.isMesh(name, item.version, item.beacon)) {
                         var flag = true,
-                            obj = {mac: item.mac, name: name, rssi: item.rssi, bssid: item.bssid,
+                            obj = {mac: item.mac, name: Util.setName(name, item.bssid), rssi: item.rssi, bssid: item.bssid,
                                 position: self.getPairInfo(item.mac), tid: item.tid, only_beacon: item.only_beacon};
                         $.each(self.scanDeviceList, function(j, itemSub) {
                             if (item.mac == itemSub.mac) {
@@ -373,7 +383,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
                     blue.enable = false;
                 }
                 if (blue.enable && this.addFlag && !this.$refs.device.addFlag) {
-                    espmesh.startBleScan();
+                    espmesh.startBleScan(JSON.stringify({"settings":{"scan_mode":2}}));
                 }
                 this.$store.commit("setBlueInfo", blue.enable);
                 this.blueEnable = blue.enable;

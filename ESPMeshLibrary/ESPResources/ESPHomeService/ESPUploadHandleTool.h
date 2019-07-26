@@ -16,6 +16,8 @@ typedef void(^ProgressBackBlock)(float Progress);
  上传进度
  */
 @property(assign,nonatomic)ProgressBackBlock Progress;
+
+- (void)sendSessionInit;
 /**
  单例
  @return 单例
@@ -45,14 +47,14 @@ typedef void(^ProgressBackBlock)(float Progress);
  *  @param ipUrl  网络请求ip地址
  *  @param requestHeader  请求头
  *  @param bodyContent  请求内容
- *  @param success  下载成功的回调(回调参数filePath:文件的路径)
- *  @param failure  下载失败的回调
+ *  @param success  成功的回调
+ *  @param failure  失败的回调
  *
  */
 - (NSURLSessionTask *)requestWithIpUrl:(NSString *)ipUrl
                        withRequestHeader:(NSDictionary *)requestHeader
                        withBodyContent:(NSDictionary *)bodyContent
-                            andSuccess:(void(^)(NSDictionary *dic))success
+                            andSuccess:(void(^)(NSArray *resultArr))success
                             andFailure:(void(^)(int fail))failure;
 
 /**
@@ -60,8 +62,8 @@ typedef void(^ProgressBackBlock)(float Progress);
  *  @param meshNodeMac      mac地址
  *  @param firmwareUrl  升级文件下载地址
  *  @param ipUrl 网络请求ip地址
- *  @param success  下载成功的回调(回调参数filePath:文件的路径)
- *  @param failure  下载失败的回调
+ *  @param success  成功的回调
+ *  @param failure  失败的回调
  *
  */
 - (NSURLSessionTask *)meshNodeMac:(NSString *)meshNodeMac
@@ -73,12 +75,25 @@ typedef void(^ProgressBackBlock)(float Progress);
 /**
  *
  *  @param ipUrl 网络请求ip地址
- *  @param success  下载成功的回调(回调参数filePath:文件的路径)
- *  @param failure  下载失败的回调
+ *  @param success  成功的回调
+ *  @param failure  失败的回调
  *
  */
 - (NSURLSessionTask *)stopOTA:(NSString *)ipUrl
                    andSuccess:(void(^)(NSDictionary *dic))success
+                   andFailure:(void(^)(int fail))failure;
+
+/**
+ *
+ *  @param ipUrl 网络请求ip地址
+ *  @param deviceMacs 请求header参数
+ *  @param success  下载成功的回调
+ *  @param failure  下载失败的回调
+ *
+ */
+- (NSURLSessionTask *)getSnifferInfo:(NSString *)ipUrl
+                    withDeviceMacs:(NSString *)deviceMacs
+                   andSuccess:(void(^)(NSArray *dic))success
                    andFailure:(void(^)(int fail))failure;
 
 @end

@@ -27,6 +27,7 @@
     //加载方法重构页面
     UINavigationController *navigationController = [[UINavigationController alloc]initWithRootViewController:[ESPNewWebViewController new]];
     self.window.rootViewController = navigationController;
+    navigationController.navigationBarHidden = YES;
     self.window.backgroundColor = [UIColor colorWithRed:62/255.0 green:194/255.0 blue:252/255.0 alpha:1];
     [self.window makeKeyAndVisible];
     

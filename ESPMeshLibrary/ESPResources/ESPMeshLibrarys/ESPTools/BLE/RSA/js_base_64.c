@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include "js_base_64.h"
 
-void build_decoding_table();
+void build_decoding_table(void);
 
 static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
     'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',

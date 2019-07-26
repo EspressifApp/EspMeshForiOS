@@ -49,7 +49,7 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-btn-select.html", "../
                     var data = '{"' + MESH_MAC + '": "' + self.deviceInfo.mac +
                         '","'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","' + MESH_REQUEST + '": "' +
                         GET_EVENT +'", "callback": "onGetEvent"}';
-                    espmesh.requestDeviceAsync(data);
+                    espmesh.requestDevice(data);
                     console.log(JSON.stringify(self.deviceEvents));
 
                 },
@@ -76,7 +76,7 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-btn-select.html", "../
                     var data = '{"' + MESH_MAC + '": "' + self.deviceInfo.mac +
                         '","'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' + MESH_REQUEST + '": "' + REMOVE_EVENT + '",' +
                         '"events":' + JSON.stringify(eventNames) + '}';
-                    espmesh.requestDeviceAsync(data);
+                    espmesh.requestDevice(data);
                     self.existEvent = false;
                     self.deviceEvents = [];
                     setTimeout(function() {
@@ -130,8 +130,12 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-btn-select.html", "../
                         res = JSON.parse(res);
                         if (!Util._isEmpty(res.result)) {
                             var result = res.result;
-                            if (!Util._isEmpty(result.trigger)) {
-                                self.deviceEvents = result.trigger;
+                            if (!Util._isEmpty(result.trigger) || !Util._isEmpty(result.events)) {
+                                if(!Util._isEmpty(result.trigger)) {
+                                    self.deviceEvents = result.trigger;
+                                } else if(!Util._isEmpty(result.events)) {
+                                    self.deviceEvents = result.events;
+                                }
                                 if (!Util._isEmpty(self.deviceEvents)) {
                                    if (self.deviceEvents.length > 0) {
                                       self.existEvent = true;

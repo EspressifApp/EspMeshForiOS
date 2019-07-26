@@ -49,7 +49,7 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-btn-devices.html", "..
                 }
             },
             methods:{
-                onValuesChange(picker, values) {
+                onValuesChange: function(picker, values) {
 
                 },
                 show: function() {
@@ -152,7 +152,7 @@ define(["vue","MINT", "Util", "txt!../../pages/automation-btn-devices.html", "..
                     var data = '{"' + MESH_MAC + '": "' + parentMac +
                         '","'+DEVICE_IP+'": "'+this.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' + MESH_REQUEST + '": "' + REMOVE_EVENT + '",' +
                         '"events":' + JSON.stringify(this.eventNames) + '}';
-                    espmesh.requestDeviceAsync(data);
+                    espmesh.requestDevice(data);
                 },
                 selectAllDevice: function (e) {
                     var self = this;
