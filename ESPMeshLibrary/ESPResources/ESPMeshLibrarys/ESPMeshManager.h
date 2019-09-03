@@ -14,6 +14,7 @@
 #import "ESPRootScanmDNS.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
 @interface ESPMeshManager : NSObject
 
 typedef void (^MeshManagerCallBack)(NSString *msg);
@@ -36,10 +37,40 @@ typedef void (^MeshManagerCallBack)(NSString *msg);
 -(void)starScanBLE:(BLEScanSccessBlock)successBlock failblock:(BLEScanFailedBlock)failBlock;
 //结束扫描
 -(void)cancelScanBLE;
-//连接设备并配网
--(void)starBLEPair:(EspDevice*)device pairInfo:(NSMutableDictionary*)info timeOut:(NSInteger)timeOut callBackBlock:(BLEIOCallBackBlock)callBackBlock;
--(void)cancleBLEPair;
+/**
+ 设备蓝牙连接
 
+ @param device 连接蓝牙的设备信息
+ @param callBackBlock 蓝牙连接回调
+ */
+-(void)starBLEPair:(EspDevice*)device callBackBlock:(BLEIOCallBackBlock)callBackBlock;
+/**
+ 断开蓝牙连接
+ */
+-(void)cancleBLEPair;
+/**
+ 调用发送自定义数据
+ 
+ @param dataMessage 需要发送的自定义数据
+ */
+- (void)sendMDFCustomDataToDevice:(NSData *)dataMessage;
+/**
+ 发送设备协商加密数据
+ */
+- (void)sendDevicesNegotiatesEncryption;
+/**
+ 通知设备进入加密模式
+ */
+- (void)notifyDevicesToEnterEncryptionMode;
+
+/**
+ 发送配网数据给设备
+
+ @param info 设备配网信息
+ @param timeOut 超时时间
+ @param callBackBlock 配网回调
+ */
+- (void)sendDistributionNetworkDataToDevices:(NSMutableDictionary*)info timeOut:(NSInteger)timeOut callBackBlock:(BLEIOCallBackBlock)callBackBlock;
 
 //***********************UDP ***********************
 //扫描已联网设备根节点1025

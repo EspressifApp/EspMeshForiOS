@@ -22,6 +22,9 @@ typedef enum
 - (ESPVersionStatus)checkAppVersion:(NSString *)appId;
 - (NSDictionary *)checkAppVersionNumber:(NSString *)appId;
 - (BOOL)appVersionUpdate;
+
+// 跳转系统设置页
+- (void)gotoSystemSetting;
 @end
 
 NS_ASSUME_NONNULL_END

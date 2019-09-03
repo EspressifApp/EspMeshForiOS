@@ -17,8 +17,6 @@
 @property (assign, nonatomic)BOOL hasSended;
 @property (strong, nonatomic)GCDAsyncUdpSocket * udpCLientSoket;
 
-@property (strong, nonatomic)NSDate* lastRequestDate;
-
 @end
 #define udpPort 1025
 #define udpHost @"255.255.255.255"

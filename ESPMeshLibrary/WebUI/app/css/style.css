@@ -19,6 +19,11 @@ html,body {
 	overflow-x: hidden;
 }
 
+html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6 {
+	一webkit一text一size一adjust: 100%;
+	一ms一text一size一adjust: 100%;
+	text一size一adjust: 100%;
+}
 /*去除IE文本框自带的叉号*/
 ::-ms-clear{
 	display: none;
@@ -1750,7 +1755,7 @@ operate-bg .group-wrapper .operate-way-info {
 	border-radius: 100%;
 }
 .scan-device {
-	height: calc(100vh - 215px);
+	height: calc(100vh - 275px);
 	padding-bottom: 0;
 	-webkit-transition: all .3s linear;
 	transition: all .3s linear;
@@ -1901,7 +1906,7 @@ operate-bg .group-wrapper .operate-way-info {
 	color: #3ec2fc;
 }
 .scan-device.height {
-	height: calc(100% - 305px);
+	height: calc(100% - 365px);
 }
 .join-device {
 	height: calc(100% - 185px);
@@ -4028,7 +4033,8 @@ operate-bg .group-wrapper .operate-way-info {
 	height: 100%;
 }
 .room-wrapper .mint-navbar::-webkit-scrollbar { display: none }
-.room-wrapper .mint-navbar {
+.room-wrapper .mint-navbar,
+.debug-navbar .mint-navbar{
 	width: 100%;
 	overflow: hidden;
 	overflow-x: auto;
@@ -4038,6 +4044,24 @@ operate-bg .group-wrapper .operate-way-info {
 	max-width: 25%;
 	font-size: 16px;
 	font-weight: bold;
+	overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+}
+.debug-navbar .mint-navbar .mint-tab-item {
+	min-width: 35%;
+	max-width: 35%;
+	font-size: 16px;
+	font-weight: bold;
+	margin: 0 10px;
+	box-sizing: border-box;
+}
+.room-wrapper .mint-navbar .mint-tab-item-label,
+.debug-navbar .mint-navbar .mint-tab-item-label {
+	width: 100%;
+	overflow: hidden;
+	text-overflow:ellipsis;
+	white-space: nowrap;
 }
 .room-wrapper .mint-tab-container {
 	margin-top: 0;
@@ -4233,6 +4257,41 @@ operate-bg .group-wrapper .operate-way-info {
 .blue-connect .btn-ble-color .icon-ok-circled {
 	font-size: 20px;
 	color: #fff;
+}
+.logout-btn {
+    padding: 0 15px;
+    box-sizing: border-box;
+    bottom: 30px;
+}
+.logout-btn .btn {
+    background: transparent;
+    color: #ff4929;
+    border: 1px solid #ff4929;
+}
+.content-tab {
+    background: #fff;
+    margin-bottom: 5px;
+}
+.content-tab span {
+    padding: 15px 10px;
+    background-color: transparent;
+    background-image: linear-gradient(#3ec2fc, #3ec2fc), linear-gradient(#f1f1f1, #f1f1f1);
+    background-position: center bottom, center calc(100% - 1px);
+    background-repeat: no-repeat;
+    background-size: 0 3px, 100% 1px;
+    font-size: 14px;
+    font-weight: bold;
+    -moz-transition: all 0s ease-out 0s; /* Firefox 4 */
+    -webkit-transition: all 0s ease-out 0s; /* Safari 和 Chrome */
+    -o-transition: all 0s ease-out 0s; /* Opera */
+    transition: all 0s ease-out 0s;
+}
+.content-tab span.active {
+    color: #3ec2fc;
+    background-image: linear-gradient(#3ec2fc, #3ec2fc), linear-gradient(#f1f1f1, #f1f1f1);
+    background-size: 100% 3px, 100% 1px;
+    outline: medium none;
+    transition-duration: 0.3s;
 }
 @media (max-height: 615px){
 	.content-wrapper {

@@ -7,53 +7,27 @@
 //
 
 #import "ESPAPPResources.h"
-#import "YTKKeyValueStore.h"
 #import "ESPDataConversion.h"
 #import "EspActionDeviceInfo.h"
 #import "EspDeviceUtil.h"
 
 #import "ESPUploadHandleTool.h"
 #import "ESPDocumentsPath.h"
+#import "ESPFBYDataBase.h"
+#import "ESPAliyunSDKUse.h"
 
 #define ValidDict(f) (f!=nil && [f isKindOfClass:[NSDictionary class]])
 #define ValidArray(f) (f!=nil && [f isKindOfClass:[NSArray class]] && [f count]>0)
 
 @interface ESPAPPResources ()
-{
-    NSMutableDictionary *ScanBLEDevices;
-    NSMutableDictionary *DevicesOfScanUDP;
-    NSMutableDictionary *requestOTAProgressDic;
-    YTKKeyValueStore *dbStore;
-    ESPDocumentsPath *espDocumentPath;
-    ESPUploadHandleTool *espUploadHandleTool;
-
-    BOOL isUDPScan;
-    NSDate* lastRequestDate;
-    NSTimer *BLETimer;
-    
-    NSTimer *OTATimer;
-    NSTimer *UPDTimer;
-    NSOperationQueue* controlQueue;
-    NSNumber* pairProgress;
-    NSURLSessionTask *sessionTask;
-    NSArray *stopRequestIpArr;
-}
 
 @end
 
 @implementation ESPAPPResources
 //开启蓝牙扫描
-- (void)startBleScanSuccess:(BleScanSuccessBlock)success andFailure:(void (^)(int))failure{
-    self.BleScanSuccess = success;
-    [self sendBLEResult];
-    ScanBLEDevices=[NSMutableDictionary dictionaryWithCapacity:0];
-    if (BLETimer) {
-        [BLETimer invalidate];
-        BLETimer=nil;
-    }
-    BLETimer=[NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(sendBLEResult) userInfo:nil repeats:true];
-    [[NSRunLoop mainRunLoop] addTimer:BLETimer forMode:NSDefaultRunLoopMode];
-    dispatch_async(dispatch_get_main_queue(), ^(){
++ (void)startBleScanSuccess:(BleScanSuccessBlock)success andFailure:(void (^)(int))failure{
+    dispatch_queue_t queue = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);
+    dispatch_async(queue, ^{
         [[ESPMeshManager share] starScanBLE:^(EspDevice *device) {
             //        NSLog(@"device ouiMDF---->%@", device.ouiMDF);
             NSMutableDictionary *deviceDic = [NSMutableDictionary dictionaryWithCapacity:0];
@@ -63,9 +37,10 @@
             deviceDic[@"device"] = device;
             deviceDic[@"version"] = device.version;
             deviceDic[@"bssid"] = device.bssid;
+            deviceDic[@"beacon"] = device.ouiMDF;
             deviceDic[@"tid"] = device.deviceTid;
             deviceDic[@"only_beacon"] = @(device.onlyBeacon);
-            self->ScanBLEDevices[device.bssid] = deviceDic;
+            success(deviceDic);
         } failblock:^(int code) {
             
         }];
@@ -73,322 +48,425 @@
 }
 
 //关闭蓝牙扫描
-- (void)stopBleScan {
-    if (BLETimer) {
-        [BLETimer invalidate];
-        BLETimer=nil;
-    }
++ (void)stopBleScan {
     [[ESPMeshManager share] cancelScanBLE];
 }
 
--(void)sendBLEResult{
-    if (ScanBLEDevices.count>0) {
-        NSMutableArray *tmpArr = [NSMutableArray arrayWithCapacity:0];
-        NSArray *allKeyArr = ScanBLEDevices.allKeys;
-        for (int i = 0; i < allKeyArr.count; i ++) {
-            [tmpArr addObject:ScanBLEDevices[allKeyArr[i]]];
-        }
-        NSMutableArray* sendArr = [NSMutableArray arrayWithCapacity:0];
-        for (int i=0; i<tmpArr.count; i++) {
-            if (ValidDict(tmpArr[i])) {
-                [sendArr addObject:@{@"mac":tmpArr[i][@"mac"],@"name":tmpArr[i][@"name"],@"rssi":tmpArr[i][@"rssi"],@"version":tmpArr[i][@"version"],@"bssid":tmpArr[i][@"bssid"],@"tid":tmpArr[i][@"tid"],@"only_beacon":tmpArr[i][@"only_beacon"]}];
-            }
-        }
-        self.BleScanSuccess(sendArr);
-    }
-}
-
-//蓝牙配网
-- (void)startConfigureBlufi:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
++ (void)BleConnection:(NSDictionary *)deviceInfo andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
     
-    NSMutableDictionary* argsDic=[messageDic copy];
-    //保存记录
-    [dbStore createTableWithName:@"ap_table"];
-    NSString* ssid=argsDic[@"ssid"];
-    NSString* password=argsDic[@"password"];
-    NSDictionary* objItem=@{@"ssid":ssid,@"password":password};
-    [dbStore putObject:objItem withId:ssid intoTable:@"ap_table"];
-    //开始配网
-    NSMutableDictionary* deviceInfo = self->ScanBLEDevices[argsDic[@"ble_addr"]];
     if (deviceInfo ==nil ) {
-        NSDictionary *failDic = @{@"progress":@"0",@"code":@0,@"message":@"配网失败"};
+        NSDictionary *failDic = @{@"progress":@"0",@"code":@0,@"message":@"蓝牙连接失败"};
         failure(failDic);
         return;
     }else{
         EspDevice* tmpDevice = deviceInfo[@"device"];
+        static int pairProgress = 5;
         
-        pairProgress=[NSNumber numberWithInt:0];
-        
-        [[ESPMeshManager share] starBLEPair:tmpDevice pairInfo:argsDic timeOut:60 callBackBlock:^(NSString *msg) {
+        [[ESPMeshManager share] starBLEPair:tmpDevice callBackBlock:^(NSString *msg) {
             NSLog(@"msg:::::::%@",msg);
             NSDictionary* logMsg;
-            if (self->pairProgress.intValue>=90) {
+            if (pairProgress >= 70) {
                 //                self->pairProgress=[NSNumber numberWithInt:self->pairProgress.intValue+1];
             }else{
-                self->pairProgress=[NSNumber numberWithInt:self->pairProgress.intValue+10];
+                pairProgress = pairProgress + 5;
             }
             NSArray *messageArr = [msg componentsSeparatedByString:@":"];
-            if ([messageArr[0] containsString:@"success"]) {
-                logMsg=@{@"progress":@100,@"code":messageArr[2],@"message":messageArr[1]};
-            }else if([messageArr[0] containsString:@"error"]){
-                self->pairProgress=[NSNumber numberWithInt:99];
-                logMsg=@{@"progress":self->pairProgress,@"code":messageArr[2],@"message":messageArr[1]};
-            }else if([messageArr[0] containsString:@"code"]){
-                self->pairProgress=[NSNumber numberWithInt:99];
-                logMsg=@{@"progress":self->pairProgress,@"code":messageArr[2],@"message":messageArr[1]};
+            if ([messageArr[0] containsString:@"blesuccess"]) {
+                
+            }else if([messageArr[0] containsString:@"bleerror"]){
+                pairProgress = 69;
+                logMsg=@{@"progress":[NSNumber numberWithInt:pairProgress],@"code":messageArr[2],@"message":messageArr[1]};
+                success(logMsg);
+            }else if([messageArr[0] containsString:@"blecode"]){
+                pairProgress = 69;
+                logMsg=@{@"progress":[NSNumber numberWithInt:pairProgress],@"code":messageArr[2],@"message":messageArr[1]};
+                success(logMsg);
             }else{//msg:
-                logMsg=@{@"progress":self->pairProgress,@"code":messageArr[2],@"message":messageArr[1]};
+                logMsg=@{@"progress":[NSNumber numberWithInt:pairProgress],@"code":messageArr[2],@"message":messageArr[1]};
+                success(logMsg);
             }
-            NSLog(@"pairProgress----->%@",pairProgress);
-            success(logMsg);
-            
+            NSLog(@"pairProgress----->%d",pairProgress);
         }];
     }
 }
 
+//蓝牙配网
++ (void)startBLEConfigure:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
+    
+    NSMutableDictionary *argsDic = [[NSMutableDictionary alloc]initWithDictionary:messageDic];
+
+    //保存记录
+    NSString* ssid=argsDic[@"ssid"];
+    BOOL beacon=[argsDic[@"beacon"] boolValue];
+    NSString* password=argsDic[@"password"];
+    NSDictionary* objItem=@{@"ssid":ssid,@"password":password};
+    [ESPFBYDataBase saveObject:objItem withNameTable:@"ap_table" withId:ssid];
+
+//    static int pairProgress = 60;
+    [[ESPMeshManager share] sendDistributionNetworkDataToDevices:argsDic timeOut:60 callBackBlock:^(NSString *msg) {
+        NSLog(@"msg:::::::%@",msg);
+        NSDictionary* logMsg;
+        NSArray *messageArr = [msg componentsSeparatedByString:@":"];
+        if ([messageArr[0] containsString:@"success"]) {
+            if (beacon) {
+                [[ESPAliyunSDKUse sharedClient] aliStartDiscoveryDevice:^(NSArray * _Nonnull devices) {
+                    NSLog(@"devices ---> %@",devices);
+                    if (ValidArray(devices)) {
+                        for (int i = 0; i < devices.count; i ++) {
+                            [[ESPAliyunSDKUse sharedClient] aliDeviceBinding:devices[i] andSuccess:^(NSDictionary * _Nonnull resultIotid) {
+                                NSMutableDictionary *yunDevice = [NSMutableDictionary dictionaryWithCapacity:0];
+                                yunDevice[@"code"] = @"-8010";
+                                yunDevice[@"deviceBind"] = resultIotid;
+                                success(yunDevice);
+                                NSDictionary *message = @{@"progress":@100,@"code":messageArr[2],@"message":messageArr[1]};
+                                success(message);
+                            } andFailure:^(NSDictionary * _Nonnull errorMsg) {
+                                NSMutableDictionary *yunDevice = [NSMutableDictionary dictionaryWithCapacity:0];
+                                yunDevice[@"code"] = @"-8010";
+                                yunDevice[@"deviceBind"] = errorMsg;
+                                success(yunDevice);
+                                NSDictionary *message = @{@"progress":@100,@"code":messageArr[2],@"message":messageArr[1]};
+                                success(message);
+                            }];
+                        }
+                    }else {
+                        NSDictionary *message = @{@"progress":@100,@"code":messageArr[2],@"message":messageArr[1]};
+                        success(message);
+                    }
+                }];
+            }else {
+                logMsg=@{@"progress":@100,@"code":messageArr[2],@"message":messageArr[1]};
+                success(logMsg);
+            }
+            
+        }else{//msg:
+            logMsg=@{@"progress":@70,@"code":messageArr[2],@"message":messageArr[1]};
+            success(logMsg);
+        }
+    }];
+}
+
 //停止配网
-- (void)stopConfigureBlufi {
++ (void)stopConfigureBlufi {
     [[ESPMeshManager share] cancleBLEPair];
 }
 
 //开启UDP扫描
-- (void)scanDevicesAsyncSuccess:(DevicesAsyncSuccessBlock)success andFailure:(void (^)(int))failure {
-    self.DevicesAsyncSuccess = success;
-    isUDPScan=true;
-    DevicesOfScanUDP=[NSMutableDictionary dictionaryWithCapacity:0];
-    //DeviceDic=[NSMutableDictionary dictionaryWithCapacity:0];
-    UPDTimer=[NSTimer scheduledTimerWithTimeInterval:20 target:self selector:@selector(sendUDPResult) userInfo:nil repeats:false];
-    [[NSRunLoop mainRunLoop] addTimer:UPDTimer forMode:NSDefaultRunLoopMode];
-    
-    [[ESPMeshManager share] starScanRootmDNS:^(NSArray * _Nonnull devixe) {
-        [self obtainDeviceDetails:devixe];
-    } failblock:^(int code) {
-        
-    }];
-    [[ESPMeshManager share] starScanRootUDP:^(NSArray *devixe) {
-        [self obtainDeviceDetails:devixe];
-    } failblock:^(int code) {
-        
-    }];
-}
-- (void)obtainDeviceDetails:(NSArray *)dev {
-    NSOperationQueue * opq=[[NSOperationQueue alloc] init];
-    opq.maxConcurrentOperationCount=1;
-    [opq addOperationWithBlock:^{
-        
-        NSMutableArray* meshinfoArr = [NSMutableArray arrayWithCapacity:0];
-        for (int i = 0; i < dev.count; i ++) {
-            NSArray *macArr=[dev[i] componentsSeparatedByString:@":"];
-            EspDevice* device=[[EspDevice alloc] init];
-            device.mac=macArr[0];
-            device.host=macArr[1];
-            device.httpType=macArr[2];
-            device.port=macArr[3];
-            NSMutableArray *meshItermArr = [[ESPMeshManager share] getMeshInfoFromHost:device];
-            for (int i = 0; i < meshItermArr.count; i ++) {
-                [meshinfoArr addObject:meshItermArr[i]];
-            }
-            NSLog(@"meshinfoArr------> %lu",(unsigned long)meshinfoArr.count);
-        }
-        NSLog(@"meshinfoArr------> %lu",(unsigned long)meshinfoArr.count);
-        NSString *httpResponse = [ESPDataConversion fby_getNSUserDefaults:@"httpResponse"];
-        if ([httpResponse intValue] != 200) {
-            [UPDTimer invalidate];
-            [self sendUDPResult];
-            self->isUDPScan=false;
-            return ;
-        }
-        NSMutableArray* tempInfosArr=[NSMutableArray arrayWithCapacity:0];
-        for (int i=0; i<meshinfoArr.count; i++) {
-            EspDevice* newDevice=[meshinfoArr objectAtIndex:i];
-            [tempInfosArr addObject:@{@"mac":newDevice.mac,
-                                      @"layer":[NSString stringWithFormat:@"%d",newDevice.meshLayerLevel],
-                                      @"host":newDevice.host
-                                      }];
-        }
-        if (tempInfosArr.count>0) {
-            self.DevicesAsyncSuccess(tempInfosArr);
++ (void)scanDevicesAsyncSuccess:(DevicesAsyncSuccessBlock)success andFailure:(void (^)(int))failure {
+    NSMutableArray *scanUDPArr = [NSMutableArray arrayWithCapacity:0];
+    dispatch_queue_t queueT = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);//一个并发队列
+    dispatch_group_t grpupT = dispatch_group_create();//一个线程组
+    dispatch_group_enter(grpupT);
+    dispatch_group_async(grpupT, queueT, ^{
+        [[ESPMeshManager share] starScanRootUDP:^(NSArray *devixe) {
+            [scanUDPArr addObjectsFromArray:devixe];
+        } failblock:^(int code) {
             
-        }else{
-            [UPDTimer invalidate];
-            [self sendUDPResult];
-            self->isUDPScan=false;
-            return ;
-        }
-        EspActionDeviceInfo* deviceinfoAction = [[EspActionDeviceInfo alloc] init];
-        NSMutableDictionary* resps = [deviceinfoAction doActionGetDevicesInfoLocal:meshinfoArr];
-        if (resps.count>0) {
-            for (int i=0; i<meshinfoArr.count; i++) {
-                EspDevice* newDevice=[meshinfoArr objectAtIndex:i];
-                NSString *url = [EspDeviceUtil getLocalUrlForProtocol:newDevice.httpType host:newDevice.host port:newDevice.port.intValue file:@""];
-                [[NSUserDefaults standardUserDefaults] setValue:url forKey:newDevice.mac];
-                //获取详细信息
-                EspHttpResponse *response = resps[newDevice.mac];
-                if (response != nil) {
-                    NSDictionary* responDic=response.getContentJSON;
-                    NSMutableDictionary *mDic=[NSMutableDictionary dictionaryWithCapacity:0];
-                    mDic[@"mac"]=newDevice.mac;
-                    if (responDic[@"position"]) {
-                        mDic[@"position"]=responDic[@"position"];
-                    }else {
-                        mDic[@"position"]=@"";
-                    }
-                    mDic[@"state"]=@"local";
-                    mDic[@"meshLayerLevel"]=[NSString stringWithFormat:@"%d",newDevice.meshLayerLevel];
-                    mDic[@"meshID"]=newDevice.meshID;
-                    mDic[@"host"]=newDevice.host;
-                    mDic[@"tid"]=responDic[@"tid"];
-                    if (responDic[@"idf_version"]) {
-                        mDic[@"idf_version"]=responDic[@"idf_version"];
-                    }else {
-                        mDic[@"idf_version"]=@"";
-                    }
-                    if (responDic[@"mdf_version"]) {
-                        mDic[@"mdf_version"]=responDic[@"mdf_version"];
-                    }else {
-                        mDic[@"mdf_version"]=@"";
-                    }
-                    if (responDic[@"mlink_version"]) {
-                        mDic[@"mlink_version"]=responDic[@"mlink_version"];
-                    }else {
-                        mDic[@"mlink_version"]=@"";
-                    }
-                    if (responDic[@"trigger"]) {
-                        mDic[@"trigger"]=responDic[@"trigger"];
-                    }else {
-                        mDic[@"trigger"]=@"";
-                    }
-                    mDic[@"name"]=responDic[@"name"];
-                    mDic[@"version"]=responDic[@"version"];
-                    mDic[@"characteristics"]=[ESPDataConversion getJSCharacters:responDic[@"characteristics"]];
-                    if (responDic[@"characteristics"] != nil) {
-                        //self->ScanUDPDevices[newDevice.mac]=mDic;
-                        newDevice.sendInfo=mDic;
-                        self->DevicesOfScanUDP[newDevice.mac]=newDevice;
-                    }
+        }];
+    });
+    dispatch_group_async(grpupT, queueT, ^{
+        [[ESPMeshManager share] starScanRootmDNS:^(NSArray * _Nonnull devixe) {
+            [scanUDPArr addObjectsFromArray:devixe];
+        } failblock:^(int code) {
+            
+        }];
+    });
+    dispatch_group_async(grpupT, queueT, ^{
+        sleep(2);
+        //        [[ESPMeshManager share] cancelScanRootUDP];
+        [[ESPMeshManager share] cancelScanRootmDNS];
+    });
+    dispatch_group_notify(grpupT, queueT, ^{
+        NSSet *set = [NSSet setWithArray:scanUDPArr];
+        NSArray *allArray = [set allObjects];
+        
+        NSMutableDictionary *DevicesOfScanUDP = [NSMutableDictionary dictionaryWithCapacity:0];
+        NSOperationQueue * opq=[[NSOperationQueue alloc] init];
+        opq.maxConcurrentOperationCount=1;
+        [opq addOperationWithBlock:^{
+            NSMutableArray* meshinfoArr = [NSMutableArray arrayWithCapacity:0];
+            if (!ValidArray(allArray)) {
+                failure(8010);
+                return ;
+            }
+            for (int i = 0; i < allArray.count; i ++) {
+                NSArray *macArr=[allArray[i] componentsSeparatedByString:@":"];
+                EspDevice* device=[[EspDevice alloc] init];
+                device.mac=macArr[0];
+                device.host=macArr[1];
+                device.httpType=macArr[2];
+                device.port=macArr[3];
+                NSMutableArray *meshItermArr = [[ESPMeshManager share] getMeshInfoFromHost:device];
+                for (int i = 0; i < meshItermArr.count; i ++) {
+                    [meshinfoArr addObject:meshItermArr[i]];
                 }
             }
-            
-        }else {
-        }
-        
-        [UPDTimer invalidate];
-        [self sendUDPResult];
-        self->isUDPScan=false;
-    }];
+            NSString *httpResponse = [ESPDataConversion fby_getNSUserDefaults:@"httpResponse"];
+            if ([httpResponse intValue] != 200) {
+                failure(8010);
+                return ;
+            }
+            NSMutableArray* tempInfosArr=[NSMutableArray arrayWithCapacity:0];
+            for (int i=0; i<meshinfoArr.count; i++) {
+                EspDevice* newDevice=[meshinfoArr objectAtIndex:i];
+                [tempInfosArr addObject:@{@"mac":newDevice.mac,
+                                          @"layer":[NSString stringWithFormat:@"%d",newDevice.meshLayerLevel],
+                                          @"host":newDevice.host
+                                          }];
+            }
+            if (ValidArray(tempInfosArr)) {
+                NSArray *deviceDetailsArr = [ESPDataConversion DeviceOfScanningUDPData:tempInfosArr];
+                NSSet *set = [NSSet setWithArray:deviceDetailsArr];
+                NSArray *allArray = [set allObjects];
+                NSMutableDictionary *deviceScanning = [NSMutableDictionary dictionaryWithCapacity:0];
+                deviceScanning[@"onDeviceScanningResult"] = allArray;
+                success(deviceScanning);
+            }else{
+                failure(8010);
+                return ;
+            }
+            NSMutableArray *DevicesOfScanUDPKeyArr = [NSMutableArray arrayWithCapacity:0];
+            NSMutableArray *DevicesOfScanUDPHostArr = [NSMutableArray arrayWithCapacity:0];
+            NSMutableArray *DevicesOfScanUDPValueArr = [NSMutableArray arrayWithCapacity:0];
+            NSMutableArray *DevicesOfScanUDPGroupArr = [NSMutableArray arrayWithCapacity:0];
+            EspActionDeviceInfo* deviceinfoAction = [[EspActionDeviceInfo alloc] init];
+            NSMutableDictionary* resps = [deviceinfoAction doActionGetDevicesInfoLocal:meshinfoArr];
+            if (resps.count>0) {
+                
+                for (int i=0; i<meshinfoArr.count; i++) {
+                    EspDevice* newDevice=[meshinfoArr objectAtIndex:i];
+                    NSString *url = [EspDeviceUtil getLocalUrlForProtocol:newDevice.httpType host:newDevice.host port:newDevice.port.intValue file:@""];
+                    [[NSUserDefaults standardUserDefaults] setValue:url forKey:newDevice.mac];
+                    //获取详细信息
+                    EspHttpResponse *response = resps[newDevice.mac];
+                    if (response != nil) {
+                        NSDictionary* responDic=response.getContentJSON;
+                        //                    NSLog(@"responDic====%@",responDic);
+                        NSMutableDictionary *mDic = [ESPDataConversion deviceDetailData:responDic withEspDevice:newDevice];
+                        [DevicesOfScanUDPGroupArr addObject:mDic[@"group"]];
+                        if (responDic[@"characteristics"] != nil) {
+                            //self->ScanUDPDevices[newDevice.mac]=mDic;
+                            [DevicesOfScanUDPHostArr addObject:newDevice.host];
+                            [DevicesOfScanUDPKeyArr addObject:newDevice.mac];
+                            [DevicesOfScanUDPValueArr addObject:mDic];
+                            
+                            newDevice.sendInfo=mDic;
+                            DevicesOfScanUDP[newDevice.mac]=newDevice;
+                        }
+                    }
+                }
+                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                [defaults setValue:DevicesOfScanUDPHostArr forKey:@"DevicesOfScanUDPHostArr"];
+                [defaults setValue:DevicesOfScanUDPKeyArr forKey:@"DevicesOfScanUDPKeyArr"];
+                [defaults setValue:DevicesOfScanUDPValueArr forKey:@"DevicesOfScanUDPValueArr"];
+                [defaults setValue:DevicesOfScanUDPGroupArr forKey:@"DevicesOfScanUDPGroupArr"];
+                [defaults synchronize];
+                
+                success(DevicesOfScanUDP);
+                
+            }else {
+                failure(8011);
+            }
+        }];
+    });
+    dispatch_group_leave(grpupT);
 }
-
-//UDP Scan超时或者失败反馈
--(void)sendUDPResult{
-    
-    [[ESPMeshManager share] cancelScanRootUDP];
-    [[ESPMeshManager share] cancelScanRootmDNS];
-    if (DevicesOfScanUDP.count>0) {
-        NSMutableArray* sendInfo=[NSMutableArray arrayWithCapacity:0];
-        for (EspDevice* item in DevicesOfScanUDP.allValues) {
-            [sendInfo addObject:item.sendInfo];
-        }
-        self.DevicesAsyncSuccess(sendInfo);
-    }else{
-        self.DevicesAsyncSuccess(@[]);
-    }
-    isUDPScan=false;
-}
-
 //发送多个设备命令
-- (void)requestDevicesMulticastAsync:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
-        
-    NSMutableDictionary* argsDic=[messageDic copy];
-    
-    NSString *requestStr = [argsDic objectForKey:@"request"];
-    NSString *callbackStr = [argsDic objectForKey:@"callback"];
-    id tag = [argsDic objectForKey:@"tag"];
-    
-    if (lastRequestDate) {
-        NSLog(@"两次请求时间间隔：%f",[[NSDate date] timeIntervalSinceDate:lastRequestDate]);
-        if ([[NSDate date] timeIntervalSinceDate:lastRequestDate]<0.5) {
-            return;//过滤频繁操作
-        }
++ (void)requestDevicesMulticastAsync:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
+    NSMutableDictionary *msg=[[NSMutableDictionary alloc]initWithDictionary:messageDic];
+    NSString *requestStr = [msg objectForKey:@"request"];
+    NSString *callbackStr = [msg objectForKey:@"callback"];
+    NSArray *groupArr = [msg objectForKey:@"group"];
+    // 区别请求是异步还是队列
+    BOOL isSendQueue = [[msg objectForKey:@"isSendQueue"] boolValue];
+    // 区别请求是多设备(NO)还是单设备(YES)
+    BOOL isDeviceNumber = NO;
+    id tag = [msg objectForKey:@"tag"];
+    id macArr = [msg objectForKey:@"mac"];
+    if (!ValidArray(macArr)) {
+        macArr = @[[msg objectForKey:@"mac"]];
+        isDeviceNumber = YES;
     }
-    lastRequestDate=[NSDate date];
-    NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[argsDic objectForKey:@"mac"]];
-    NSArray *deviceIpArr = [deviceIpWithMacDic allKeys];
-    NSUInteger taskInt = deviceIpArr.count;
-    
+
+    NSDictionary *deviceIpWithDic;
+    BOOL isGroupBool = [[msg objectForKey:@"isGroup"] boolValue];
+    NSString *isGroup;
+    NSArray *deviceIpArr;
+    if (isGroupBool) {
+        isGroup = @"1";
+    }else {
+        isGroup = @"0";
+    }
+    deviceIpWithDic = [ESPDataConversion deviceRequestIpWithMac:macArr];
+    deviceIpArr = [deviceIpWithDic allKeys];
+    if (!ValidArray(deviceIpArr)) {
+        if (callbackStr != nil) {
+            NSDictionary *resultDic = @{@"code":@"8010",@"callbackStr":callbackStr};
+            failure(resultDic);
+        }
+        return;
+    }
+    __block NSUInteger taskInt = deviceIpArr.count;
+    NSUInteger requestInt = deviceIpArr.count;
+
     NSMutableArray *resultAllArr = [NSMutableArray arrayWithCapacity:0];
-    
+
     for (int i = 0; i < deviceIpArr.count; i ++) {
-        
-        NSArray* macs = [deviceIpWithMacDic objectForKey:deviceIpArr[i]];
-        if (macs.count==0) {
+
+        NSArray *macs;
+        //        NSArray *groups;
+        NSMutableDictionary* headers = [NSMutableDictionary dictionary];
+        if ([isGroup integerValue] == 1) {
+            NSString* groupsStr=groupArr[0];
+
+            for (int j=1; j<groupArr.count; j++) {
+                groupsStr=[NSString stringWithFormat:@"%@,%@",groupsStr,groupArr[j]];
+            }
+            [headers setObject:groupsStr forKey:@"meshNodeGroup"];
+        }
+        macs = [deviceIpWithDic objectForKey:deviceIpArr[i]];
+        if (!ValidArray(macs)) {
+            if (callbackStr != nil) {
+                NSDictionary *resultDic = @{@"code":@"8010",@"callbackStr":callbackStr};
+                failure(resultDic);
+            }
             return;
         }
         NSString* macsStr=macs[0];
         if ([requestStr isEqualToString:@"reset"]) {//重置设备
-            [self->DevicesOfScanUDP removeObjectForKey:macsStr];
+//            [ESPDataConversion fby_saveNSUserDefaults:macsStr withKey:@"resetMacsStr"];
+            NSDictionary *resultDic = @{@"code":@"8011",@"resetMacsStr":macsStr};
+            failure(resultDic);
         }
-        for (int i=1; i<macs.count; i++) {
-            macsStr=[NSString stringWithFormat:@"%@,%@",macsStr,macs[i]];
-            
+        for (int m=1; m<macs.count; m++) {
+            macsStr=[NSString stringWithFormat:@"%@,%@",macsStr,macs[m]];
+
             if ([requestStr isEqualToString:@"reset"]) {//重置设备
-                [self->DevicesOfScanUDP removeObjectForKey:macs[i]];
+//                [ESPDataConversion fby_saveNSUserDefaults:macsStr withKey:@"resetMacsStr"];
+                NSDictionary *resultDic = @{@"code":@"8011",@"resetMacsStr":macs[m]};
+                failure(resultDic);
             }
         }
-        
+
         NSString *port = @"80";
         NSString *urlStr = [NSString stringWithFormat:@"http://%@:%@/device_request",deviceIpArr[i],port];
-        
-        NSMutableDictionary* headers = [NSMutableDictionary dictionary];
+
         [headers setObject:[NSString stringWithFormat:@"%lu",(unsigned long)macs.count] forKey:@"meshNodeNum"];
-        if ([argsDic objectForKey:@"root_response"]) {
-            NSString* root_response = [NSString stringWithFormat:@"%@", [argsDic objectForKey:@"root_response"]];
+        if ([msg objectForKey:@"root_response"]) {
+            NSString* root_response = [NSString stringWithFormat:@"%@", [msg objectForKey:@"root_response"]];
             [headers setObject:root_response forKey:@"rootResponse"];
         }
         [headers setObject:macsStr forKey:@"meshNodeMac"];
-        [headers setObject:[NSString stringWithFormat:@"%lu",(unsigned long)taskInt] forKey:@"taskStr"];
-        
+        [headers setObject:isGroup forKey:@"isGroup"];
+        [headers setObject:[NSString stringWithFormat:@"%lu",(unsigned long)requestInt] forKey:@"taskStr"];
+
         if (callbackStr) {
-            [argsDic removeObjectForKey:@"callback"];
+            [msg removeObjectForKey:@"callback"];
         }
         if (tag) {
-            [argsDic removeObjectForKey:@"tag"];
+            [msg removeObjectForKey:@"tag"];
         }
-        [argsDic removeObjectForKey:@"root_response"];
-        [argsDic removeObjectForKey:@"mac"];
-        [argsDic removeObjectForKey:@"host"];
-        
-        if (controlQueue==nil) {
-            controlQueue = [[NSOperationQueue alloc] init];
-            controlQueue.maxConcurrentOperationCount=20;//1串行，>2并发
+        if ([isGroup integerValue] == 1) {
+            [msg removeObjectForKey:@"group"];
         }
-        [controlQueue addOperationWithBlock:^{
-            espUploadHandleTool = [[ESPUploadHandleTool alloc]init];
-            [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:argsDic andSuccess:^(NSArray * _Nonnull resultArr) {
-                if (ValidArray(resultArr)) {
-                    if (callbackStr == nil) {
-                        return;
-                    }
-                    if (taskInt > 1) {
-                        [resultAllArr addObjectsFromArray:resultArr];
-                    }else {
-                        [resultAllArr addObjectsFromArray:resultArr];
-                        NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
-                        jsonDic[@"result"] = resultAllArr;
-                        if (tag) {
-                            jsonDic[@"tag"] = tag;
+        [msg removeObjectForKey:@"root_response"];
+        [msg removeObjectForKey:@"mac"];
+        [msg removeObjectForKey:@"host"];
+
+        ESPUploadHandleTool *espUploadHandleTool = [ESPUploadHandleTool shareInstance];
+        if (isSendQueue) {
+            dispatch_queue_t queue = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_SERIAL);
+            dispatch_sync(queue, ^{
+                //                NSLog(@"%@----------%d",[NSThread currentThread], i);
+                [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:msg andSuccess:^(NSArray * _Nonnull resultArr) {
+                    if (ValidArray(resultArr)) {
+                        if (callbackStr == nil) {
+                            return;
                         }
-                        success(jsonDic);
+                        if (isDeviceNumber) {
+                            NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                            jsonDic[@"result"] = resultArr[0];
+                            jsonDic[@"callbackStr"] = callbackStr;
+                            if (tag) {
+                                jsonDic[@"tag"] = tag;
+                            }
+                            success(jsonDic);
+                        }else {
+                            if (taskInt > 1) {
+                                [resultAllArr addObjectsFromArray:resultArr];
+                            }else {
+                                [resultAllArr addObjectsFromArray:resultArr];
+                                NSSet *set = [NSSet setWithArray:resultAllArr];
+                                NSArray *allArray = [set allObjects];
+                                NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                                jsonDic[@"result"] = allArray;
+                                jsonDic[@"callbackStr"] = callbackStr;
+                                if (tag) {
+                                    jsonDic[@"tag"] = tag;
+                                }
+                                success(jsonDic);
+                            }
+                            taskInt --;
+                        }
                     }
-                }
-            } andFailure:^(int fail) {
-                failure(@{@"status_code":@"-100"});
-            }];
-        }];
+                } andFailure:^(int fail) {
+                    NSLog(@"%d",fail);
+                    if (callbackStr != nil) {
+                        NSDictionary *resultDic = @{@"code":@"8010",@"callbackStr":callbackStr};
+                        failure(resultDic);
+                    }
+                }];
+            });
+        }else {
+            dispatch_queue_t queueT = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);//一个并发队列
+            dispatch_async(queueT, ^{
+                //                NSLog(@"%@----------%d",[NSThread currentThread], i);
+                [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:msg andSuccess:^(NSArray * _Nonnull resultArr) {
+                    if (ValidArray(resultArr)) {
+                        if (callbackStr == nil) {
+                            return;
+                        }
+                        if (isDeviceNumber) {
+                            NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                            jsonDic[@"result"] = resultArr[0];
+                            jsonDic[@"callbackStr"] = callbackStr;
+                            if (tag) {
+                                jsonDic[@"tag"] = tag;
+                            }
+                            success(jsonDic);
+                        }else {
+                            if (taskInt > 1) {
+                                [resultAllArr addObjectsFromArray:resultArr];
+                            }else {
+                                [resultAllArr addObjectsFromArray:resultArr];
+                                NSSet *set = [NSSet setWithArray:resultAllArr];
+                                NSArray *allArray = [set allObjects];
+                                NSMutableDictionary * jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                                jsonDic[@"result"] = allArray;
+                                jsonDic[@"callbackStr"] = callbackStr;
+                                if (tag) {
+                                    jsonDic[@"tag"] = tag;
+                                }
+                                success(jsonDic);
+                            }
+                            taskInt --;
+                        }
+                    }
+                } andFailure:^(int fail) {
+                    NSLog(@"%d",fail);
+                    if (callbackStr != nil) {
+                        NSDictionary *resultDic = @{@"code":@"8010",@"callbackStr":callbackStr};
+                        failure(resultDic);
+                    }
+                }];
+            });
+        }
+
     }
     
 }
 
-//发送单个设备命令
+//发送单个设备命令(弃用)
 - (void)requestDeviceAsync:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
     
     NSMutableDictionary* argsDic=[messageDic copy];
@@ -399,7 +477,7 @@
     
     NSString* macsStr=[argsDic objectForKey:@"mac"];
     if ([requestStr isEqualToString:@"reset"]) {//重置设备
-        [self->DevicesOfScanUDP removeObjectForKey:macsStr];
+//        [self->DevicesOfScanUDP removeObjectForKey:macsStr];
     }
     NSMutableDictionary* headers = [NSMutableDictionary dictionary];
     [headers setObject:@"1" forKey:@"meshNodeNum"];
@@ -422,7 +500,7 @@
     [argsDic removeObjectForKey:@"mac"];
     [argsDic removeObjectForKey:@"host"];
     NSMutableArray *resultAllArr = [NSMutableArray arrayWithCapacity:0];
-    espUploadHandleTool = [[ESPUploadHandleTool alloc]init];
+    ESPUploadHandleTool *espUploadHandleTool = [ESPUploadHandleTool shareInstance];
     [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:headers withBodyContent:argsDic andSuccess:^(NSArray * _Nonnull resultArr) {
         if ([[resultArr[0] objectForKey:@"status_code"] intValue] == 0) {
             if (callbackStr == nil) {
@@ -443,21 +521,20 @@
 }
 
 //设备升级
-- (void)startOTA:(NSDictionary *)messageDic Success:(startOTASuccessBlock)success andFailure:(void (^)(int))failure {
++ (void)startOTA:(NSString *)message Success:(startOTASuccessBlock)successOTA andFailure:(void (^)(int))failure {
     
-    self.startOTASuccess = success;
-    
-    NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[messageDic objectForKey:@"macs"]];
+    id msg=[ESPDataConversion objectFromJsonString:message];
+    NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[msg objectForKey:@"macs"]];
     NSArray *deviceIpArr = [deviceIpWithMacDic allKeys];
-    stopRequestIpArr = deviceIpArr;
+    if (!ValidArray(deviceIpArr)) {
+        failure(8010);
+        return;
+    }
+    [ESPDataConversion fby_saveNSUserDefaults:deviceIpArr withKey:@"stopRequestIpArr"];
     for (int i = 0; i < deviceIpArr.count; i ++) {
-        requestOTAProgressDic = [NSMutableDictionary dictionaryWithCapacity:0];
-        NSArray *macs = [deviceIpWithMacDic objectForKey:deviceIpArr[i]];
+        NSMutableDictionary *requestOTAProgressDic = [NSMutableDictionary dictionaryWithCapacity:0];
+        NSArray* macs = [deviceIpWithMacDic objectForKey:deviceIpArr[i]];
         NSString *hostStr = deviceIpArr[i];
-        espDocumentPath = [[ESPDocumentsPath alloc]init];
-        if (macs.count==0) {
-            return;
-        }
         NSString* macsStr=macs[0];
         for (int i=1; i<macs.count; i++) {
             macsStr=[NSString stringWithFormat:@"%@,%@",macsStr,macs[i]];
@@ -465,43 +542,58 @@
         requestOTAProgressDic[@"mac"] = macsStr;
         requestOTAProgressDic[@"macArr"] = macs;
         requestOTAProgressDic[@"host"] = hostStr;
-        if ([messageDic[@"type"] intValue] == 3) {
-            sessionTask = [espUploadHandleTool meshNodeMac:macsStr andWithFirmwareUrl:messageDic[@"bin"] withIPUrl:hostStr andSuccess:^(NSDictionary * _Nonnull dic) {
+        [ESPDataConversion fby_saveNSUserDefaults:requestOTAProgressDic withKey:@"requestOTAProgressDic"];
+        ESPUploadHandleTool *espUploadHandleTool = [ESPUploadHandleTool shareInstance];
+        __block NSURLSessionTask *sessionTask;
+        if ([msg[@"type"] intValue] == 3) {
+            sessionTask = [espUploadHandleTool meshNodeMac:macsStr andWithFirmwareUrl:msg[@"bin"] withIPUrl:hostStr andSuccess:^(NSDictionary * _Nonnull dic) {
                 NSLog(@"dic--->%@",dic);
                 if (dic==nil) {
+                    failure(8010);
                     return ;
                 }
-                NSDictionary *resultDic = [dic objectForKey:@"result"];
-                if ([[resultDic objectForKey:@"status_code"] intValue] == 0) {
-                    NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
-                    for (int i = 0; i < macs.count; i ++) {
+                NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
+                if (macs.count == 1) {
+                    NSDictionary *resultDic = [dic objectForKey:@"result"];
+                    if ([[resultDic objectForKey:@"status_code"] intValue] == 0) {
                         NSMutableDictionary *macDic = [NSMutableDictionary dictionaryWithCapacity:0];
-                        macDic[@"mac"] = macs[i];
+                        macDic[@"mac"] = macs[0];
                         macDic[@"progress"] = @"50";
                         macDic[@"message"] = @"ota message";
                         [jsonArr addObject:macDic];
                     }
-                    //文件下载进度
-                    self.startOTASuccess(jsonArr);
                 }else {
-                    //文件下载失败
+                    NSArray *resultArr = [dic objectForKey:@"result"];
+                    for (int i = 0; i < resultArr.count; i ++) {
+                        NSDictionary *resultDic = resultArr[i];
+                        if ([[resultDic objectForKey:@"code"] intValue] == 0) {
+                            NSMutableDictionary *macDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                            macDic[@"mac"] = [resultDic objectForKey:@"mac"];
+                            macDic[@"progress"] = @"50";
+                            macDic[@"message"] = [resultDic objectForKey:@"message"];
+                            [jsonArr addObject:macDic];
+                            
+                        }
+                    }
                 }
                 
-                sleep(3);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (OTATimer) {
-                        [OTATimer invalidate];
-                        OTATimer=nil;
-                    }
-                    OTATimer=[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(requestOTAProgress) userInfo:nil repeats:true];
-                    [[NSRunLoop mainRunLoop] addTimer:OTATimer forMode:NSDefaultRunLoopMode];
-                });
+                if (ValidArray(jsonArr)) {
+                    NSMutableDictionary *jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                    jsonDic[@"jsonArr"] = jsonArr;
+                    jsonDic[@"type"] = @"0";
+                    jsonDic[@"sessionTask"] = sessionTask;
+                    successOTA(jsonDic);
+                }else {
+                    failure(8010);
+                }
+                
             } andFailure:^(int fail) {
                 NSLog(@"fail--->%d",fail);
-                //文件下载失败
+                failure(8010);
             }];
-        }else if ([messageDic[@"type"] intValue] == 2) {
-            NSString* binPath=[messageDic[@"bin"] componentsSeparatedByString:@"_"].lastObject;
+        }else if ([msg[@"type"] intValue] == 2) {
+            NSString* binPath=[msg[@"bin"] componentsSeparatedByString:@"_"].lastObject;
+            ESPDocumentsPath *espDocumentPath = [[ESPDocumentsPath alloc]init];
             NSString *path = [espDocumentPath getDocumentsPath];
             NSString  *documentPath = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"iOSUpgradeFiles/%@",binPath]];
             NSLog(@"%@",documentPath);
@@ -518,53 +610,70 @@
                     macDic[@"message"] = @"ota message";
                     [jsonArr addObject:macDic];
                 }
-                //文件上传进度
-                self.startOTASuccess(jsonArr);
+                NSMutableDictionary *jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                jsonDic[@"jsonArr"] = jsonArr;
+                jsonDic[@"type"] = @"1";
+                jsonDic[@"sessionTask"] = sessionTask;
+                successOTA(jsonDic);
             } success:^(NSDictionary * _Nonnull success) {
                 NSLog(@"%@",success);
                 if (success==nil) {
+                    failure(8010);
                     return ;
                 }
-                NSDictionary *resultDic = [success objectForKey:@"result"];
-                if ([[resultDic objectForKey:@"status_code"] intValue] == 0) {
-                    NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
-                    for (int i = 0; i < macs.count; i ++) {
+                
+                NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
+                if (macs.count == 1) {
+                    NSDictionary *resultDic = [success objectForKey:@"result"];
+                    if ([[resultDic objectForKey:@"status_code"] intValue] == 0) {
                         NSMutableDictionary *macDic = [NSMutableDictionary dictionaryWithCapacity:0];
-                        macDic[@"mac"] = macs[i];
+                        macDic[@"mac"] = macs[0];
                         macDic[@"progress"] = @"50";
                         macDic[@"message"] = @"ota message";
                         [jsonArr addObject:macDic];
                     }
-                    //文件上传成功
-                    self.startOTASuccess(jsonArr);
                 }else {
-                    //文件上传失败
-                }
-                sleep(3);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (OTATimer) {
-                        [OTATimer invalidate];
-                        OTATimer=nil;
+                    NSArray *resultArr = [success objectForKey:@"result"];
+                    for (int i = 0; i < resultArr.count; i ++) {
+                        NSDictionary *resultDic = resultArr[i];
+                        if ([[resultDic objectForKey:@"code"] intValue] == 0) {
+                            NSMutableDictionary *macDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                            macDic[@"mac"] = [resultDic objectForKey:@"mac"];
+                            macDic[@"progress"] = @"50";
+                            macDic[@"message"] = [resultDic objectForKey:@"message"];
+                            [jsonArr addObject:macDic];
+                            
+                        }
                     }
-                    OTATimer=[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(requestOTAProgress) userInfo:nil repeats:true];
-                    [[NSRunLoop mainRunLoop] addTimer:OTATimer forMode:NSDefaultRunLoopMode];
-                });
+                }
+                if (ValidArray(jsonArr)) {
+                    NSMutableDictionary *jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                    jsonDic[@"jsonArr"] = jsonArr;
+                    jsonDic[@"type"] = @"0";
+                    jsonDic[@"sessionTask"] = sessionTask;
+                    successOTA(jsonDic);
+                }else {
+                    failure(8010);
+                }
             } andFailure:^(int fail) {
                 NSLog(@"%d",fail);
-                //文件上传失败
+                failure(8010);
             }];
         }else {
-            //就设备OTA升级
+            failure(8010);
         }
     }
     
 }
 
-- (void)requestOTAProgress {
++ (void)networkRequestOTAProgress:(startOTAProgressBlock)successOTA andFailure:(void (^)(int))failure {
+    NSDictionary *requestOTAProgressDic = [ESPDataConversion fby_getNSUserDefaults:@"requestOTAProgressDic"];
     NSString *ip = requestOTAProgressDic[@"host"];
     NSArray *macArr = requestOTAProgressDic[@"macArr"];
     NSString *port=@"80";
     NSString *urlStr=[NSString stringWithFormat:@"http://%@:%@/device_request",ip,port];
+    ESPUploadHandleTool *espUploadHandleTool = [ESPUploadHandleTool shareInstance];
+    __block NSURLSessionTask *sessionTask;
     sessionTask = [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":requestOTAProgressDic[@"mac"],@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macArr.count]} withBodyContent:@{@"request":@"get_ota_progress"} andSuccess:^(NSArray * _Nonnull resultArr) {
         NSLog(@"resultArr-->%@",resultArr);
         if (!ValidArray(resultArr)) {
@@ -572,7 +681,6 @@
         }
         if (macArr.count == 1) {
             NSDictionary *resultDic = resultArr[0];
-            NSMutableArray *jsonArr = [NSMutableArray arrayWithCapacity:0];
             if ([[resultDic objectForKey:@"code"] isEqualToString:[NSString stringWithFormat:@"200"]]) {
                 float totalSize = [[resultDic objectForKey:@"total_size"] floatValue];
                 float writtenSize = [[resultDic objectForKey:@"total_size"] floatValue];
@@ -581,16 +689,21 @@
                 macDic[@"mac"] = macArr[0];
                 macDic[@"progress"] = [NSString stringWithFormat:@"%d",Progress * 100];
                 macDic[@"message"] = @"ota message";
-                [jsonArr addObject:macDic];
                 if (totalSize == writtenSize) {
-                    //升级成功
-                    self.startOTASuccess(macArr);
+                    NSMutableDictionary *jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                    jsonDic[@"jsonArr"] = macArr;
+                    jsonDic[@"type"] = @"1";
+                    jsonDic[@"sessionTask"] = sessionTask;
+                    successOTA(jsonDic);
                 }else {
-                    //升级进行中
-                    self.startOTASuccess(jsonArr);
+                    NSMutableDictionary *jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                    jsonDic[@"jsonArr"] = @[macDic];
+                    jsonDic[@"type"] = @"0";
+                    jsonDic[@"sessionTask"] = sessionTask;
+                    successOTA(jsonDic);
                 }
             }else {
-                //升级失败
+                failure(8010);
             }
             
         }else {
@@ -610,33 +723,42 @@
                         [jsonMacArr addObject:[resultArr[i] objectForKey:@"mac"]];
                     }
                 }else {
-                    //升级失败
+                    failure(8010);
                 }
             }
             if (resultArr.count == jsonMacArr.count) {
-                //升级成功
-                self.startOTASuccess(jsonMacArr);
+                NSMutableDictionary *jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                jsonDic[@"jsonArr"] = jsonMacArr;
+                jsonDic[@"type"] = @"1";
+                jsonDic[@"sessionTask"] = sessionTask;
+                successOTA(jsonDic);
             }else {
-                //升级进行中
-                self.startOTASuccess(jsonArr);
+                NSMutableDictionary *jsonDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                jsonDic[@"jsonArr"] = jsonArr;
+                jsonDic[@"type"] = @"0";
+                jsonDic[@"sessionTask"] = sessionTask;
+                successOTA(jsonDic);
             }
         }
-        [self->OTATimer invalidate];
     } andFailure:^(int fail) {
         NSLog(@"%d",fail);
-        //升级失败
-        [self->OTATimer invalidate];
+        failure(8011);
     }];
     
 }
 
 //停止OTA升级
-- (void)stopOTA:(NSDictionary *)messageDic {
-        
++ (void)stopOTA:(NSString *)message withSessionTask:(NSURLSessionTask *)sessionTask {
+    id msg=[ESPDataConversion objectFromJsonString:message];
+    NSArray *stopRequestIpArr = [ESPDataConversion fby_getNSUserDefaults:@"stopRequestIpArr"];
+    if (msg==nil) {
+        return;
+    }
+    NSMutableArray *stopOTAIpArr = [NSMutableArray arrayWithArray:stopRequestIpArr];
     [sessionTask cancel];
-    if (stopRequestIpArr) {
-        for (int i = 0; i < stopRequestIpArr.count; i ++) {
-            [espUploadHandleTool stopOTA:stopRequestIpArr[i] andSuccess:^(NSDictionary * _Nonnull dic) {
+    if (ValidArray(stopOTAIpArr)) {
+        for (int i = 0; i < stopOTAIpArr.count; i ++) {
+            [[ESPUploadHandleTool shareInstance] stopOTA:stopOTAIpArr[i] andSuccess:^(NSDictionary * _Nonnull dic) {
                 NSLog(@"%@",dic);
             } andFailure:^(int fail) {
                 NSLog(@"%d",fail);
@@ -648,15 +770,15 @@
 }
 
 //重启设备命令
-- (void)reboot:(NSDictionary *)messageDic {
-        
-    NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[messageDic objectForKey:@"macs"]];
++ (void)reboot:(NSString *)message {
+    id msg=[ESPDataConversion objectFromJsonString:message];
+    NSDictionary *deviceIpWithMacDic = [ESPDataConversion deviceRequestIpWithMac:[msg objectForKey:@"macs"]];
     NSArray *deviceIpArr = [deviceIpWithMacDic allKeys];
+    if (!ValidArray(deviceIpArr)) {
+        return;
+    }
     for (int i = 0; i < deviceIpArr.count; i ++) {
         NSArray* macs = [deviceIpWithMacDic objectForKey:deviceIpArr[i]];
-        if (macs.count==0) {
-            return;
-        }
         NSString* macsStr=macs[0];
         for (int i=1; i<macs.count; i++) {
             macsStr=[NSString stringWithFormat:@"%@,%@",macsStr,macs[i]];
@@ -664,7 +786,7 @@
         NSString *ip = deviceIpArr[i];
         NSString *port=@"80";
         NSString *urlStr=[NSString stringWithFormat:@"http://%@:%@/device_request",ip,port];
-        [espUploadHandleTool requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":macsStr,@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macs.count]} withBodyContent:@{@"request":@"reboot"} andSuccess:^(NSArray * _Nonnull resultArr) {
+        [[ESPUploadHandleTool shareInstance] requestWithIpUrl:urlStr withRequestHeader:@{@"meshNodeMac":macsStr,@"meshNodeNum":[NSString stringWithFormat:@"%lu",(unsigned long)macs.count]} withBodyContent:@{@"request":@"reboot"} andSuccess:^(NSArray * _Nonnull resultArr) {
             NSLog(@"%@",resultArr);
         } andFailure:^(int fail) {
             NSLog(@"%d",fail);

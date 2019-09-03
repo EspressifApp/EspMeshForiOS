@@ -1,7 +1,7 @@
-define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, MINT, Util, colorPicker) {
+define(["vue","MINT", "Util", "txt!../../pages/colorCloudPicker.html"], function(v, MINT, Util, colorCloudPicker) {
 
-    var ColorPicker = v.extend({
-        template: colorPicker,
+    var ColorCloudPicker = v.extend({
+        template: colorCloudPicker,
         props: {
             colorId: {
                 type: String
@@ -24,8 +24,8 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
                 initSize: 240,
                 showColor: false,
                 pickerShow: true,
-                device: this.$store.state.deviceInfo,
-                deviceList: this.$store.state.deviceList,
+                device: this.$store.state.deviceCloudInfo,
+                aliDeviceList: this.$store.state.aliDeviceList,
                 currentHue: 360,
                 currentSaturation: 100,
                 currentLuminance: 100,
@@ -33,7 +33,8 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
                 currentBrightness: 70,
                 boxShadow: "none",
                 borderColor: "",
-                currentStatus: false
+                currentStatus: false,
+                lightMode: 1,
             }
         },
         computed: {
@@ -56,24 +57,26 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
             show: function() {
                 var self = this,
                     hueValue = 0, saturation = 0, luminance = 100, temperature = 0, brightness = 100;
-                self.deviceList = self.$store.state.deviceList;
-                 if (self.colorType == RECENT_TYPE_DEVICE) {
-                     self.device = self.$store.state.deviceInfo;
-                     $.each(self.device.characteristics, function(i, item) {
-                         if (item.cid == HUE_CID) {
-                             hueValue = item.value;
-                         }else if (item.cid == SATURATION_CID) {
-                             saturation = item.value;
-                         }else if (item.cid == VALUE_CID) {
-                             luminance = item.value;
-                         }else if (item.cid == TEMPERATURE_CID) {
-                             temperature = item.value;
-                         }else if (item.cid == BRIGHTNESS_CID) {
-                             brightness = item.value;
-                         }
-                     })
+                self.aliDeviceList = self.$store.state.aliDeviceList;
+                self.device = self.$store.state.deviceCloudInfo;
+                var characteristics = self.device.characteristics;
+                if (!Util._isEmpty(characteristics)) {
+                    var hsv = characteristics["HSVColor"];
+                    hueValue = hsv.value["Hue"];
+                    saturation = hsv.value["Saturation"];
+                    luminance = hsv.value["Value"];
+                    temperature = characteristics["ColorTemperature"].value;
+                    temperature = parseInt((temperature - 2000) / 50);
+                    brightness = characteristics["Brightness"].value;
+                    self.lightMode = characteristics["LightMode"].value;
+                    if (self.lightMode == 1) {
+                        self.pickerShow = true;
+                    } else {
+                        self.pickerShow = false;
+                    }
+                }
 
-                 };
+
                 var h = hueValue / 360,
                     s = saturation / 100,
                     b = luminance / 100,
@@ -98,17 +101,12 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
                 var self = this;
                 self.currentStatus = false;
                 if (!Util._isEmpty(self.macs) && self.macs.length > 0) {
-                    $.each(self.deviceList, function(i, item) {
-                        if (self.macs.indexOf(item.mac) > -1) {
-                            $.each(item.characteristics, function(j, itemSub) {
-                                if (itemSub.cid == STATUS_CID) {
-                                    if (itemSub.value == STATUS_ON) {
-                                        self.currentStatus = true;
-                                        return false;
-                                    }
-                                }
-                            });
-                            if (self.currentStatus) {
+                    $.each(self.aliDeviceList, function(i, item) {
+                        if (self.macs.indexOf(item.iotId) > -1) {
+                            var characteristics = item.characteristics;
+                            var status = characteristics["LightSwitch"].value;
+                            if (status == STATUS_ON) {
+                                self.currentStatus = true;
                                 return false;
                             }
                         }
@@ -188,6 +186,7 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
             showPicker: function () {
                 if (this.currentStatus) {
                     this.pickerShow = true;
+                    this.editDevice({"LightMode": 1});
                     this.setBordeColor(this.currentHue / 360, this.currentSaturation / 100, 1, this.currentLuminance / 100);
                 }
             },
@@ -195,6 +194,7 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
                 if (this.currentStatus) {
                     this.pickerShow = false;
                     this.initWarmCold(this.currentTemperature, this.currentBrightness);
+                    this.editDevice({"LightMode": 0});
                 }
             },
             changValue: function(type, value) {
@@ -217,91 +217,71 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
                     default: break;
                 }
             },
-            editDeviceH: function(hueValue) {
-                hueValue = Math.round(parseFloat(hueValue) * 360);
-                this.editDevice(HUE_CID, hueValue);
+            editDeviceH: function() {
+                this.editDeviceHsv()
             },
             editDeviceWhite: function() {
                 if (!this.currentStatus) {
                     this.close();
                 } else {
-                    this.editDeviceS(0);
                     this.currentSaturation = 0;
+                    this.editDeviceS();
                     $("#" + this.colorId + "saturation").slider("value", 0);
                 }
 
             },
             editDeviceS: function(saturation) {
-                this.editDevice(SATURATION_CID, saturation);
+                this.editDeviceHsv();
             },
             editDeviceL: function(luminance) {
-                this.editDevice(VALUE_CID, luminance);
+                this.editDeviceHsv();
+            },
+            editDeviceHsv: function() {
+                var self = this;
+                var data = {
+                    "HSVColor":{
+                        "Hue":  Math.round(self.currentHue),
+                        "Saturation": self.currentSaturation,
+                        "Value": self.currentLuminance
+                    }
+                }
+                self.editDevice(data);
             },
             editDeviceT: function(temperature) {
-                this.editDevice(TEMPERATURE_CID, temperature);
+                var data = {
+                    "ColorTemperature": this.currentTemperature * 50 + 2000
+                }
+                this.editDevice(data);
             },
             editDeviceB: function(brightness) {
-                this.editDevice(BRIGHTNESS_CID, brightness);
+                var data = {
+                    "Brightness": this.currentBrightness
+                }
+                this.editDevice(data);
             },
             close: function () {
                 var status = 0;
                 if(!this.currentStatus) {
                     status = 1;
                 }
-                this.editDevice(STATUS_CID, parseInt(status));
+                var data = {
+                    "LightSwitch": status
+                }
+                this.editDevice(data)
             },
-            editDevice: function(cid, value) {
-                var self = this, meshs = [], changeList = [],
-                    macs = this.macs;
-                meshs.push({cid: cid, value: value});
-                if (cid == HUE_CID) {
-                    meshs.push({cid: SATURATION_CID, value: 100});
-                    self.currentSaturation = 100;
-                    $("#" + self.colorId + "saturation").slider( "value", 100);
-                }
-                var data = '{"' + MESH_MAC + '": ' + JSON.stringify(macs) + ',';
-                if (self.isRoom) {
-                    data += '"' + MESH_GROUP + '": ' + JSON.stringify([self.$store.state.deviceInfo.roomKey]) +
-                    ',"isGroup": true,';
-                }
-                if (!Util._isEmpty(self.$store.state.tsfTime) && self.$store.state.tsfTime != 0) {
-                    var tsfTime = (new Date().getTime()  * 1000) - self.$store.state.tsfTime +
-                                        (self.$store.state.delayTime) * 1000;
-                    data += '"tsf_time": "'+ tsfTime +'",';
-                }
-
-                data += '"'+DEVICE_IP+'": "'+self.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' +
-                    MESH_REQUEST + '": "' + SET_STATUS + '","characteristics":' + JSON.stringify(meshs) + '}';
-                console.log(data);
-                espmesh.addQueueTask(JSON.stringify({"method":"requestDevicesMulticast","argument": data}));
-                this.setDeviceStatus(cid, value);
-                if (cid == HUE_CID) {
-                    this.setDeviceStatus(SATURATION_CID, 100);
-                }
+            editDevice: function(data) {
+                var self = this;
+                console.log(JSON.stringify(data));
+                espmesh.setAliDeviceProperties(JSON.stringify({"iotId":this.macs,"properties":data}));
+                self.setDeviceStatus(data);
                 setTimeout(function() {
                     window.onBackPressed = self.hide;
                 });
             },
-            setDeviceStatus: function(cid, value) {
-                var self = this, changeList = [];
-                $.each(self.deviceList, function(i, item){
-                    if (self.macs.indexOf(item.mac) > -1) {
-                        var characteristics = [];
-                        $.each(item.characteristics, function(j, itemSub) {
-                            if (itemSub.cid == cid) {
-                                itemSub.value = parseInt(value);
-                            }
-                            characteristics.push(itemSub);
-                        })
-                        item.characteristics = characteristics;
-                    }
-                    changeList.push(item);
-                });
-                self.deviceList = changeList;
-                if (cid == STATUS_CID) {
-                    self.getDeviceStatus();
+            setDeviceStatus: function(data) {
+                if (Util.setAliDeviceStatus(this, this.macs, data)) {
+                    this.getDeviceStatus();
                 }
-                self.$store.commit("setList", self.deviceList);
             },
             setBordeColor: function(h, s, b, p) {
                 var rgb = Raphael.getRGB("hsb("+h+","+s+","+b+")");
@@ -330,7 +310,9 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
                     $(document).on("touchend", "#"+id, function () {
                         if (isChange) {
                             if (self.pickerShow) {
-                                self.editDeviceH(h);
+                                self.currentSaturation = 100;
+                                $("#" + self.colorId + "saturation").slider("value", 100);
+                                self.editDeviceH();
                             }
                             isChange = false;
                         }
@@ -342,5 +324,5 @@ define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, M
 
     });
 
-    return ColorPicker;
+    return ColorCloudPicker;
 });

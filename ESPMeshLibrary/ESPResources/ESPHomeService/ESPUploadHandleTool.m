@@ -110,6 +110,8 @@
                     jsonMutableDic[@"result"] = jsonDict;
                     success ? success(jsonMutableDic) : nil;
                 }
+//                NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
+//                success ? success(jsonDict) : nil;
             }
         }];
         //启动任务
@@ -166,8 +168,12 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
     
     NSURLSessionDataTask *tasks = [self.sendSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (error) {
+//            NSLog(@"localizedDescription1-->%@",error.localizedDescription);
             failure ? failure((int)error) : nil;
         }else {
+            
+//            NSLog(@">>>>>>expectedContentLength%@",[NSString stringWithFormat:@"%lld",response.expectedContentLength]);
+//            NSMutableDictionary *jsonMutableDic = [NSMutableDictionary dictionaryWithCapacity:0];
             if ([@"-1" isEqualToString:[NSString stringWithFormat:@"%lld",response.expectedContentLength]]) {
                 NSMutableArray *allJsonArr = [NSMutableArray arrayWithCapacity:0];
                 
@@ -185,11 +191,14 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
                     mutDic2[@"mac"] = meshNodeMac;
                     [allJsonArr addObject:mutDic2];
                 }
+//                jsonMutableDic[@"result"] = allJsonArr;
+//                NSLog(@"%@",jsonMutableDic);
                 success ? success(allJsonArr) : nil;
             }else {
                 NSMutableArray *allJsonArr = [NSMutableArray arrayWithCapacity:0];
                 NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil];
                 [allJsonArr addObject:jsonDict];
+//                jsonMutableDic[@"result"] = allJsonArr;
                 success ? success(allJsonArr) : nil;
             }
         }
@@ -302,7 +311,7 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
             //响应头信息
             NSHTTPURLResponse *res = (NSHTTPURLResponse *)response;
             NSDictionary *headerDic = res.allHeaderFields;
-            NSLog(@"allHeaderFields ===> %@ Mesh-Node-Mac ===> %@",headerDic,[headerDic objectForKey:@"Mesh-Node-Mac"]);
+//            NSLog(@"allHeaderFields ===> %@ Mesh-Node-Mac ===> %@",headerDic,[headerDic objectForKey:@"Mesh-Node-Mac"]);
             self.meshNodeMac = [headerDic objectForKey:@"Mesh-Node-Mac"];
             
             NSArray *result = [self testByte:data];
@@ -317,17 +326,15 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
 
 - (NSArray *)testByte:(NSData *)data {
     Byte *testByte = (Byte *)[data bytes];
-    NSLog(@"testByte===>%s",testByte);
     NSString *hexStr=@"";
     for (int i = 0; i < [data length]; i++) {
-        NSLog(@"%d", testByte[i]);
         NSString *newHexStr = [NSString stringWithFormat:@"%x",testByte[i]&0xff]; ///16进制数
         if([newHexStr length]==1)
             hexStr = [NSString stringWithFormat:@"%@0%@",hexStr,newHexStr];
         else
             hexStr = [NSString stringWithFormat:@"%@%@",hexStr,newHexStr];
     }
-    NSLog(@"bytes 的16进制数为:%@",hexStr);
+//    NSLog(@"bytes 的16进制数为:%@",hexStr);
     
     BOOL readSnifferLen = YES;
     int snifferLen = -1;
@@ -358,7 +365,7 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
         if (snifferBytes.length < snifferLen - 1 ) {
             continue;
         }
-        NSLog(@"%lu,%@,%lu",sizeof(snifferBytes),snifferBytes,(unsigned long)snifferBytes.length);
+//        NSLog(@"%lu,%@,%lu",sizeof(snifferBytes),snifferBytes,(unsigned long)snifferBytes.length);
         ESPSniffer *espSniffer = [self getSnifferWithData:snifferBytes];
         
         NSDate *dateNow = [NSDate date];
@@ -386,14 +393,13 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
     Byte *testByte = (Byte *)[SnifferData bytes];
     NSString *contentStr=@"";
     for (int i = 0; i < [SnifferData length]; i++) {
-        NSLog(@"%d", testByte[i]);
         NSString *newHexStr = [NSString stringWithFormat:@"%x",testByte[i]&0xff]; ///16进制数
         if([newHexStr length]==1)
             contentStr = [NSString stringWithFormat:@"%@0%@",contentStr,newHexStr];
         else
             contentStr = [NSString stringWithFormat:@"%@%@",contentStr,newHexStr];
     }
-    NSLog(@"SnifferData 的16进制数为:%@",contentStr);
+//    NSLog(@"SnifferData 的16进制数为:%@",contentStr);
     
     int contentLength = -1;
     int contentType = -1;
@@ -418,7 +424,7 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
         if (snifferContentData.length < contentLength - 1 ) {
             continue;
         }
-        NSLog(@"%lu,%@,%lu",sizeof(snifferContentData),snifferContentData,(unsigned long)snifferContentData.length);
+//        NSLog(@"%lu,%@,%lu",sizeof(snifferContentData),snifferContentData,(unsigned long)snifferContentData.length);
         
         Byte *espByte = (Byte *)[snifferContentData bytes];
         int rssiCount;

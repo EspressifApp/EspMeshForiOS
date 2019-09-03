@@ -7,6 +7,7 @@
 //
 
 #import "ESPBLEHelper.h"
+#import "ESPMeshManager.h"
 #define BleFilterName @"light"
 #define ValidDict(f) (f!=nil && [f isKindOfClass:[NSDictionary class]])
 @implementation ESPBLEHelper
@@ -62,23 +63,24 @@
     
     __weak typeof(self) weakSelf = self;
     [baby setBlockOnCentralManagerDidUpdateState:^(CBCentralManager *central) {
+        [weakSelf.delegate bleUpdateStatusBlock:central];
         if (@available(iOS 10.0, *)) {
             if (central.state != CBManagerStatePoweredOn) {
                 if (weakSelf.failBlock) {
                     weakSelf.failBlock(1);
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@"false"}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@false}];
             }else if (central.state != CBManagerStatePoweredOff) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@"true"}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@true}];
             }
         }else {
             if (central.state != CBCentralManagerStatePoweredOn) {
                 if (weakSelf.failBlock) {
                     weakSelf.failBlock(1);
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@"false"}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@false}];
             }else if (central.state != CBCentralManagerStatePoweredOff) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@"true"}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@true}];
             }
         }
     }];

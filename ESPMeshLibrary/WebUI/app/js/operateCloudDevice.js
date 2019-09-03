@@ -1,9 +1,9 @@
-define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/colorPicker", "../js/colorCloudPicker" ],
-    function(v, MINT, Util, operateDevice, colorPicker, colorCloudPicker) {
+define(["vue","MINT", "Util", "txt!../../pages/operateCloudDevice.html", "../js/colorCloudPicker" ],
+    function(v, MINT, Util, operateCloudDevice, colorCloudPicker) {
 
-    var OperateDevice = v.extend({
+    var OperateCloudDevice = v.extend({
 
-        template: operateDevice,
+        template: operateCloudDevice,
         props: {
             colorId: {
                 type: String
@@ -23,7 +23,6 @@ define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/color
                 addFlag: false,
                 deviceMacs: "",
                 name: "",
-                isCloud: false,
                 operateType: RECENT_TYPE_DEVICE,
                 device: ""
             }
@@ -35,32 +34,27 @@ define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/color
             show: function() {
                 var self = this;
                 window.onBackPressed = this.hide;
-                self.device = self.$store.state.deviceInfo;
-                self.name = self.device.name;
-                if (!self.$parent.isDevice) {
-                    self.deviceMacs = self.device.macs;
-                    self.operateType = "";
-                } else {
-                    self.operateType = RECENT_TYPE_DEVICE;
-                    self.deviceMacs = [self.device.mac];
-                }
-                self.addFlag = true;
+                self.device = self.$store.state.deviceCloudInfo;
+                console.log(JSON.stringify(self.$store.state.deviceCloudInfo));
+                self.deviceMacs = [self.device.iotId];
+                self.name = self.device.deviceName;
+                console.log();
                 setTimeout(function () {
-                    self.$refs.color.show()
+                    self.$refs.colorCloud.show()
                 })
+                self.addFlag = true;
             },
             hide: function () {
                 this.addFlag = false;
                 this.$store.commit("setShowScanBle", true);
-                this.$emit("operateShow");
+                this.$emit("operateCloudShow");
             },
         },
         components: {
-            "v-color": colorPicker,
             "v-colorCloud": colorCloudPicker
         }
 
     });
 
-    return OperateDevice;
+    return OperateCloudDevice;
 });

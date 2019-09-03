@@ -185,18 +185,40 @@ define(["vue", "MINT", "Util", "txt!../../pages/writing.html"],
             },
             methods:{
                 show: function() {
-                    this.writingFlag = true;
-                    window.onAddQueueTask = this.onAddQueueTask;
-                    this.currentWrite = -1;
-                    this.timerNum = 0;
-                    this.clearWriting(true);
-                    this.operateEvent();
+                    var self = this;
+                    self.writingFlag = true;
+                    window.onAddQueueTask = self.onAddQueueTask;
+                    window.onGetTsfTime = self.onGetTsfTime;
+                    self.currentWrite = -1;
+                    self.timerNum = 0;
+                    self.clearWriting(true);
+                    self.operateEvent();
+                    MINT.Indicator.open();
+                    setTimeout(function() {
+                        self.getTsfTime();
+                        self.currentRgb = "#ff0000";
+                    })
+                },
+                getTsfTime: function() {
+                    var self = this;
+                    var deviceList = self.$store.state.deviceList, rootMac = "";
+                    $.each(deviceList, function(i, item) {
+                        if (item.layer == 1) {
+                            rootMac = item.mac;
+                            return false;
+                        }
+                    })
+                    var data = '{"' + MESH_MAC + '": "' + rootMac +
+                            '","' + MESH_REQUEST + '": "' + GET_TSF_TIME + '"' +
+                            ',"callback": "onGetTsfTime"}}';
+                    espmesh.requestDevice(data);
                 },
                 hideTable: function () {
                     this.writingFlag = false;
                     this.$store.commit("setShowScanBle", true);
                     this.$store.commit("setShowLoading", true);
                     this.clearTimerId(true);
+                    MINT.Indicator.close();
                     espmesh.closeDeviceLongSocket(this.$store.state.deviceIp);
                     this.$emit("writingShow");
                 },
@@ -232,6 +254,11 @@ define(["vue", "MINT", "Util", "txt!../../pages/writing.html"],
                     })
                     this.editLightStatus(macs, this.currentRgb);
                 },
+                writeWord: function(list, num, flag) {
+                    var self = this;
+                    self.clearTimerId(true);
+                    self.writeColor(list, num, flag);
+                },
                 writeColor: function(list, num, flag) {
                     var self = this;
                     self.currentWrite = num;
@@ -260,7 +287,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/writing.html"],
                 cyclePositiveFun: function() {
                     var self = this;
                     var list = this.cycleList;
-                    console.log("cyclePositiveFun");
                     self.clearTimerId(true);
                     self.marqueeId = setTimeout(function() {
                         var mac = list[self.timerNum];
@@ -276,7 +302,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/writing.html"],
                             self.editLightStatus([mac], self.currentRgb)
                             self.cyclePositiveFun();
                         }
-                    }, 200);
+                    }, 100);
                 },
                 cycleReverseFun: function() {
                     var self = this;
@@ -317,7 +343,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/writing.html"],
                 writeCycle: function(num) {
                     var self = this;
                     self.currentWrite = num;
-                    self.clearTimerId(false);
+                    self.clearTimerId(true);
                     var number = 1;
                     self.writeId = setInterval(function() {
                         if (number == 1) {
@@ -437,8 +463,13 @@ define(["vue", "MINT", "Util", "txt!../../pages/writing.html"],
                     }
                     var data = '{"macs": ' + JSON.stringify(macs) +
                         ',"host": "'+self.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' +MESH_REQUEST + '": "' + SET_STATUS + '",' +
-                        '"characteristics":' + JSON.stringify(meshs) + '}';
-                    console.log(data);
+                        '"characteristics":' + JSON.stringify(meshs);
+                    if (!Util._isEmpty(self.$store.state.tsfTime) && self.$store.state.tsfTime != 0) {
+                        var tsfTime = (new Date().getTime()  * 1000) - self.$store.state.tsfTime +
+                                            (self.$store.state.delayTime) * 1000;
+                        data += ',"tsf_time": "'+ tsfTime +'"';
+                    }
+                    data += '}';
                     espmesh.addQueueTask(JSON.stringify({"method":"requestDeviceLongSocket","argument": data}));
                 },
                 editLightStatus: function (macs, color) {
@@ -451,14 +482,29 @@ define(["vue", "MINT", "Util", "txt!../../pages/writing.html"],
                     }
                     var data = '{"macs": ' + JSON.stringify(macs) +
                         ',"host": "'+self.$store.state.deviceIp+'","'+NO_RESPONSE+'": true,"' +MESH_REQUEST + '": "' + SET_STATUS + '",' +
-                        '"characteristics":' + JSON.stringify(meshs) + '}';
+                        '"characteristics":' + JSON.stringify(meshs) ;
+                    console.log(self.$store.state.tsfTime);
+                    if (!Util._isEmpty(self.$store.state.tsfTime) && self.$store.state.tsfTime != 0) {
+                        var tsfTime = (new Date().getTime()  * 1000) - self.$store.state.tsfTime +
+                                            (self.$store.state.delayTime) * 1000;
+                        data += ',"tsf_time": "'+ tsfTime +'"';
+                    }
+                    data += '}';
                     console.log(data);
                     if (macs.length > 0) {
                         espmesh.addQueueTask(JSON.stringify({"method":"requestDeviceLongSocket","argument": data}));
                     }
                 },
                 onAddQueueTask: function() {
-                }
+                },
+                onGetTsfTime: function(res) {
+                    MINT.Indicator.close();
+                    console.log(res);
+                    if (!Util._isEmpty(res) && res != "{}") {
+                        res = JSON.parse(res);
+                        this.$store.commit("setTsfTime", new Date().getTime() * 1000 - parseInt(res.result.tsf_time));
+                    }
+                },
             },
             created: function () {
 

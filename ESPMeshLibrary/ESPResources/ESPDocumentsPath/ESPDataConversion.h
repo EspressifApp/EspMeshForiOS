@@ -8,11 +8,22 @@
 
 #import <Foundation/Foundation.h>
 #import "EspDevice.h"
+#import "ESPMeshManager.h"
+#import "ESPHomeService.h"
+#import "ESPDocumentsPath.h"
+#import "ESPUploadHandleTool.h"
+#import "ESPSniffer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ESPDataConversion : NSObject
 
+typedef void(^scanDeviceTopoBlock)(NSArray *resultArr);
+typedef void(^sendDeviceSnifferBlock)(NSArray *snifferResultArr);
+typedef void(^sendDeviceStatusBlock)(NSDictionary *statusResultDic);
+
+// 判空
++ (BOOL)isNull:(NSObject *)object;
 //JSON字符串转化为对象
 + (id)objectFromJsonString:(NSString *)jsonString;
 //字典转json字符串方法
@@ -68,6 +79,55 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (NSMutableDictionary *)deviceDetailData:(NSDictionary *)responDic withEspDevice:(EspDevice *)newDevice;
 
+/**
+ 获取设备Topo结构
+
+ @param scanTopoArr 成功结果回调
+ @param failure 失败结果回调
+ */
++ (void)scanDeviceTopo:(scanDeviceTopoBlock)scanTopoArr andFailure:(void(^)(int fail))failure;
+
+/**
+ 下载设备升级文件
+
+ @param downloadSuccess 成功回调
+ @param failure 失败回调
+ */
++ (void)downloadDeviceOTAFiles:(void(^)(NSString *successMsg))downloadSuccess andFailure:(void(^)(int fail))failure;
+
+/**
+ 上报设备sniffer变化信息
+
+ @param mac 设备Mac地址
+ @param snifferSuccess 成功回调
+ @param failure 失败回调
+ */
++ (void)sendDeviceSnifferInfo:(NSString *)mac withSnifferSuccess:(sendDeviceSnifferBlock)snifferSuccess andFailure:(void(^)(int fail))failure;
+
+/**
+ 设备状态变化上报
+
+ @param msgDic 设备信息
+ @param statusSuccess 设备上报成功回调
+ @param failure 设备上报失败回调
+ */
++ (void)sendDevicesStatusChanged:(NSDictionary *)msgDic withDeviceStatusSuccess:(sendDeviceStatusBlock)statusSuccess andFailure:(void(^)(int fail))failure;
+
+/**
+ 设备上线下线变化上报
+
+ @param msgDic 设备信息
+ @param statusSuccess 设备上报成功回调
+ @param failure 设备上报失败回调
+ */
++ (void)sendDevicesFoundOrLost:(NSDictionary *)msgDic withDeviceStatusSuccess:(sendDeviceStatusBlock)statusSuccess andFailure:(void(^)(int fail))failure;
+
+/**
+ 发送Wi-Fi状态
+
+ @param wifiSuccess Wi-Fi状态回调
+ */
++ (void)sendAPPWifiStatus:(void(^)(NSString *message))wifiSuccess;
 @end
 
 NS_ASSUME_NONNULL_END

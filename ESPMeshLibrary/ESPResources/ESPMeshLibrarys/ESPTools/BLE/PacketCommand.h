@@ -59,7 +59,7 @@ typedef enum  {
     Authentication_SoftAP_DataSubType=0x7,
     Channel_SoftAP_DataSubType=0x8,
     Username_DataSubType=0x9,
-    CA_Certification_DataSubType=0xa,
+    MDF_CUSTOM_DATA=0xa,
     Client_Certification_DataSubType=0xb,
     Server_Certification_DataSubType=0xc,
     Client_PrivateKey_DataSubType=0xd,
@@ -67,6 +67,7 @@ typedef enum  {
     Wifi_Connection_state_Report_DataSubType=0xf,
     Version_DataSubType=0x10,
     Error_DataSubType=0x12,
+    CUSTOM_DATA=0x13,
 } DataSubType;
 
 //包控制域，1个字节，每个bit表示不同的含义
@@ -142,5 +143,17 @@ typedef enum  {
 +(NSData *)convertHexStrToData:(NSString *)str;
 //
 + (NSString *)convertDataToHexStr:(NSData *)data;
+
+/**
+ *
+ * @brief         This function is called to send custom data
+ * @param sequence  :  current sequence
+ * @param flag      :  Whether the encryption
+ * @param Isencrypt :  use encrypt or not
+ * @param keydata   :  Secret key
+ * @return          data
+ *
+ */
++(NSMutableData *)SendCustomData:(NSData *)custom_data Sequence:(uint8_t)sequence Frag:(BOOL)flag Encrypt:(BOOL)Isencrypt TotalLength:(uint16_t)totallength WithKeyData:(NSData *)keydata;
 
 @end

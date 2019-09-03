@@ -11,6 +11,8 @@
 #import "ESPNewWebViewController.h"
 #import "ESPFBYWebViewController.h"
 
+#import "ESPAliyunSDKInit.h"
+
 
 @interface AppDelegate ()<UIApplicationDelegate>
 
@@ -23,11 +25,14 @@
     //不能删，否则，后面回掉的蓝牙状态不准确
     NSLog(@"初始化蓝牙状态：%ld", (long)[[BabyBluetooth shareBabyBluetooth] centralManager].state);
     [IQKeyboardManager sharedManager].enable = true;
+    // 阿里云SDK初始化
+//    ESPAliyunSDKInit *HandleTool = [[ESPAliyunSDKInit alloc]init];
+//    [HandleTool LongLinksHandleToolInit];
     
     //加载方法重构页面
     UINavigationController *navigationController = [[UINavigationController alloc]initWithRootViewController:[ESPNewWebViewController new]];
     self.window.rootViewController = navigationController;
-    navigationController.navigationBarHidden = YES;
+//    navigationController.navigationBarHidden = YES;
     self.window.backgroundColor = [UIColor colorWithRed:62/255.0 green:194/255.0 blue:252/255.0 alpha:1];
     [self.window makeKeyAndVisible];
     

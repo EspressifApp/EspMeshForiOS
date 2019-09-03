@@ -77,19 +77,21 @@
 
 -(void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContex
 {
+    @synchronized (self) {
         NSString *dataStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-//        NSLog(@"dataStr--->%@",dataStr);
+        NSLog(@"dataStr--->%@",dataStr);
+        
         if ([dataStr.lowercaseString containsString:@"mac"]&&[dataStr.lowercaseString containsString:@"\r\n"]) {
             NSArray* dataArr=[dataStr componentsSeparatedByString:@"\r\n"];
             NSString* newflag=[dataArr[1] componentsSeparatedByString:@"="][1];
             NSString* mac=[dataArr[0] componentsSeparatedByString:@"="][1];
             NSString* type=[dataArr[2] componentsSeparatedByString:@"="][1];
-            if (![newflag isEqualToString:curFlag]) {
+            if (![newflag isEqualToString:[NSString stringWithFormat:@"%@",curFlag]]) {
                 curFlag=newflag;
                 _successBlock(type,mac);
             }
         }
-
+    }
 }
 
 @end

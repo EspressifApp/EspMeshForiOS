@@ -51,11 +51,13 @@ require(["IScroll", "jQuery", "FastClick", "vue", "vueRouter", "MINT", "Util", "
     var store = new Vuex.Store({
         state: {
             deviceList: [],
+            aliDeviceList: [],
             groupList: [],
             roomList: [],
             mixList: [],
             deviceInfo: "",
-            userName: "",
+            deviceCloudInfo: "",
+            userInfo: "",
             searchName:"",
             scanDeviceList: [],
             conScanDeviceList: [],
@@ -71,10 +73,14 @@ require(["IScroll", "jQuery", "FastClick", "vue", "vueRouter", "MINT", "Util", "
             isNewVersion: false,
             delayTime: 0,
             tsfTime: 0,
+            isLogin: false,
         },
         mutations: {
             setList: function(state, list){
                 state.deviceList = list;
+            },
+            setAliDeviceList: function(state, list){
+                state.aliDeviceList = list;
             },
             setGroupList: function(state, list){
                 state.groupList = list;
@@ -85,11 +91,14 @@ require(["IScroll", "jQuery", "FastClick", "vue", "vueRouter", "MINT", "Util", "
             setRecentList: function(state, list){
                 state.mixList = list;
             },
-            setUserName: function(state, name){
-                state.userName = name;
+            setUserInfo: function(state, name){
+                state.userInfo = name;
             },
             setDeviceInfo: function(state, info){
                 state.deviceInfo = info;
+            },
+            setDeviceCloudInfo: function(state, info){
+                state.deviceCloudInfo = info;
             },
             setWifiInfo: function(state, info){
                 state.wifiInfo = info;
@@ -132,6 +141,9 @@ require(["IScroll", "jQuery", "FastClick", "vue", "vueRouter", "MINT", "Util", "
             },
             setTsfTime: function(state, info) {
                 state.tsfTime = info;
+            },
+            setIsLogin: function(state, info) {
+                state.isLogin = info;
             }
         }
     });
@@ -150,7 +162,7 @@ require(["IScroll", "jQuery", "FastClick", "vue", "vueRouter", "MINT", "Util", "
         mounted: function() {
             window.onLocaleGot = this.onLocaleGot;
             window.onGetAppInfo = this.onGetAppInfo;
-            espmesh.userGuestLogin();
+            //espmesh.userGuestLogin();
             espmesh.getLocale();
             espmesh.getAppInfo();
         },

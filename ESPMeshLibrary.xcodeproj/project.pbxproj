@@ -3,18 +3,38 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06F5E6081B2EFCAEA5BE0D44 /* libPods-ESPMeshLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E4B3FCA16651B67A0E5D6B /* libPods-ESPMeshLibrary.a */; };
 		263384DA21CA30D300E3EC90 /* ESPFBYWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 263384D921CA30D300E3EC90 /* ESPFBYWebViewController.m */; };
 		263384DD21CB7F6200E3EC90 /* ESPFBYBLEHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 263384DC21CB7F6200E3EC90 /* ESPFBYBLEHelper.m */; };
 		263384E021CB91A700E3EC90 /* ESPFBYBLEDataParsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 263384DF21CB91A700E3EC90 /* ESPFBYBLEDataParsing.m */; };
 		2646CCE3220181F30074C296 /* ESPRootScanmDNS.m in Sources */ = {isa = PBXBuildFile; fileRef = 2646CCE2220181F30074C296 /* ESPRootScanmDNS.m */; };
-		264F615422EADD4600E4E8DF /* ESPFBYDataBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F615222EADD4500E4E8DF /* ESPFBYDataBase.m */; };
-		264F615722EADD6200E4E8DF /* ESPSniffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F615622EADD6200E4E8DF /* ESPSniffer.m */; };
-		264F615B22EADDA500E4E8DF /* ESPLoadHyperlinksViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F615922EADDA400E4E8DF /* ESPLoadHyperlinksViewController.m */; };
-		264F615E22EADDD000E4E8DF /* ESPFBYBLECBPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F615C22EADDCF00E4E8DF /* ESPFBYBLECBPeripheral.m */; };
+		26497EB722EE9F670080FC15 /* ESPAliyunSDKUse.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */; };
+		26497EC022F131AE0080FC15 /* IMSLifeClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497EBE22F131AE0080FC15 /* IMSLifeClient.m */; };
+		26497ECF22F3E05C0080FC15 /* IMSOpenAccount.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */; };
+		264E417922DD71A00069139E /* bt_org_list.txt in Resources */ = {isa = PBXBuildFile; fileRef = 264E417822DD71A00069139E /* bt_org_list.txt */; };
+		264E417B22DD761C0069139E /* mac_org_list.txt in Resources */ = {isa = PBXBuildFile; fileRef = 264E417A22DD761B0069139E /* mac_org_list.txt */; };
+		264EAD0722D469EE00AD811C /* ESPSniffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 264EAD0622D469ED00AD811C /* ESPSniffer.m */; };
+		264F615122E8492900E4E8DF /* ESPFBYDataBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F615022E8492900E4E8DF /* ESPFBYDataBase.m */; };
+		264F616F22EAFF8000E4E8DF /* ALBBOpenAccountLoginLogTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616022EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogTableViewCell.xib */; };
+		264F617022EAFF8000E4E8DF /* ALBBOpenAccountOneStepRegisterVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616122EAFF7F00E4E8DF /* ALBBOpenAccountOneStepRegisterVC.xib */; };
+		264F617122EAFF8000E4E8DF /* ALBBOpenAccountUpdateMobileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616222EAFF7F00E4E8DF /* ALBBOpenAccountUpdateMobileViewController.xib */; };
+		264F617222EAFF8000E4E8DF /* ALBBOpenAccountRegisterViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616322EAFF7F00E4E8DF /* ALBBOpenAccountRegisterViewController.xib */; };
+		264F617322EAFF8000E4E8DF /* ALBBOpenAccountFindPwdViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616422EAFF7F00E4E8DF /* ALBBOpenAccountFindPwdViewController.xib */; };
+		264F617422EAFF8000E4E8DF /* ALBBOpenAccountSetPwdViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616522EAFF7F00E4E8DF /* ALBBOpenAccountSetPwdViewController.xib */; };
+		264F617522EAFF8000E4E8DF /* ALBBOpenAccountLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616622EAFF7F00E4E8DF /* ALBBOpenAccountLoginViewController.xib */; };
+		264F617622EAFF8000E4E8DF /* ALBBOpenAccountEmailRegisterViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616722EAFF7F00E4E8DF /* ALBBOpenAccountEmailRegisterViewController.xib */; };
+		264F617722EAFF8000E4E8DF /* ALBBOpenAccountCountryCodeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616822EAFF7F00E4E8DF /* ALBBOpenAccountCountryCodeViewController.xib */; };
+		264F617822EAFF8000E4E8DF /* ALBBOpenAccountLoginNoPwdViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616922EAFF7F00E4E8DF /* ALBBOpenAccountLoginNoPwdViewController.xib */; };
+		264F617922EAFF8000E4E8DF /* ALBBOpenAccountEmailFindPwdViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616A22EAFF7F00E4E8DF /* ALBBOpenAccountEmailFindPwdViewController.xib */; };
+		264F617A22EAFF8000E4E8DF /* ALBBOpenAccountLoginHistoryTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616B22EAFF7F00E4E8DF /* ALBBOpenAccountLoginHistoryTableViewCell.xib */; };
+		264F617B22EAFF8000E4E8DF /* ALBBOpenAccountPreFindPwdViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616C22EAFF7F00E4E8DF /* ALBBOpenAccountPreFindPwdViewController.xib */; };
+		264F617C22EAFF8000E4E8DF /* ALBBOpenAccountResetPwdViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616D22EAFF7F00E4E8DF /* ALBBOpenAccountResetPwdViewController.xib */; };
+		264F617D22EAFF8000E4E8DF /* ALBBOpenAccountLoginLogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616E22EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogViewController.xib */; };
+		264F618322EB006C00E4E8DF /* ESPAliyunSDKInit.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */; };
 		2656240721DF312F0020F852 /* ESPCheckAppVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2656240621DF312F0020F852 /* ESPCheckAppVersion.m */; };
 		2656240A21DF43230020F852 /* ESPDataConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2656240921DF43230020F852 /* ESPDataConversion.m */; };
 		26859DC6223F4DA3006FB122 /* NSString+URL.m in Sources */ = {isa = PBXBuildFile; fileRef = 26859DC5223F4DA3006FB122 /* NSString+URL.m */; };
@@ -24,6 +44,8 @@
 		26A25A7521D31A330028F66C /* ESPUploadHandleTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A25A7421D31A330028F66C /* ESPUploadHandleTool.m */; };
 		26A25AA121D4829B0028F66C /* ESPNewWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A25AA021D4829B0028F66C /* ESPNewWebViewController.m */; };
 		26A25AA721D5CBDF0028F66C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26A25AA621D5CBDF0028F66C /* Main.storyboard */; };
+		26B0751622817BD8001A4B7A /* ESPLoadHyperlinksViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0751522817BD8001A4B7A /* ESPLoadHyperlinksViewController.m */; };
+		26C92C70227E96C20017FA66 /* ESPFBYBLECBPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C92C6F227E96C20017FA66 /* ESPFBYBLECBPeripheral.m */; };
 		26C93A8221EF3D0900683553 /* js_rsa.c in Sources */ = {isa = PBXBuildFile; fileRef = 26C93A2A21EF3D0800683553 /* js_rsa.c */; };
 		26C93A8321EF3D0900683553 /* HGBRSAEncrytor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C93A7921EF3D0800683553 /* HGBRSAEncrytor.m */; };
 		26C93A8421EF3D0900683553 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26C93A7D21EF3D0800683553 /* libcrypto.a */; };
@@ -61,18 +83,6 @@
 		8D83CC1B20DA48F800DD632E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8D83CC1920DA48F800DD632E /* LaunchScreen.storyboard */; };
 		8D83CC1E20DA48F800DD632E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC1D20DA48F800DD632E /* main.m */; };
 		8D83CC2A20DA4E9200DD632E /* ESPMeshManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC2920DA4E9200DD632E /* ESPMeshManager.m */; };
-		8D83CC9F20DA514C00DD632E /* Documentation.html in Resources */ = {isa = PBXBuildFile; fileRef = 8D83CC8120DA514C00DD632E /* Documentation.html */; };
-		8D83CCA020DA514C00DD632E /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC8220DA514C00DD632E /* GCDAsyncUdpSocket.m */; };
-		8D83CCA120DA514C00DD632E /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC8320DA514C00DD632E /* GCDAsyncSocket.m */; };
-		8D83CCA220DA514C00DD632E /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC8920DA514C00DD632E /* DDTTYLogger.m */; };
-		8D83CCA320DA514C00DD632E /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC8C20DA514C00DD632E /* DDASLLogger.m */; };
-		8D83CCA420DA514C00DD632E /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC8F20DA514C00DD632E /* DDContextFilterLogFormatter.m */; };
-		8D83CCA520DA514C00DD632E /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC9020DA514C00DD632E /* DDDispatchQueueLogFormatter.m */; };
-		8D83CCA620DA514C00DD632E /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC9320DA514C00DD632E /* DDMultiFormatter.m */; };
-		8D83CCA720DA514C00DD632E /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8D83CC9520DA514C00DD632E /* README.txt */; };
-		8D83CCA820DA514C00DD632E /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC9620DA514C00DD632E /* DDLog.m */; };
-		8D83CCA920DA514C00DD632E /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC9920DA514C00DD632E /* DDAbstractDatabaseLogger.m */; };
-		8D83CCAA20DA514C00DD632E /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CC9A20DA514C00DD632E /* DDFileLogger.m */; };
 		8D83CCC020DA53EC00DD632E /* BabyToy.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CCB020DA53EC00DD632E /* BabyToy.m */; };
 		8D83CCC120DA53EC00DD632E /* BabyOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CCB520DA53EC00DD632E /* BabyOptions.m */; };
 		8D83CCC220DA53EC00DD632E /* BabyCallback.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D83CCB620DA53EC00DD632E /* BabyCallback.m */; };
@@ -130,6 +140,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		04AA1E37D1E04C314608E74A /* Pods-ESPMeshLibrary.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ESPMeshLibrary.release.xcconfig"; path = "Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary.release.xcconfig"; sourceTree = "<group>"; };
 		263384D821CA30D300E3EC90 /* ESPFBYWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYWebViewController.h; sourceTree = "<group>"; };
 		263384D921CA30D300E3EC90 /* ESPFBYWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYWebViewController.m; sourceTree = "<group>"; };
 		263384DB21CB7F6200E3EC90 /* ESPFBYBLEHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYBLEHelper.h; sourceTree = "<group>"; };
@@ -138,14 +149,35 @@
 		263384DF21CB91A700E3EC90 /* ESPFBYBLEDataParsing.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYBLEDataParsing.m; sourceTree = "<group>"; };
 		2646CCE1220181F30074C296 /* ESPRootScanmDNS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPRootScanmDNS.h; sourceTree = "<group>"; };
 		2646CCE2220181F30074C296 /* ESPRootScanmDNS.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPRootScanmDNS.m; sourceTree = "<group>"; };
-		264F615222EADD4500E4E8DF /* ESPFBYDataBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESPFBYDataBase.m; sourceTree = "<group>"; };
-		264F615322EADD4500E4E8DF /* ESPFBYDataBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESPFBYDataBase.h; sourceTree = "<group>"; };
-		264F615522EADD6200E4E8DF /* ESPSniffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESPSniffer.h; sourceTree = "<group>"; };
-		264F615622EADD6200E4E8DF /* ESPSniffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESPSniffer.m; sourceTree = "<group>"; };
-		264F615922EADDA400E4E8DF /* ESPLoadHyperlinksViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESPLoadHyperlinksViewController.m; sourceTree = "<group>"; };
-		264F615A22EADDA400E4E8DF /* ESPLoadHyperlinksViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESPLoadHyperlinksViewController.h; sourceTree = "<group>"; };
-		264F615C22EADDCF00E4E8DF /* ESPFBYBLECBPeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESPFBYBLECBPeripheral.m; sourceTree = "<group>"; };
-		264F615D22EADDD000E4E8DF /* ESPFBYBLECBPeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESPFBYBLECBPeripheral.h; sourceTree = "<group>"; };
+		26497EB522EE9F670080FC15 /* ESPAliyunSDKUse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPAliyunSDKUse.h; sourceTree = "<group>"; };
+		26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPAliyunSDKUse.m; sourceTree = "<group>"; };
+		26497EBE22F131AE0080FC15 /* IMSLifeClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMSLifeClient.m; sourceTree = "<group>"; };
+		26497EBF22F131AE0080FC15 /* IMSLifeClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMSLifeClient.h; sourceTree = "<group>"; };
+		26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMSOpenAccount.h; sourceTree = "<group>"; };
+		26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMSOpenAccount.m; sourceTree = "<group>"; };
+		264E417822DD71A00069139E /* bt_org_list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bt_org_list.txt; sourceTree = "<group>"; };
+		264E417A22DD761B0069139E /* mac_org_list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mac_org_list.txt; sourceTree = "<group>"; };
+		264EAD0522D469ED00AD811C /* ESPSniffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPSniffer.h; sourceTree = "<group>"; };
+		264EAD0622D469ED00AD811C /* ESPSniffer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPSniffer.m; sourceTree = "<group>"; };
+		264F614F22E8492900E4E8DF /* ESPFBYDataBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYDataBase.h; sourceTree = "<group>"; };
+		264F615022E8492900E4E8DF /* ESPFBYDataBase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYDataBase.m; sourceTree = "<group>"; };
+		264F616022EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountLoginLogTableViewCell.xib; sourceTree = "<group>"; };
+		264F616122EAFF7F00E4E8DF /* ALBBOpenAccountOneStepRegisterVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountOneStepRegisterVC.xib; sourceTree = "<group>"; };
+		264F616222EAFF7F00E4E8DF /* ALBBOpenAccountUpdateMobileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountUpdateMobileViewController.xib; sourceTree = "<group>"; };
+		264F616322EAFF7F00E4E8DF /* ALBBOpenAccountRegisterViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountRegisterViewController.xib; sourceTree = "<group>"; };
+		264F616422EAFF7F00E4E8DF /* ALBBOpenAccountFindPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountFindPwdViewController.xib; sourceTree = "<group>"; };
+		264F616522EAFF7F00E4E8DF /* ALBBOpenAccountSetPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountSetPwdViewController.xib; sourceTree = "<group>"; };
+		264F616622EAFF7F00E4E8DF /* ALBBOpenAccountLoginViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountLoginViewController.xib; sourceTree = "<group>"; };
+		264F616722EAFF7F00E4E8DF /* ALBBOpenAccountEmailRegisterViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountEmailRegisterViewController.xib; sourceTree = "<group>"; };
+		264F616822EAFF7F00E4E8DF /* ALBBOpenAccountCountryCodeViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountCountryCodeViewController.xib; sourceTree = "<group>"; };
+		264F616922EAFF7F00E4E8DF /* ALBBOpenAccountLoginNoPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountLoginNoPwdViewController.xib; sourceTree = "<group>"; };
+		264F616A22EAFF7F00E4E8DF /* ALBBOpenAccountEmailFindPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountEmailFindPwdViewController.xib; sourceTree = "<group>"; };
+		264F616B22EAFF7F00E4E8DF /* ALBBOpenAccountLoginHistoryTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountLoginHistoryTableViewCell.xib; sourceTree = "<group>"; };
+		264F616C22EAFF7F00E4E8DF /* ALBBOpenAccountPreFindPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountPreFindPwdViewController.xib; sourceTree = "<group>"; };
+		264F616D22EAFF7F00E4E8DF /* ALBBOpenAccountResetPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountResetPwdViewController.xib; sourceTree = "<group>"; };
+		264F616E22EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountLoginLogViewController.xib; sourceTree = "<group>"; };
+		264F618122EB006C00E4E8DF /* ESPAliyunSDKInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPAliyunSDKInit.h; sourceTree = "<group>"; };
+		264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPAliyunSDKInit.m; sourceTree = "<group>"; };
 		2656240521DF312F0020F852 /* ESPCheckAppVersion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPCheckAppVersion.h; sourceTree = "<group>"; };
 		2656240621DF312F0020F852 /* ESPCheckAppVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPCheckAppVersion.m; sourceTree = "<group>"; };
 		2656240821DF43230020F852 /* ESPDataConversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPDataConversion.h; sourceTree = "<group>"; };
@@ -164,6 +196,10 @@
 		26A25A9F21D4829B0028F66C /* ESPNewWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPNewWebViewController.h; sourceTree = "<group>"; };
 		26A25AA021D4829B0028F66C /* ESPNewWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPNewWebViewController.m; sourceTree = "<group>"; };
 		26A25AA621D5CBDF0028F66C /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		26B0751422817BD8001A4B7A /* ESPLoadHyperlinksViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPLoadHyperlinksViewController.h; sourceTree = "<group>"; };
+		26B0751522817BD8001A4B7A /* ESPLoadHyperlinksViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPLoadHyperlinksViewController.m; sourceTree = "<group>"; };
+		26C92C6E227E96C20017FA66 /* ESPFBYBLECBPeripheral.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYBLECBPeripheral.h; sourceTree = "<group>"; };
+		26C92C6F227E96C20017FA66 /* ESPFBYBLECBPeripheral.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYBLECBPeripheral.m; sourceTree = "<group>"; };
 		26C93A2A21EF3D0800683553 /* js_rsa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = js_rsa.c; sourceTree = "<group>"; };
 		26C93A2B21EF3D0800683553 /* js_base_64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = js_base_64.h; sourceTree = "<group>"; };
 		26C93A2E21EF3D0800683553 /* pem2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pem2.h; sourceTree = "<group>"; };
@@ -249,6 +285,7 @@
 		26C93A7F21EF3D0800683553 /* js_base_64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = js_base_64.c; sourceTree = "<group>"; };
 		26C93A8021EF3D0800683553 /* HGBRSAEncrytor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HGBRSAEncrytor.h; sourceTree = "<group>"; };
 		26C93A8121EF3D0900683553 /* JSRSA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSRSA.m; sourceTree = "<group>"; };
+		57E4B3FCA16651B67A0E5D6B /* libPods-ESPMeshLibrary.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ESPMeshLibrary.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D0AEDA320DBCACD00D3EB87 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
 		8D0AEDA520DBCACD00D3EB87 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		8D0AEDA720DBCACD00D3EB87 /* pem2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pem2.h; sourceTree = "<group>"; };
@@ -384,30 +421,6 @@
 		8D83CC1D20DA48F800DD632E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D83CC2820DA4E9200DD632E /* ESPMeshManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPMeshManager.h; sourceTree = "<group>"; };
 		8D83CC2920DA4E9200DD632E /* ESPMeshManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPMeshManager.m; sourceTree = "<group>"; };
-		8D83CC8120DA514C00DD632E /* Documentation.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = Documentation.html; sourceTree = "<group>"; };
-		8D83CC8220DA514C00DD632E /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncUdpSocket.m; sourceTree = "<group>"; };
-		8D83CC8320DA514C00DD632E /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncSocket.m; sourceTree = "<group>"; };
-		8D83CC8420DA514C00DD632E /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
-		8D83CC8520DA514C00DD632E /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncSocket.h; sourceTree = "<group>"; };
-		8D83CC8620DA514C00DD632E /* CocoaAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaAsyncSocket.h; sourceTree = "<group>"; };
-		8D83CC8920DA514C00DD632E /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
-		8D83CC8A20DA514C00DD632E /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
-		8D83CC8B20DA514C00DD632E /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
-		8D83CC8C20DA514C00DD632E /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogger.m; sourceTree = "<group>"; };
-		8D83CC8D20DA514C00DD632E /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
-		8D83CC8F20DA514C00DD632E /* DDContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDContextFilterLogFormatter.m; sourceTree = "<group>"; };
-		8D83CC9020DA514C00DD632E /* DDDispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDDispatchQueueLogFormatter.m; sourceTree = "<group>"; };
-		8D83CC9120DA514C00DD632E /* DDMultiFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDMultiFormatter.h; sourceTree = "<group>"; };
-		8D83CC9220DA514C00DD632E /* DDContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDContextFilterLogFormatter.h; sourceTree = "<group>"; };
-		8D83CC9320DA514C00DD632E /* DDMultiFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDMultiFormatter.m; sourceTree = "<group>"; };
-		8D83CC9420DA514C00DD632E /* DDDispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDDispatchQueueLogFormatter.h; sourceTree = "<group>"; };
-		8D83CC9520DA514C00DD632E /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
-		8D83CC9620DA514C00DD632E /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
-		8D83CC9720DA514C00DD632E /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
-		8D83CC9820DA514C00DD632E /* DDLog+LOGV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DDLog+LOGV.h"; sourceTree = "<group>"; };
-		8D83CC9920DA514C00DD632E /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
-		8D83CC9A20DA514C00DD632E /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
-		8D83CC9B20DA514C00DD632E /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
 		8D83CCAE20DA53EC00DD632E /* BabyRhythm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BabyRhythm.h; sourceTree = "<group>"; };
 		8D83CCAF20DA53EC00DD632E /* BabySpeaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BabySpeaker.h; sourceTree = "<group>"; };
 		8D83CCB020DA53EC00DD632E /* BabyToy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BabyToy.m; sourceTree = "<group>"; };
@@ -509,6 +522,7 @@
 		8DD92A6320F7690D00D7CA89 /* QRCodeReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QRCodeReader.m; sourceTree = "<group>"; };
 		8DD92A6920F896B100D7CA89 /* ESPUDP3232.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ESPUDP3232.m; sourceTree = "<group>"; };
 		8DD92A6A20F896B100D7CA89 /* ESPUDP3232.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ESPUDP3232.h; sourceTree = "<group>"; };
+		CC89E6905351E6233FCBAA96 /* Pods-ESPMeshLibrary.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ESPMeshLibrary.debug.xcconfig"; path = "Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -527,6 +541,7 @@
 				8D83CD1520DB859D00DD632E /* UIKit.framework in Frameworks */,
 				8D83CD1320DB854D00DD632E /* SystemConfiguration.framework in Frameworks */,
 				8D83CCDD20DA865300DD632E /* MobileCoreServices.framework in Frameworks */,
+				06F5E6081B2EFCAEA5BE0D44 /* libPods-ESPMeshLibrary.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -547,7 +562,7 @@
 		263384FA21CCEFE400E3EC90 /* ESPResources */ = {
 			isa = PBXGroup;
 			children = (
-				264F615822EADDA400E4E8DF /* ESPMeshViews */,
+				26B0751322817BC3001A4B7A /* ESPMeshViews */,
 				8D83CC2420DA4C8A00DD632E /* ESPMeshLibrarys */,
 				26A25A4821D0B2AB0028F66C /* ESPDocumentsPath */,
 				26A25A4421D0B1CC0028F66C /* ESPHomeService */,
@@ -555,22 +570,51 @@
 			path = ESPResources;
 			sourceTree = "<group>";
 		};
-		264F615822EADDA400E4E8DF /* ESPMeshViews */ = {
+		264F615F22EAFF7F00E4E8DF /* xib */ = {
 			isa = PBXGroup;
 			children = (
-				264F615922EADDA400E4E8DF /* ESPLoadHyperlinksViewController.m */,
-				264F615A22EADDA400E4E8DF /* ESPLoadHyperlinksViewController.h */,
+				264F616022EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogTableViewCell.xib */,
+				264F616122EAFF7F00E4E8DF /* ALBBOpenAccountOneStepRegisterVC.xib */,
+				264F616222EAFF7F00E4E8DF /* ALBBOpenAccountUpdateMobileViewController.xib */,
+				264F616322EAFF7F00E4E8DF /* ALBBOpenAccountRegisterViewController.xib */,
+				264F616422EAFF7F00E4E8DF /* ALBBOpenAccountFindPwdViewController.xib */,
+				264F616522EAFF7F00E4E8DF /* ALBBOpenAccountSetPwdViewController.xib */,
+				264F616622EAFF7F00E4E8DF /* ALBBOpenAccountLoginViewController.xib */,
+				264F616722EAFF7F00E4E8DF /* ALBBOpenAccountEmailRegisterViewController.xib */,
+				264F616822EAFF7F00E4E8DF /* ALBBOpenAccountCountryCodeViewController.xib */,
+				264F616922EAFF7F00E4E8DF /* ALBBOpenAccountLoginNoPwdViewController.xib */,
+				264F616A22EAFF7F00E4E8DF /* ALBBOpenAccountEmailFindPwdViewController.xib */,
+				264F616B22EAFF7F00E4E8DF /* ALBBOpenAccountLoginHistoryTableViewCell.xib */,
+				264F616C22EAFF7F00E4E8DF /* ALBBOpenAccountPreFindPwdViewController.xib */,
+				264F616D22EAFF7F00E4E8DF /* ALBBOpenAccountResetPwdViewController.xib */,
+				264F616E22EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogViewController.xib */,
 			);
-			path = ESPMeshViews;
+			name = xib;
+			path = Pods/AlicloudALBBOpenAccount/openaccount/ALBBOpenAccountUI.framework/ALBBOpenAccount.bundle/xib;
+			sourceTree = SOURCE_ROOT;
+		};
+		264F618022EB002200E4E8DF /* ESPAliyunResources */ = {
+			isa = PBXGroup;
+			children = (
+				26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */,
+				26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */,
+				26497EBF22F131AE0080FC15 /* IMSLifeClient.h */,
+				26497EBE22F131AE0080FC15 /* IMSLifeClient.m */,
+				264F618122EB006C00E4E8DF /* ESPAliyunSDKInit.h */,
+				264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */,
+				26497EB522EE9F670080FC15 /* ESPAliyunSDKUse.h */,
+				26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */,
+			);
+			path = ESPAliyunResources;
 			sourceTree = "<group>";
 		};
 		2656240421DF30CB0020F852 /* ESPFBYBLEHelper */ = {
 			isa = PBXGroup;
 			children = (
-				264F615D22EADDD000E4E8DF /* ESPFBYBLECBPeripheral.h */,
-				264F615C22EADDCF00E4E8DF /* ESPFBYBLECBPeripheral.m */,
 				263384DB21CB7F6200E3EC90 /* ESPFBYBLEHelper.h */,
 				263384DC21CB7F6200E3EC90 /* ESPFBYBLEHelper.m */,
+				26C92C6E227E96C20017FA66 /* ESPFBYBLECBPeripheral.h */,
+				26C92C6F227E96C20017FA66 /* ESPFBYBLECBPeripheral.m */,
 				263384DE21CB91A700E3EC90 /* ESPFBYBLEDataParsing.h */,
 				263384DF21CB91A700E3EC90 /* ESPFBYBLEDataParsing.m */,
 			);
@@ -603,20 +647,31 @@
 		26A25A4821D0B2AB0028F66C /* ESPDocumentsPath */ = {
 			isa = PBXGroup;
 			children = (
-				264F615322EADD4500E4E8DF /* ESPFBYDataBase.h */,
-				264F615222EADD4500E4E8DF /* ESPFBYDataBase.m */,
+				264E417A22DD761B0069139E /* mac_org_list.txt */,
+				264E417822DD71A00069139E /* bt_org_list.txt */,
 				26A25A4921D0B2C80028F66C /* ESPDocumentsPath.h */,
 				26A25A4A21D0B2C80028F66C /* ESPDocumentsPath.m */,
 				2656240521DF312F0020F852 /* ESPCheckAppVersion.h */,
 				2656240621DF312F0020F852 /* ESPCheckAppVersion.m */,
 				2656240821DF43230020F852 /* ESPDataConversion.h */,
 				2656240921DF43230020F852 /* ESPDataConversion.m */,
+				264F614F22E8492900E4E8DF /* ESPFBYDataBase.h */,
+				264F615022E8492900E4E8DF /* ESPFBYDataBase.m */,
 				26859DC4223F4DA3006FB122 /* NSString+URL.h */,
 				26859DC5223F4DA3006FB122 /* NSString+URL.m */,
-				264F615522EADD6200E4E8DF /* ESPSniffer.h */,
-				264F615622EADD6200E4E8DF /* ESPSniffer.m */,
+				264EAD0522D469ED00AD811C /* ESPSniffer.h */,
+				264EAD0622D469ED00AD811C /* ESPSniffer.m */,
 			);
 			path = ESPDocumentsPath;
+			sourceTree = "<group>";
+		};
+		26B0751322817BC3001A4B7A /* ESPMeshViews */ = {
+			isa = PBXGroup;
+			children = (
+				26B0751422817BD8001A4B7A /* ESPLoadHyperlinksViewController.h */,
+				26B0751522817BD8001A4B7A /* ESPLoadHyperlinksViewController.m */,
+			);
+			path = ESPMeshViews;
 			sourceTree = "<group>";
 		};
 		26C93A2921EF3D0800683553 /* RSA */ = {
@@ -901,7 +956,6 @@
 				8D0AEE0920DCAA6B00D3EB87 /* EspBlockingQueue.h */,
 				8D0AEE0820DCAA6B00D3EB87 /* EspBlockingQueue.m */,
 				8D37C5BF20DBAF2400C217AA /* AFNetworking */,
-				8D83CC7F20DA514C00DD632E /* CocoaAsyncSocket */,
 			);
 			path = ESPNetWork;
 			sourceTree = "<group>";
@@ -939,6 +993,7 @@
 				8D83CC0A20DA48F700DD632E /* ESPMeshLibrary */,
 				8D83CC0920DA48F700DD632E /* Products */,
 				8D83CCDB20DA865300DD632E /* Frameworks */,
+				C72DC5F624F537373B549AA2 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -953,6 +1008,8 @@
 		8D83CC0A20DA48F700DD632E /* ESPMeshLibrary */ = {
 			isa = PBXGroup;
 			children = (
+				264F618022EB002200E4E8DF /* ESPAliyunResources */,
+				264F615F22EAFF7F00E4E8DF /* xib */,
 				268F060F22278AE500B54600 /* ESPAPPResources */,
 				26A25A4C21D1E79B0028F66C /* ESPMeshLibrary.entitlements */,
 				263384FA21CCEFE400E3EC90 /* ESPResources */,
@@ -992,69 +1049,6 @@
 				8D83CCDF20DB7A7B00DD632E /* ESPTools.m */,
 			);
 			path = ESPTools;
-			sourceTree = "<group>";
-		};
-		8D83CC7F20DA514C00DD632E /* CocoaAsyncSocket */ = {
-			isa = PBXGroup;
-			children = (
-				8D83CC8020DA514C00DD632E /* GCD */,
-				8D83CC8620DA514C00DD632E /* CocoaAsyncSocket.h */,
-				8D83CC8720DA514C00DD632E /* Vendor */,
-			);
-			path = CocoaAsyncSocket;
-			sourceTree = "<group>";
-		};
-		8D83CC8020DA514C00DD632E /* GCD */ = {
-			isa = PBXGroup;
-			children = (
-				8D83CC8120DA514C00DD632E /* Documentation.html */,
-				8D83CC8220DA514C00DD632E /* GCDAsyncUdpSocket.m */,
-				8D83CC8320DA514C00DD632E /* GCDAsyncSocket.m */,
-				8D83CC8420DA514C00DD632E /* GCDAsyncUdpSocket.h */,
-				8D83CC8520DA514C00DD632E /* GCDAsyncSocket.h */,
-			);
-			path = GCD;
-			sourceTree = "<group>";
-		};
-		8D83CC8720DA514C00DD632E /* Vendor */ = {
-			isa = PBXGroup;
-			children = (
-				8D83CC8820DA514C00DD632E /* CocoaLumberjack */,
-			);
-			path = Vendor;
-			sourceTree = "<group>";
-		};
-		8D83CC8820DA514C00DD632E /* CocoaLumberjack */ = {
-			isa = PBXGroup;
-			children = (
-				8D83CC8920DA514C00DD632E /* DDTTYLogger.m */,
-				8D83CC8A20DA514C00DD632E /* DDLog.h */,
-				8D83CC8B20DA514C00DD632E /* DDAbstractDatabaseLogger.h */,
-				8D83CC8C20DA514C00DD632E /* DDASLLogger.m */,
-				8D83CC8D20DA514C00DD632E /* DDFileLogger.h */,
-				8D83CC8E20DA514C00DD632E /* Extensions */,
-				8D83CC9620DA514C00DD632E /* DDLog.m */,
-				8D83CC9720DA514C00DD632E /* DDTTYLogger.h */,
-				8D83CC9820DA514C00DD632E /* DDLog+LOGV.h */,
-				8D83CC9920DA514C00DD632E /* DDAbstractDatabaseLogger.m */,
-				8D83CC9A20DA514C00DD632E /* DDFileLogger.m */,
-				8D83CC9B20DA514C00DD632E /* DDASLLogger.h */,
-			);
-			path = CocoaLumberjack;
-			sourceTree = "<group>";
-		};
-		8D83CC8E20DA514C00DD632E /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				8D83CC8F20DA514C00DD632E /* DDContextFilterLogFormatter.m */,
-				8D83CC9020DA514C00DD632E /* DDDispatchQueueLogFormatter.m */,
-				8D83CC9120DA514C00DD632E /* DDMultiFormatter.h */,
-				8D83CC9220DA514C00DD632E /* DDContextFilterLogFormatter.h */,
-				8D83CC9320DA514C00DD632E /* DDMultiFormatter.m */,
-				8D83CC9420DA514C00DD632E /* DDDispatchQueueLogFormatter.h */,
-				8D83CC9520DA514C00DD632E /* README.txt */,
-			);
-			path = Extensions;
 			sourceTree = "<group>";
 		};
 		8D83CCAB20DA53EB00DD632E /* BabyBluetooth */ = {
@@ -1108,6 +1102,7 @@
 				8D83CD1420DB859D00DD632E /* UIKit.framework */,
 				8D83CD1220DB854D00DD632E /* SystemConfiguration.framework */,
 				8D83CCDC20DA865300DD632E /* MobileCoreServices.framework */,
+				57E4B3FCA16651B67A0E5D6B /* libPods-ESPMeshLibrary.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1246,6 +1241,15 @@
 			path = QRCodeReaderViewController;
 			sourceTree = "<group>";
 		};
+		C72DC5F624F537373B549AA2 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				CC89E6905351E6233FCBAA96 /* Pods-ESPMeshLibrary.debug.xcconfig */,
+				04AA1E37D1E04C314608E74A /* Pods-ESPMeshLibrary.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1253,9 +1257,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8D83CC2120DA48F800DD632E /* Build configuration list for PBXNativeTarget "ESPMeshLibrary" */;
 			buildPhases = (
+				DEA40BFCF4E4700476E23868 /* [CP] Check Pods Manifest.lock */,
 				8D83CC0420DA48F700DD632E /* Sources */,
 				8D83CC0520DA48F700DD632E /* Frameworks */,
 				8D83CC0620DA48F700DD632E /* Resources */,
+				A975F1E94449B36156B906F6 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1280,6 +1286,9 @@
 						SystemCapabilities = {
 							com.apple.AccessWiFi = {
 								enabled = 1;
+							};
+							com.apple.BackgroundModes = {
+								enabled = 0;
 							};
 						};
 					};
@@ -1310,18 +1319,75 @@
 			files = (
 				8D9C131F20ECCFB60002D331 /* WebUI in Resources */,
 				26A25AA721D5CBDF0028F66C /* Main.storyboard in Resources */,
+				264E417922DD71A00069139E /* bt_org_list.txt in Resources */,
+				264F617A22EAFF8000E4E8DF /* ALBBOpenAccountLoginHistoryTableViewCell.xib in Resources */,
+				264F617922EAFF8000E4E8DF /* ALBBOpenAccountEmailFindPwdViewController.xib in Resources */,
 				8D0AEDF420DBCACE00D3EB87 /* LICENSE in Resources */,
 				8D83CC1B20DA48F800DD632E /* LaunchScreen.storyboard in Resources */,
+				264F617C22EAFF8000E4E8DF /* ALBBOpenAccountResetPwdViewController.xib in Resources */,
+				264E417B22DD761C0069139E /* mac_org_list.txt in Resources */,
+				264F617822EAFF8000E4E8DF /* ALBBOpenAccountLoginNoPwdViewController.xib in Resources */,
 				8D83CC1820DA48F800DD632E /* Assets.xcassets in Resources */,
-				8D83CC9F20DA514C00DD632E /* Documentation.html in Resources */,
-				8D83CCA720DA514C00DD632E /* README.txt in Resources */,
+				264F617622EAFF8000E4E8DF /* ALBBOpenAccountEmailRegisterViewController.xib in Resources */,
+				264F617122EAFF8000E4E8DF /* ALBBOpenAccountUpdateMobileViewController.xib in Resources */,
+				264F617722EAFF8000E4E8DF /* ALBBOpenAccountCountryCodeViewController.xib in Resources */,
+				264F617422EAFF8000E4E8DF /* ALBBOpenAccountSetPwdViewController.xib in Resources */,
+				264F617522EAFF8000E4E8DF /* ALBBOpenAccountLoginViewController.xib in Resources */,
 				8D9BBAC920E108DB0061A3B8 /* README.md in Resources */,
+				264F617D22EAFF8000E4E8DF /* ALBBOpenAccountLoginLogViewController.xib in Resources */,
 				8D9BBAC820E108DB0061A3B8 /* LICENSE.md in Resources */,
 				8D9BBAD020E108DB0061A3B8 /* IQKeyboardManager.bundle in Resources */,
+				264F616F22EAFF8000E4E8DF /* ALBBOpenAccountLoginLogTableViewCell.xib in Resources */,
+				264F617322EAFF8000E4E8DF /* ALBBOpenAccountFindPwdViewController.xib in Resources */,
+				264F617222EAFF8000E4E8DF /* ALBBOpenAccountRegisterViewController.xib in Resources */,
+				264F617022EAFF8000E4E8DF /* ALBBOpenAccountOneStepRegisterVC.xib in Resources */,
+				264F617B22EAFF8000E4E8DF /* ALBBOpenAccountPreFindPwdViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A975F1E94449B36156B906F6 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DEA40BFCF4E4700476E23868 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ESPMeshLibrary-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D83CC0420DA48F700DD632E /* Sources */ = {
@@ -1337,27 +1403,23 @@
 				8D9BBAD420E108DB0061A3B8 /* IQUITextFieldView+Additions.m in Sources */,
 				26859DC6223F4DA3006FB122 /* NSString+URL.m in Sources */,
 				8D9BBAD220E108DB0061A3B8 /* IQNSArray+Sort.m in Sources */,
-				264F615422EADD4600E4E8DF /* ESPFBYDataBase.m in Sources */,
 				8D0AEE0020DCAA0900D3EB87 /* EspHttpResponse.m in Sources */,
-				8D83CCA620DA514C00DD632E /* DDMultiFormatter.m in Sources */,
 				8D0AEE0A20DCAA6B00D3EB87 /* EspBlockingQueue.m in Sources */,
 				8DD92A6720F7690D00D7CA89 /* QRCodeReaderView.m in Sources */,
 				8D83CCD120DA567100DD632E /* ESPBLEHelper.m in Sources */,
 				8D83CD7F20DB8B2B00DD632E /* EspDevice.m in Sources */,
 				8D83CCC520DA53EC00DD632E /* BabySpeaker.m in Sources */,
 				8D9BBACE20E108DB0061A3B8 /* IQUIView+IQKeyboardToolbar.m in Sources */,
+				264F618322EB006C00E4E8DF /* ESPAliyunSDKInit.m in Sources */,
 				8DD92A6620F7690D00D7CA89 /* QRCodeReaderViewController.m in Sources */,
-				8D83CCA220DA514C00DD632E /* DDTTYLogger.m in Sources */,
-				8D83CCA520DA514C00DD632E /* DDDispatchQueueLogFormatter.m in Sources */,
 				26A25A4B21D0B2C80028F66C /* ESPDocumentsPath.m in Sources */,
-				8D83CCAA20DA514C00DD632E /* DDFileLogger.m in Sources */,
-				8D83CCA920DA514C00DD632E /* DDAbstractDatabaseLogger.m in Sources */,
 				8D9BBA9920E0E2F00061A3B8 /* EspRomQueryResult.m in Sources */,
 				26A25A4721D0B1E10028F66C /* ESPHomeService.m in Sources */,
 				8D83CC0D20DA48F700DD632E /* AppDelegate.m in Sources */,
 				8D37C5DB20DBC29300C217AA /* PacketCommand.m in Sources */,
 				8DD9271F20F48D9100D7CA89 /* FMDatabaseAdditions.m in Sources */,
 				2656240A21DF43230020F852 /* ESPDataConversion.m in Sources */,
+				26497ECF22F3E05C0080FC15 /* IMSOpenAccount.m in Sources */,
 				8D9BBAD720E108DB0061A3B8 /* IQUIViewController+Additions.m in Sources */,
 				8D0AEE0720DCAA5E00D3EB87 /* EspTextUtil.m in Sources */,
 				26C93A8321EF3D0900683553 /* HGBRSAEncrytor.m in Sources */,
@@ -1366,7 +1428,6 @@
 				8D9BBACC20E108DB0061A3B8 /* IQTitleBarButtonItem.m in Sources */,
 				8DD9272220F48D9100D7CA89 /* FMResultSet.m in Sources */,
 				8D37C5CE20DBAF2400C217AA /* AFURLResponseSerialization.m in Sources */,
-				264F615B22EADDA500E4E8DF /* ESPLoadHyperlinksViewController.m in Sources */,
 				8D0AEE0120DCAA0900D3EB87 /* EspHttpParams.m in Sources */,
 				8D37C5D020DBAF2400C217AA /* AFURLSessionManager.m in Sources */,
 				8D83CCD020DA567100DD632E /* ESPBLEIO.m in Sources */,
@@ -1379,7 +1440,6 @@
 				26C93A8721EF3D0900683553 /* JSRSA.m in Sources */,
 				8DD92A6520F7690D00D7CA89 /* QRCameraSwitchButton.m in Sources */,
 				8DD9272020F48D9100D7CA89 /* FMDatabase.m in Sources */,
-				264F615E22EADDD000E4E8DF /* ESPFBYBLECBPeripheral.m in Sources */,
 				8DD9272120F48D9100D7CA89 /* FMDatabasePool.m in Sources */,
 				26A25A7521D31A330028F66C /* ESPUploadHandleTool.m in Sources */,
 				263384DD21CB7F6200E3EC90 /* ESPFBYBLEHelper.m in Sources */,
@@ -1388,19 +1448,21 @@
 				8D83CCC220DA53EC00DD632E /* BabyCallback.m in Sources */,
 				8D5F306920E0DEDA00B9BCCD /* EspDeviceCharacteristic.m in Sources */,
 				8D83CD7C20DB8A0300DD632E /* ESPRootScanUDP.m in Sources */,
+				26B0751622817BD8001A4B7A /* ESPLoadHyperlinksViewController.m in Sources */,
 				8D9BBACD20E108DB0061A3B8 /* IQBarButtonItem.m in Sources */,
 				8D9BBA9620E0E2D00061A3B8 /* EspActionDeviceOTA.m in Sources */,
+				264F615122E8492900E4E8DF /* ESPFBYDataBase.m in Sources */,
 				8D83CCC320DA53EC00DD632E /* BabyPeripheralManager.m in Sources */,
+				26497EC022F131AE0080FC15 /* IMSLifeClient.m in Sources */,
 				8DD9272320F48D9100D7CA89 /* YTKKeyValueStore.m in Sources */,
+				264EAD0722D469EE00AD811C /* ESPSniffer.m in Sources */,
 				8D9BBAD520E108DB0061A3B8 /* IQUIScrollView+Additions.m in Sources */,
 				8D5F307520E0E04500B9BCCD /* EspConstants.m in Sources */,
+				26C92C70227E96C20017FA66 /* ESPFBYBLECBPeripheral.m in Sources */,
 				8D5F307820E0E0B700B9BCCD /* EspDeviceUtil.m in Sources */,
 				8D37C5CF20DBAF2400C217AA /* AFHTTPSessionManager.m in Sources */,
-				8D83CCA820DA514C00DD632E /* DDLog.m in Sources */,
 				2656240721DF312F0020F852 /* ESPCheckAppVersion.m in Sources */,
-				8D83CCA420DA514C00DD632E /* DDContextFilterLogFormatter.m in Sources */,
 				8D37C5D320DBAF2400C217AA /* AFSecurityPolicy.m in Sources */,
-				8D83CCA320DA514C00DD632E /* DDASLLogger.m in Sources */,
 				8DD92A6B20F896B100D7CA89 /* ESPUDP3232.m in Sources */,
 				8D9BBAD620E108DB0061A3B8 /* IQUIView+Hierarchy.m in Sources */,
 				26A25AA121D4829B0028F66C /* ESPNewWebViewController.m in Sources */,
@@ -1408,13 +1470,10 @@
 				8D5F307C20E0E12100B9BCCD /* EspJsonUtils.m in Sources */,
 				8D9BBA9C20E0E3130061A3B8 /* EspNetUtils.m in Sources */,
 				8D9BBAD120E108DB0061A3B8 /* IQKeyboardManager.m in Sources */,
-				8D83CCA020DA514C00DD632E /* GCDAsyncUdpSocket.m in Sources */,
 				8D5F306F20E0DF2200B9BCCD /* EspActionDevice.m in Sources */,
 				8D0AEDFB20DCA9F700D3EB87 /* EspHttpUtils.m in Sources */,
 				8D9BBACF20E108DB0061A3B8 /* IQPreviousNextView.m in Sources */,
-				264F615722EADD6200E4E8DF /* ESPSniffer.m in Sources */,
 				8D37C5D120DBAF2400C217AA /* AFURLRequestSerialization.m in Sources */,
-				8D83CCA120DA514C00DD632E /* GCDAsyncSocket.m in Sources */,
 				8D9BBAD820E108DB0061A3B8 /* IQKeyboardReturnKeyHandler.m in Sources */,
 				8D37C5DE20DBC2A700C217AA /* RSAObject.m in Sources */,
 				8D9BBAD320E108DB0061A3B8 /* IQUIWindow+Hierarchy.m in Sources */,
@@ -1423,6 +1482,7 @@
 				2646CCE3220181F30074C296 /* ESPRootScanmDNS.m in Sources */,
 				8D0AEDF820DBCF7A00D3EB87 /* DH_AES.m in Sources */,
 				8DD92A6820F7690D00D7CA89 /* QRCodeReader.m in Sources */,
+				26497EB722EE9F670080FC15 /* ESPAliyunSDKUse.m in Sources */,
 				268F061222278D2D00B54600 /* ESPAPPResources.m in Sources */,
 				8DD92A6420F7690D00D7CA89 /* QRToggleTorchButton.m in Sources */,
 				263384E021CB91A700E3EC90 /* ESPFBYBLEDataParsing.m in Sources */,
@@ -1560,6 +1620,7 @@
 		};
 		8D83CC2220DA48F800DD632E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CC89E6905351E6233FCBAA96 /* Pods-ESPMeshLibrary.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -1569,9 +1630,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = QWXF6GB4AV;
 				ENABLE_BITCODE = NO;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl/include/";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl/include/",
+					"$(inherited)",
+				);
 				INFOPLIST_FILE = ESPMeshLibrary/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1584,7 +1649,8 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = "$(inherited)";
+				PODS_ROOT = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.espressif.ESPMeshLibrary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1594,6 +1660,7 @@
 		};
 		8D83CC2320DA48F800DD632E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04AA1E37D1E04C314608E74A /* Pods-ESPMeshLibrary.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -1603,9 +1670,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = QWXF6GB4AV;
 				ENABLE_BITCODE = NO;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl/include/";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl/include/",
+					"$(inherited)",
+				);
 				INFOPLIST_FILE = ESPMeshLibrary/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1617,7 +1688,8 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl",
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = "$(inherited)";
+				PODS_ROOT = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.espressif.ESPMeshLibrary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

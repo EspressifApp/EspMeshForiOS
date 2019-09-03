@@ -9,7 +9,15 @@
 #import <Foundation/Foundation.h>
 #import "BabyBluetooth.h"
 #import "EspDevice.h"
+@protocol BleDelegate <NSObject>
+// 蓝牙状态
+- (void)bleUpdateStatusBlock:(CBCentralManager *)central;
+
+@end
+
 @interface ESPBLEHelper : NSObject
+
+@property (weak, nonatomic)id<BleDelegate> delegate;
 
 typedef void (^BLEScanSccessBlock)(EspDevice*device);
 typedef void (^BLEScanFailedBlock)(int code);

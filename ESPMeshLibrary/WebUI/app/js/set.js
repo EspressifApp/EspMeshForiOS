@@ -11,6 +11,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
                 isNewVersion: false,
                 time: 0,
                 rootMac: "",
+                isLogin: false,
             }
         },
         computed: {
@@ -28,12 +29,23 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
                 this.hideThis();
                 window.onCheckAppVersion = this.onCheckAppVersion;
                 window.onGetTsfTime = this.onGetTsfTime;
+                this.isLogin = this.$store.state.isLogin;
                 this.flag = true;
             },
             hide: function () {
                 this.flag = false;
                 MINT.Indicator.close();
                 this.$emit("setShow");
+            },
+            logout: function() {
+                var self = this;
+                MINT.MessageBox.confirm("退出登录后, 将无法获取到云端的设备，是否退出？", "系统提示",{
+                    confirmButtonText: self.$t('confirmBtn'), cancelButtonText: self.$t('cancelBtn')}).then(function(action) {
+                    espmesh.userLogout();
+                    self.$store.commit("setUserInfo", "");
+                    self.$store.commit("setIsLogin", false);
+                    self.isLogin = false;
+                });
             },
             showDelay: function() {
                 var self= this;

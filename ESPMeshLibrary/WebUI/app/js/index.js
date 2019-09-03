@@ -1,8 +1,8 @@
 define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./resetDevice",
-"./operateDevice", "./addGroup", "./load", "./aboutDevice", "./otaInfo", "./automation",
+"./operateDevice", "./operateCloudDevice", "./addGroup", "./load", "./aboutDevice", "./otaInfo", "./automation",
  "./ibeacon", "./scanDevice", "./remind", "./attr", "./setDevicePair", "./joinDevice", "./command",
  "./sendIP", "./blueFail", "./wifiFail", "./config", "./newVersion"],
-    function(v, MINT, Util, index, footer, resetDevice, operateDevice, addGroup, load, aboutDevice,
+    function(v, MINT, Util, index, footer, resetDevice, operateDevice, operateCloudDevice, addGroup, load, aboutDevice,
         otaInfo, automation, ibeacon, scanDevice, remind, attr, setDevicePair, joinDevice, command,
         sendIP, blueFail, wifiFail, config, newVersion) {
 
@@ -19,7 +19,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 temperatureId: "device-temperature",
                 otaDeviceId: "ota-device-id",
                 deviceList: [],
+                aliDevices: [],
+                aliDeviceList: [],
                 deviceInfo: "",
+                deviceCloudInfo: "",
                 name: "",
                 loadDesc: "",
                 infoShow: false,
@@ -50,6 +53,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 loadList: [],
                 loadMoreing: false,
                 pullLoad: false,
+                localOrCloud: false,
+                isLogin: false,
+                isCloud: false,
             }
         },
         watch: {
@@ -70,17 +76,18 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             setTimeout(function() {
                 espmesh.hideCoverImage();
                 espmesh.checkAppVersion();
+                espmesh.isAliUserLogin();
                 self.loadHWDevices();
                 self.reload();
             }, 500)
         },
         computed: {
             list: function () {
-                var self = this;
+                var self = this, deviceList = [];
                 self.deviceList = self.$store.state.deviceList;
-                if (self.deviceList.length > 0) {
+                deviceList = self.deviceList;
+                if (deviceList.length > 0) {
                     self.$refs.remind.hide();
-
                     if (self.hideTrue) {
                         self.hideLoad();
                     }
@@ -91,11 +98,12 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                         }
                     });
 
+
                     if (Util._isEmpty(self.searchName)) {
-                        self.indexList = self.sortList(self.deviceList);
+                        self.indexList = self.sortList(deviceList);
                     } else {
                         var searchList = [];
-                        $.each(self.deviceList, function(i, item) {
+                        $.each(deviceList, function(i, item) {
                             if (item.name.indexOf(self.searchName) != -1 || item.position.indexOf(self.searchName) != -1) {
                                 searchList.push(item);
                             }
@@ -128,6 +136,30 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     self.loadList = [];
                     self.$store.commit("setTsfTime", "");
                 }
+            },
+            cloudList: function() {
+                var self = this, deviceList = [], indexList = [];
+                self.aliDeviceList = self.$store.state.aliDeviceList;
+                deviceList = self.aliDeviceList;
+                var searchList = [];
+                if (Util._isEmpty(self.searchName)) {
+                    indexList = self.sortList(deviceList);
+                } else {
+                    $.each(deviceList, function (i, item) {
+                        if (item.name.indexOf(self.searchName) != -1) {
+                            searchList.push(item);
+                        }
+                    })
+                    indexList = self.sortList(searchList);
+                }
+                return indexList;
+            },
+            isLoginFun: function() {
+                this.isLogin = this.$store.state.isLogin;
+                if (this.isLogin) {
+                    espmesh.getAliyunDeviceList();
+                }
+                return this.isLogin;
             }
         },
         methods:{
@@ -166,6 +198,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 } else {
                     this.loadMoreing = true;
                 }
+            },
+            switchDevice: function(flag) {
+                this.localOrCloud = flag;
             },
             addDevice: function (event) {
                 var self = this;
@@ -428,6 +463,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     self.$store.commit("setList", []);
                     self.loadList = [];
                     espmesh.scanDevicesAsync();
+                    if (this.isLogin) {
+                        espmesh.getAliyunDeviceList();
+                    }
                 }, 50);
             },
             showUl: function () {
@@ -465,8 +503,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     tid = item.tid;
                 self.flag = false;
                 this.$store.commit("setShowScanBle", false);
+                this.isCloud = false;
                 setTimeout(function() {
-                    if (self.deviceList.length > 0) {
+                    if (self.deviceList.length > 0 && !self.pullLoad) {
                         if (tid >= MIN_LIGHT && tid <= MAX_LIGHT) {
                             self.deviceInfo = item;
                             self.$store.commit("setDeviceInfo", self.deviceInfo);
@@ -481,6 +520,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     }
                 }, 50)
             },
+
             showAbout: function () {
                 this.infoShow = false;
                 this.$store.commit("setShowScanBle", false);
@@ -659,47 +699,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 });
             },
             getColor: function (characteristics, tid) {
-                var self = this,
-                    hueValue = 0, saturation = 0, luminance = 0, status = 0, rgb = "#6b6b6b",
-                    mode = 0, temperature = 0, brightness = 0;
-                if (!Util._isEmpty(characteristics)) {
-                    $.each(characteristics, function(i, item) {
-                        if (item.cid == HUE_CID) {
-                            hueValue = item.value;
-                        }else if (item.cid == SATURATION_CID) {
-                            saturation = item.value;
-                        }else if (item.cid == VALUE_CID) {
-                            luminance = item.value;
-                        } else if (item.cid == STATUS_CID) {
-                            status = item.value;
-                        } else if (item.cid == MODE_CID) {
-                            mode = item.value;
-                        } else if (item.cid == TEMPERATURE_CID) {
-                            temperature = item.value;
-                        } else if (item.cid == BRIGHTNESS_CID) {
-                            brightness = item.value;
-                        }
-                    })
-                }
-                if (status == STATUS_ON) {
-                    if (mode == MODE_CTB) {
-                        rgb = Util.modeFun(temperature, brightness);
-                    } else {
-                        rgb = Raphael.hsb2rgb(hueValue / 360, saturation / 100, luminance / 100);
-                        var v = luminance / 100;
-                        if (v <= 0.4)  {
-                            v *= 1.2;
-                        }
-                        if(v <= 0.2) {
-                            v = 0.2;
-                        }
-                        rgb = "rgba("+Math.round(rgb.r)+", "+Math.round(rgb.g)+", "+Math.round(rgb.b)+", "+ v +")";
-                    }
-                }
-                if (tid < MIN_LIGHT || tid > MAX_LIGHT) {
-                    rgb = "#3ec2fc";
-                }
-                return rgb;
+                return Util.getColor(characteristics, tid);
             },
 
             editName: function () {
@@ -744,13 +744,15 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     }
                 });
                 var characteristics = [];
-                $.each(self.deviceInfo.characteristics, function(i, item) {
-                    if (item.cid == STATUS_CID) {
-                        deviceStatus = item.value;
-                        item.value = parseInt(status);
-                    }
-                    characteristics.push(item);
-                });
+                if (!Util._isEmpty(self.deviceInfo)) {
+                    $.each(self.deviceInfo.characteristics, function(i, item) {
+                        if (item.cid == STATUS_CID) {
+                            deviceStatus = item.value;
+                            item.value = parseInt(status);
+                        }
+                        characteristics.push(item);
+                    });
+                }
                 if (!deviceStatus == status) {
                     meshs.push({cid: STATUS_CID, value: parseInt(status)});
                     var data = '{"' + MESH_MAC + '": "' + self.deviceInfo.mac +
@@ -813,16 +815,26 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             loadTop: function() {
                 var self = this;
                 self.pullLoad = true;
-                self.deviceList = [];
-                self.loadList = [];
-                self.$store.commit("setList", self.deviceList);
+                if (!self.localOrCloud) {
+                    self.deviceList = [];
+                    self.loadList = [];
+                    self.$store.commit("setList", self.deviceList);
+                }else if(self.isLogin && self.localOrCloud) {
+                    self.aliDeviceList = [];
+                }
                 setTimeout(function() {
                     if (!self.loadShow) {
                         self.loadShow = true;
                         self.$store.commit("setShowScanBle", true);
                         self.stopBleScan();
                         self.$refs.load.hide();
-                        espmesh.scanDevicesAsync();
+                        if (!self.localOrCloud) {
+                            console.log("本地");
+                            espmesh.scanDevicesAsync();
+                        } else if(self.isLogin && self.localOrCloud) {
+                            console.log("云端");
+                            espmesh.getAliyunDeviceList();
+                        }
                     } else {
                         self.pullLoad = false;
                         self.$refs.loadmore.onTopLoaded();
@@ -869,6 +881,64 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     obj = objP;
                 }
                 return obj;
+            },
+            //云端设备操控
+            operateItemCloud: function(item) {
+                var self = this;
+                if (item.status == STATUS_ON  && !self.pullLoad) {
+                    self.isCloud = true;
+                    self.deviceCloudInfo = item;
+                    self.$store.commit("setDeviceCloudInfo", self.deviceCloudInfo);
+                    self.stopBleScan();
+                    self.$store.commit("setShowScanBle", false);
+                    setTimeout(function() {
+                        self.$refs.operateCloud.show();
+                    })
+                }
+            },
+            getAliStatus: function(status) {
+                var desc = "";
+                status = parseInt(status);
+                switch(status) {
+                    case 0: desc = "未激活"; break;
+                    case 1: desc = "在线"; break;
+                    case 3: desc = "离线"; break;
+                    case 8: desc = "禁用"; break;
+                }
+                return desc;
+            },
+            getAliColor: function(characteristics) {
+                console.log(JSON.stringify(characteristics));
+                if (!Util._isEmpty(characteristics)) {
+                    var hsv = characteristics["HSVColor"];
+                    var lightSwitch = characteristics["LightSwitch"];
+                    console.log(JSON.stringify(lightSwitch));
+                    if (lightSwitch["value"] == STATUS_ON) {
+                        console.log(Util.getDeviceRgb(hsv.value["Hue"], hsv.value["Saturation"], hsv.value["Value"]));
+                        return Util.getDeviceRgb(hsv.value["Hue"], hsv.value["Saturation"], hsv.value["Value"]);
+                    }
+
+                }
+                return "#6b6b6b";
+            },
+            getAliSwitch: function(characteristics) {
+                if(!Util._isEmpty(characteristics)) {
+                    var lightSwitch = characteristics["LightSwitch"];
+                    console.log(lightSwitch["value"]);
+                    if (lightSwitch["value"] == STATUS_ON) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            },
+            closeCloud: function(iotId, status) {
+                console.log(status);
+                espmesh.setAliDeviceProperties(JSON.stringify({"iotId":[iotId],"properties":{"LightSwitch":parseInt(status)}}));
+                this.setDeviceCloud(iotId, status);
+            },
+            setDeviceCloud: function(iotId, status) {
+                Util.setAliDeviceStatus(this, [iotId], {"LightSwitch": status})
             },
             onDelDevice: function(res) {
                 var self = this;
@@ -1140,7 +1210,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 console.log(blue);
                 if (!Util._isEmpty(blue)) {
                     blue = JSON.parse(blue);
-                    if (blue.enable || blue.enable == "true") {
+                    if (blue.enable != "false" && (blue.enable || blue.enable == "true")) {
                         blue.enable = true;
                     } else {
                         blue.enable = false;
@@ -1150,11 +1220,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 }
             },
             onScanBLE: function (devices) {
-                console.log(devices);
                 var self = this,
                     scanList = [], rssiList = [], notExist = [],
                     rssiValue = self.$store.state.rssiInfo;
-                if (!Util._isEmpty(devices) && self.$store.state.showScanBle && self.showScanDevice && !self.loadShow) {
+                if (!Util._isEmpty(devices) && self.$store.state.showScanBle && self.showScanDevice && !self.loadShow && !self.localOrCloud) {
                     var conScanDeviceList = self.$store.state.conScanDeviceList;
                     devices = JSON.parse(devices);
                     $.each(devices, function(i, item) {
@@ -1224,6 +1293,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             },
             onDeviceScanned: function(devices) {
                var self = this;
+               console.log(devices);
                self.deviceList = self.$store.state.deviceList;
                if (!Util._isEmpty(devices)) {
                    devices = JSON.parse(devices);
@@ -1309,6 +1379,84 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             },
             onAddQueueTask: function() {
             },
+            onIsAliUserLogin: function(res) {
+                 console.log(res);
+                 if (!Util._isEmpty(res) && res != "{}") {
+                     res = JSON.parse(res);
+                     this.$store.commit("setIsLogin", res.isLogin);
+                     if (res.isLogin) {
+                         espmesh.getAliUserInfo();
+                     }
+                 }
+            },
+            onGetAliUserInfo: function(res) {
+                 console.log(res);
+                 if (!Util._isEmpty(res) && res != "{}") {
+                     res = JSON.parse(res);
+                     this.$store.commit("setUserInfo", res);
+                 }
+            },
+            onGetAliyunDeviceList: function(res) {
+                 var self = this;
+                 console.log(res);
+                 if (res) {
+                     res = JSON.parse(res);
+                     if (res.code == 200) {
+                         var iotIds = [];
+                         var data = res.data;
+                         $.each(data, function(i, item) {
+                             if (iotIds.indexOf(item.iotId) == -1) {
+                                 iotIds.push(item.iotId);
+                             }
+                         });
+                         console.log(JSON.stringify(iotIds));
+                         if (iotIds.length > 0) {
+                             self.aliDevices = data;
+                             espmesh.getAliDeviceProperties(JSON.stringify(iotIds));
+                         } else {
+                            if (this.localOrCloud) {
+                                setTimeout(function() {
+                                    self.loadShow = false;
+                                    self.pullLoad = false;
+                                    self.hideLoad();
+                                    self.$refs.loadmore.onTopLoaded();
+                                }, 1000)
+                            }
+                         }
+                     } else if (res.code == 401) {
+                         espmesh.aliUserLogout();
+                         this.$store.commit("setUserInfo", "");
+                         this.$store.commit("setIsLogin", false);
+                     }
+
+                 }
+            },
+            onGetAliDeviceProperties: function (res) {
+                var self = this;
+                console.log(res);
+                if (res) {
+                    res = JSON.parse(res);
+                    $.each(self.aliDevices, function(i, item) {
+                        $.each(res, function(j, itemSub) {
+                            if (item.iotId == itemSub.iotId) {
+                                item["characteristics"] = itemSub;
+                                self.aliDevices.splice(i, 1, item);
+                            }
+                        })
+                    });
+                    console.log(JSON.stringify(self.aliDevices));
+                    this.$store.commit("setAliDeviceList", self.aliDevices);
+                }
+                if (self.localOrCloud) {
+                    self.loadShow = false;
+                    self.pullLoad = false;
+                    self.hideLoad();
+                    self.$refs.loadmore.onTopLoaded();
+                }
+            },
+            onSetAliDeviceProperties: function(res) {
+            }
+
         },
         created: function () {
             window.onDeviceScanned = this.onDeviceScanned;
@@ -1326,12 +1474,18 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             window.onBluetoothStateChanged = this.onBluetoothStateChanged;
             window.onAddQueueTask = this.onAddQueueTask;
             window.onCheckAppVersion = this.onCheckAppVersion;
+            window.onIsAliUserLogin = this.onIsAliUserLogin;
+            window.onGetAliUserInfo = this.onGetAliUserInfo;
+            window.onGetAliyunDeviceList = this.onGetAliyunDeviceList;
+            window.onGetAliDeviceProperties = this.onGetAliDeviceProperties;
+            window.onSetAliDeviceProperties = this.onSetAliDeviceProperties;
         },
         components: {
             "v-footer": footer,
             "v-resetDevice": resetDevice,
             "v-addGroup": addGroup,
             "v-operateDevice": operateDevice,
+            "v-operateCloudDevice": operateCloudDevice,
             "v-load": load,
             "v-aboutDevice": aboutDevice,
             "v-otaInfo": otaInfo,

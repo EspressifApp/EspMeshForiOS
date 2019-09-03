@@ -179,7 +179,7 @@
         
         dataArr = [UTF8txtString componentsSeparatedByString:@"\n"];
     }
-    NSLog(@"dataArr ====> %@",dataArr);
+//    NSLog(@"dataArr ====> %@",dataArr);
     return dataArr;
 }
 

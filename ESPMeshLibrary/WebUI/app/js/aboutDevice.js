@@ -47,20 +47,23 @@ define(["vue","MINT", "Util", "txt!../../pages/aboutDevice.html" ],
                     return type;
                 },
                 getStatus: function () {
-                    var state = this.deviceInfo.state,
-                        len = state.length;
-                    if (len == 0) {
-                        return this.$t('offline');
-                    } else if (len == 1) {
-                        var status = state[0];
-                        if (status == "local") {
-                            return this.$t('local');
-                        } else if (status == "cloud") {
-                            return this.$t('cloud');
+                    if (!Util._isEmpty(this.deviceInfo)) {
+                        var state = this.deviceInfo.state,
+                            len = state.length;
+                        if (len == 0) {
+                            return this.$t('offline');
+                        } else if (len == 1) {
+                            var status = state[0];
+                            if (status == "local") {
+                                return this.$t('local');
+                            } else if (status == "cloud") {
+                                return this.$t('cloud');
+                            }
+                        } else if (len == 2) {
+                            return "内网和外网";
                         }
-                    } else if (len == 2) {
-                        return "内网和外网";
                     }
+
                 },
                 getColor: function () {
                     var hueValue = 0, saturation = 0, luminance = 0, status = 0, rgb = "#6b6b6b",

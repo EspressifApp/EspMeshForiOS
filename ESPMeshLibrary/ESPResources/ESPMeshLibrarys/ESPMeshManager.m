@@ -59,9 +59,10 @@
     [[ESPBLEHelper share] cancelScan];
 }
 //开始蓝牙Wi-Fi配网
--(void)starBLEPair:(EspDevice*)device pairInfo:(NSMutableDictionary*)info timeOut:(NSInteger)timeOut callBackBlock:(BLEIOCallBackBlock)callBackBlock{
+-(void)starBLEPair:(EspDevice *)device callBackBlock:(BLEIOCallBackBlock)callBackBlock{
     [self cancelScanBLE];
-    curPairIO=[[ESPBLEIO alloc] init:device pairInfo:info timeOut:timeOut callBackBlock:callBackBlock];
+//    curPairIO=[[ESPBLEIO alloc] init:device pairInfo:info timeOut:timeOut callBackBlock:callBackBlock];
+    curPairIO = [[ESPBLEIO alloc] init:device callBackBlock:callBackBlock];
 }
 
 
@@ -69,6 +70,30 @@
     if (curPairIO) {
         [curPairIO disconnectBLE];
         curPairIO=nil;
+    }
+}
+
+- (void)sendMDFCustomDataToDevice:(NSData *)dataMessage {
+    if (curPairIO) {
+        [curPairIO sendMDFCustomData:dataMessage];
+    }
+}
+
+- (void)sendDevicesNegotiatesEncryption {
+    if (curPairIO) {
+        [curPairIO sendDeviceNegotiatesEncryption];
+    }
+}
+
+- (void)notifyDevicesToEnterEncryptionMode {
+    if (curPairIO) {
+        [curPairIO notifyDeviceToEnterEncryptionMode];
+    }
+}
+
+- (void)sendDistributionNetworkDataToDevices:(NSMutableDictionary *)info timeOut:(NSInteger)timeOut callBackBlock:(BLEIOCallBackBlock)callBackBlock {
+    if (curPairIO) {
+        [curPairIO sendDistributionNetworkDataToDevice:info timeOut:timeOut callBackBlock:callBackBlock];
     }
 }
 

@@ -55,13 +55,17 @@
 
 - (NSDictionary *)checkAppVersionNumber:(NSString *)appId
 {
-    NSURL *appUrl = [NSURL URLWithString:[NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%@",appId]];
-    id appMsg = [NSString stringWithContentsOfURL:appUrl encoding:NSUTF8StringEncoding error:nil];
-//    NSLog(@"%@",appMsg);
-    NSDictionary *appMsgDict = [self jsonStringToDictionary:appMsg];
-    NSDictionary *appResultsDict = [appMsgDict[@"results"] lastObject];
-    
-    return appResultsDict;
+    if (![appId isEqualToString:@""]) {
+        NSURL *appUrl = [NSURL URLWithString:[NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%@",appId]];
+        id appMsg = [NSString stringWithContentsOfURL:appUrl encoding:NSUTF8StringEncoding error:nil];
+        //    NSLog(@"%@",appMsg);
+        NSDictionary *appMsgDict = [self jsonStringToDictionary:appMsg];
+        NSDictionary *appResultsDict = [appMsgDict[@"results"] lastObject];
+        
+        return appResultsDict;
+    }else {
+        return nil;
+    }
 }
 
 - (BOOL)appVersionUpdate {
@@ -88,6 +92,23 @@
     }
     
     return dict;
+}
+
+- (void)gotoSystemSetting {
+    NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+    if ([[UIApplication sharedApplication] canOpenURL:url]) {
+        if (@available(iOS 10.0, *)) {
+            [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:^(BOOL success) {
+                if (success) {
+                    NSLog(@"success");
+                }else{
+                    NSLog(@"fail");
+                }
+            }];
+        } else {
+            [[UIApplication sharedApplication] openURL:url];
+        }
+    }
 }
 
 @end

@@ -21,12 +21,8 @@
 - (void)checkAppVersion;
 //APP版本更新
 - (void)appVersionUpdate:(NSString *)message;
-//用户登录信息
-- (void)userGuestLogin;
 //获取系统语言
 - (void)getLocale;
-//用户登录
-- (void)userLogin:(NSString *)message;
 //开启蓝牙扫描
 - (void)startBleScan;
 //获取topo结构
@@ -111,6 +107,31 @@
 - (void)loadTableDevices;
 - (void)removeTableDevices:(NSString *)message;
 - (void)removeAllTableDevices;
+
+//用户登录信息
+- (void)getAliUserInfo;
+//用户登出
+- (void)aliUserLogout;
+//用户是否登录
+- (void)isAliUserLogin;
+//用户登录
+- (void)aliUserLogin;
+// 获取阿里云绑定设备列表
+- (void)getAliyunDeviceList;
+// 发现本地的已配网设备，或者已配网设备、路由器发现的待配设备。发现的待配设备信息可以作为后续设备配网的入参信息
+- (void)aliStartDiscovery;
+// 停止扫描设备
+- (void)aliStopDiscovery;
+// 设备绑定
+- (void)aliDeviceBinding:(NSString *)message;
+// 设备解绑
+- (void)aliyunDeviceUnbindRequest:(NSString *)message;
+// 获取设备状态
+- (void)getAliDeviceStatus:(NSString *)message;
+// 获取设备属性
+- (void)getAliDeviceProperties:(NSString *)message;
+// 修改设备属性
+- (void)setAliDeviceProperties:(NSString *)message;
 
 @end
 

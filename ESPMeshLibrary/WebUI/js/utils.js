@@ -108,7 +108,7 @@ define(function(){
                 if (i < str.length - 1) {
                     var sub = str.substr(i, 2);
                     if (sub != "00") {
-                         arr.push(str.substr(i, 2));
+                        arr.push(str.substr(i, 2));
                     }
 
                 }
@@ -231,6 +231,52 @@ define(function(){
                 return "icon-light";
             }
         },
+        getColor: function (characteristics, tid) {
+            var self = this,
+                hueValue = 0, saturation = 0, luminance = 0, status = 0, rgb = "#6b6b6b",
+                mode = 0, temperature = 0, brightness = 0;
+            if (!self._isEmpty(characteristics)) {
+                $.each(characteristics, function(i, item) {
+                    if (item.cid == HUE_CID) {
+                        hueValue = item.value;
+                    }else if (item.cid == SATURATION_CID) {
+                        saturation = item.value;
+                    }else if (item.cid == VALUE_CID) {
+                        luminance = item.value;
+                    } else if (item.cid == STATUS_CID) {
+                        status = item.value;
+                    } else if (item.cid == MODE_CID) {
+                        mode = item.value;
+                    } else if (item.cid == TEMPERATURE_CID) {
+                        temperature = item.value;
+                    } else if (item.cid == BRIGHTNESS_CID) {
+                        brightness = item.value;
+                    }
+                })
+            }
+            if (status == STATUS_ON) {
+                if (mode == MODE_CTB) {
+                    rgb = self.modeFun(temperature, brightness);
+                } else {
+                    rgb = self.getDeviceRgb(hueValue, saturation, luminance);
+                }
+            }
+            if (tid < MIN_LIGHT || tid > MAX_LIGHT) {
+                rgb = "#3ec2fc";
+            }
+            return rgb;
+        },
+        getDeviceRgb: function(hueValue, saturation, luminance) {
+            var rgb = Raphael.hsb2rgb(hueValue / 360, saturation / 100, luminance / 100);
+            var v = luminance / 100;
+            if (v <= 0.4)  {
+                v *= 1.2;
+            }
+            if(v <= 0.2) {
+                v = 0.2;
+            }
+            return "rgba("+Math.round(rgb.r)+", "+Math.round(rgb.g)+", "+Math.round(rgb.b)+", "+ v +")";
+        },
         getBxColor: function(layer) {
             switch(parseInt(layer)) {
                 case 1: return "bx-red"; break;
@@ -249,11 +295,11 @@ define(function(){
             } else if (rssi >= -75) {
                 return "images/signal3.png"
             } else if (rssi >= -80) {
-                 return "images/signal2.png"
+                return "images/signal2.png"
             } else if (rssi >= -90) {
-                 return "images/signal1.png"
+                return "images/signal1.png"
             } else {
-                 return "images/signal0.png"
+                return "images/signal0.png"
             }
         },
         getWIFIRssiIcon: function(rssi) {
@@ -264,11 +310,11 @@ define(function(){
             } else if (rssi >= -65) {
                 return "images/signal3.png"
             } else if (rssi >= -70) {
-                 return "images/signal2.png"
+                return "images/signal2.png"
             } else if (rssi >= -75) {
-                 return "images/signal1.png"
+                return "images/signal1.png"
             } else {
-                 return "images/signal0.png"
+                return "images/signal0.png"
             }
         },
         sortBy: function(attr,rev){
@@ -330,6 +376,36 @@ define(function(){
 //                name += mac;
 //            }
             return name;
+        },
+        setAliDeviceStatus: function(self, macs, data) {
+            var that = this, changeList = [], isStatus = false;
+            $.each(self.aliDeviceList, function(i, item){
+                if (macs.indexOf(item.iotId) > -1) {
+                    var characteristics = item.characteristics;
+                    if (!that._isEmpty(data["HSVColor"])) {
+                        characteristics["HSVColor"].value = data["HSVColor"];
+                    }
+                    if (!that._isEmpty(data["LightSwitch"])) {
+                        isStatus = true;
+                        characteristics["LightSwitch"].value = data["LightSwitch"];
+                    }
+                    if (!that._isEmpty(data["ColorTemperature"])) {
+                        characteristics["ColorTemperature"].value = data["ColorTemperature"];
+                    }
+                    if (!that._isEmpty(data["Brightness"])) {
+                        characteristics["Brightness"].value = data["Brightness"];
+                    }
+                    if (!that._isEmpty(data["LightMode"])) {
+                        characteristics["LightMode"].value = data["LightMode"];
+                    }
+                    item.characteristics = characteristics;
+                }
+                changeList.push(item);
+            });
+            self.aliDeviceList = changeList;
+            console.log(changeList);
+            self.$store.commit("setAliDeviceList", self.aliDeviceList);
+            return isStatus;
         },
         isExistGroup: function(groupList, name) {
             var groupNames = [], flag = false;
@@ -399,7 +475,7 @@ define(function(){
             var flag = false;
             if ((version == 0 || (version == -1 && !this._isEmpty(name) && name.indexOf("MESH_") != -1))) {
                 if (!this._isEmpty(beacon)) {
-                    if (beacon == BEACON_MDF) {
+                    if (beacon == BEACON_MDF || beacon == BEACON_MAY) {
                         flag = true;
                     }
                 } else {
@@ -415,6 +491,10 @@ define(function(){
                 flag = true;
             }
             return flag;
+        },
+        assemblyObject: function(item, self) {
+            return {mac: item.mac, name: item.name, rssi: item.rssi, bssid: item.bssid,
+                position: self.getPairInfo(item.mac), tid: item.tid, beacon: item.beacon, only_beacon: item.only_beacon};
         },
         stringToBytes: function (str) {
             var ch, st, re = [];
@@ -573,7 +653,7 @@ define(function(){
             self._addRequestEvent(parentMac, events, deviceIp);
         },
         setModelEvent: function(name, childMacs, cid, subCid, h, s, b, flag, type, eventClass, execCid, isLong,
-            defaultValue, compare) {
+                                defaultValue, compare) {
             var self = this;
             var eventModel = "";
             if (flag) {
@@ -692,7 +772,7 @@ define(function(){
             return event;
         },
         _assemblyButtonEvent: function (name, cid, mac, subCid, type, eventClass, isLong,
-            defaultValue, compare) {
+                                        defaultValue, compare) {
             var event = {
                 "name": name,
                 "trigger_cid": cid,
