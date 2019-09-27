@@ -69,18 +69,12 @@
                 if (weakSelf.failBlock) {
                     weakSelf.failBlock(1);
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@false}];
-            }else if (central.state != CBManagerStatePoweredOff) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@true}];
             }
         }else {
             if (central.state != CBCentralManagerStatePoweredOn) {
                 if (weakSelf.failBlock) {
                     weakSelf.failBlock(1);
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@false}];
-            }else if (central.state != CBCentralManagerStatePoweredOff) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"appBleStateNotification" object:@{@"enable":@true}];
             }
         }
     }];

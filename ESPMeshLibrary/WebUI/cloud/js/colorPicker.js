@@ -1,7 +1,7 @@
-define(["vue","MINT", "Util", "txt!../../pages/colorCloudPicker.html"], function(v, MINT, Util, colorCloudPicker) {
+define(["vue","MINT", "Util", "txt!../../pages/colorPicker.html"], function(v, MINT, Util, colorPicker) {
 
-    var ColorCloudPicker = v.extend({
-        template: colorCloudPicker,
+    var ColorPicker = v.extend({
+        template: colorPicker,
         props: {
             colorId: {
                 type: String
@@ -24,8 +24,8 @@ define(["vue","MINT", "Util", "txt!../../pages/colorCloudPicker.html"], function
                 initSize: 240,
                 showColor: false,
                 pickerShow: true,
-                device: this.$store.state.deviceCloudInfo,
-                aliDeviceList: this.$store.state.aliDeviceList,
+                device: this.$store.state.deviceInfo,
+                deviceList: this.$store.state.deviceList,
                 currentHue: 360,
                 currentSaturation: 100,
                 currentLuminance: 100,
@@ -57,8 +57,8 @@ define(["vue","MINT", "Util", "txt!../../pages/colorCloudPicker.html"], function
             show: function() {
                 var self = this,
                     hueValue = 0, saturation = 0, luminance = 100, temperature = 0, brightness = 100;
-                self.aliDeviceList = self.$store.state.aliDeviceList;
-                self.device = self.$store.state.deviceCloudInfo;
+                self.deviceList = self.$store.state.deviceList;
+                self.device = self.$store.state.deviceInfo;
                 var characteristics = self.device.characteristics;
                 if (!Util._isEmpty(characteristics)) {
                     var hsv = characteristics["HSVColor"];
@@ -101,7 +101,7 @@ define(["vue","MINT", "Util", "txt!../../pages/colorCloudPicker.html"], function
                 var self = this;
                 self.currentStatus = false;
                 if (!Util._isEmpty(self.macs) && self.macs.length > 0) {
-                    $.each(self.aliDeviceList, function(i, item) {
+                    $.each(self.deviceList, function(i, item) {
                         if (self.macs.indexOf(item.iotId) > -1) {
                             var characteristics = item.characteristics;
                             var status = characteristics["LightSwitch"].value;
@@ -272,7 +272,8 @@ define(["vue","MINT", "Util", "txt!../../pages/colorCloudPicker.html"], function
             editDevice: function(data) {
                 var self = this;
                 console.log(JSON.stringify(data));
-                espmesh.setAliDeviceProperties(JSON.stringify({"iotId":this.macs,"properties":data}));
+                console.log(JSON.stringify(self.macs));
+                aliyun.setAliDeviceProperties(JSON.stringify({"iotId":self.macs,"properties":data}));
                 self.setDeviceStatus(data);
                 setTimeout(function() {
                     window.onBackPressed = self.hide;
@@ -324,5 +325,5 @@ define(["vue","MINT", "Util", "txt!../../pages/colorCloudPicker.html"], function
 
     });
 
-    return ColorCloudPicker;
+    return ColorPicker;
 });

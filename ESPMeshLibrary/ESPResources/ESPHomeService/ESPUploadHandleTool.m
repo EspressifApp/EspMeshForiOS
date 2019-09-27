@@ -42,6 +42,7 @@
     if (instacne==nil) {
         instacne=[[ESPUploadHandleTool alloc]init];
         //初始化
+        [instacne sendSessionInit];
     }
     return instacne;
 }

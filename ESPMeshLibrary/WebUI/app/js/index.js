@@ -1,8 +1,8 @@
 define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./resetDevice",
-"./operateDevice", "./operateCloudDevice", "./addGroup", "./load", "./aboutDevice", "./otaInfo", "./automation",
+"./operateDevice", "./addGroup", "./load", "./aboutDevice", "./otaInfo", "./automation",
  "./ibeacon", "./scanDevice", "./remind", "./attr", "./setDevicePair", "./joinDevice", "./command",
  "./sendIP", "./blueFail", "./wifiFail", "./config", "./newVersion"],
-    function(v, MINT, Util, index, footer, resetDevice, operateDevice, operateCloudDevice, addGroup, load, aboutDevice,
+    function(v, MINT, Util, index, footer, resetDevice, operateDevice, addGroup, load, aboutDevice,
         otaInfo, automation, ibeacon, scanDevice, remind, attr, setDevicePair, joinDevice, command,
         sendIP, blueFail, wifiFail, config, newVersion) {
 
@@ -19,10 +19,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 temperatureId: "device-temperature",
                 otaDeviceId: "ota-device-id",
                 deviceList: [],
-                aliDevices: [],
-                aliDeviceList: [],
                 deviceInfo: "",
-                deviceCloudInfo: "",
                 name: "",
                 loadDesc: "",
                 infoShow: false,
@@ -53,9 +50,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 loadList: [],
                 loadMoreing: false,
                 pullLoad: false,
-                localOrCloud: false,
-                isLogin: false,
-                isCloud: false,
             }
         },
         watch: {
@@ -76,18 +70,17 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             setTimeout(function() {
                 espmesh.hideCoverImage();
                 espmesh.checkAppVersion();
-                espmesh.isAliUserLogin();
                 self.loadHWDevices();
                 self.reload();
             }, 500)
         },
         computed: {
             list: function () {
-                var self = this, deviceList = [];
+                var self = this;
                 self.deviceList = self.$store.state.deviceList;
-                deviceList = self.deviceList;
-                if (deviceList.length > 0) {
+                if (self.deviceList.length > 0) {
                     self.$refs.remind.hide();
+
                     if (self.hideTrue) {
                         self.hideLoad();
                     }
@@ -98,12 +91,11 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                         }
                     });
 
-
                     if (Util._isEmpty(self.searchName)) {
-                        self.indexList = self.sortList(deviceList);
+                        self.indexList = self.sortList(self.deviceList);
                     } else {
                         var searchList = [];
-                        $.each(deviceList, function(i, item) {
+                        $.each(self.deviceList, function(i, item) {
                             if (item.name.indexOf(self.searchName) != -1 || item.position.indexOf(self.searchName) != -1) {
                                 searchList.push(item);
                             }
@@ -136,30 +128,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     self.loadList = [];
                     self.$store.commit("setTsfTime", "");
                 }
-            },
-            cloudList: function() {
-                var self = this, deviceList = [], indexList = [];
-                self.aliDeviceList = self.$store.state.aliDeviceList;
-                deviceList = self.aliDeviceList;
-                var searchList = [];
-                if (Util._isEmpty(self.searchName)) {
-                    indexList = self.sortList(deviceList);
-                } else {
-                    $.each(deviceList, function (i, item) {
-                        if (item.name.indexOf(self.searchName) != -1) {
-                            searchList.push(item);
-                        }
-                    })
-                    indexList = self.sortList(searchList);
-                }
-                return indexList;
-            },
-            isLoginFun: function() {
-                this.isLogin = this.$store.state.isLogin;
-                if (this.isLogin) {
-                    espmesh.getAliyunDeviceList();
-                }
-                return this.isLogin;
             }
         },
         methods:{
@@ -198,9 +166,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 } else {
                     this.loadMoreing = true;
                 }
-            },
-            switchDevice: function(flag) {
-                this.localOrCloud = flag;
             },
             addDevice: function (event) {
                 var self = this;
@@ -463,9 +428,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     self.$store.commit("setList", []);
                     self.loadList = [];
                     espmesh.scanDevicesAsync();
-                    if (this.isLogin) {
-                        espmesh.getAliyunDeviceList();
-                    }
                 }, 50);
             },
             showUl: function () {
@@ -503,9 +465,8 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     tid = item.tid;
                 self.flag = false;
                 this.$store.commit("setShowScanBle", false);
-                this.isCloud = false;
                 setTimeout(function() {
-                    if (self.deviceList.length > 0 && !self.pullLoad) {
+                    if (self.deviceList.length > 0) {
                         if (tid >= MIN_LIGHT && tid <= MAX_LIGHT) {
                             self.deviceInfo = item;
                             self.$store.commit("setDeviceInfo", self.deviceInfo);
@@ -520,7 +481,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     }
                 }, 50)
             },
-
             showAbout: function () {
                 this.infoShow = false;
                 this.$store.commit("setShowScanBle", false);
@@ -744,15 +704,13 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     }
                 });
                 var characteristics = [];
-                if (!Util._isEmpty(self.deviceInfo)) {
-                    $.each(self.deviceInfo.characteristics, function(i, item) {
-                        if (item.cid == STATUS_CID) {
-                            deviceStatus = item.value;
-                            item.value = parseInt(status);
-                        }
-                        characteristics.push(item);
-                    });
-                }
+                $.each(self.deviceInfo.characteristics, function(i, item) {
+                    if (item.cid == STATUS_CID) {
+                        deviceStatus = item.value;
+                        item.value = parseInt(status);
+                    }
+                    characteristics.push(item);
+                });
                 if (!deviceStatus == status) {
                     meshs.push({cid: STATUS_CID, value: parseInt(status)});
                     var data = '{"' + MESH_MAC + '": "' + self.deviceInfo.mac +
@@ -815,26 +773,16 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             loadTop: function() {
                 var self = this;
                 self.pullLoad = true;
-                if (!self.localOrCloud) {
-                    self.deviceList = [];
-                    self.loadList = [];
-                    self.$store.commit("setList", self.deviceList);
-                }else if(self.isLogin && self.localOrCloud) {
-                    self.aliDeviceList = [];
-                }
+                self.deviceList = [];
+                self.loadList = [];
+                self.$store.commit("setList", self.deviceList);
                 setTimeout(function() {
                     if (!self.loadShow) {
                         self.loadShow = true;
                         self.$store.commit("setShowScanBle", true);
                         self.stopBleScan();
                         self.$refs.load.hide();
-                        if (!self.localOrCloud) {
-                            console.log("本地");
-                            espmesh.scanDevicesAsync();
-                        } else if(self.isLogin && self.localOrCloud) {
-                            console.log("云端");
-                            espmesh.getAliyunDeviceList();
-                        }
+                        espmesh.scanDevicesAsync();
                     } else {
                         self.pullLoad = false;
                         self.$refs.loadmore.onTopLoaded();
@@ -881,64 +829,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                     obj = objP;
                 }
                 return obj;
-            },
-            //云端设备操控
-            operateItemCloud: function(item) {
-                var self = this;
-                if (item.status == STATUS_ON  && !self.pullLoad) {
-                    self.isCloud = true;
-                    self.deviceCloudInfo = item;
-                    self.$store.commit("setDeviceCloudInfo", self.deviceCloudInfo);
-                    self.stopBleScan();
-                    self.$store.commit("setShowScanBle", false);
-                    setTimeout(function() {
-                        self.$refs.operateCloud.show();
-                    })
-                }
-            },
-            getAliStatus: function(status) {
-                var desc = "";
-                status = parseInt(status);
-                switch(status) {
-                    case 0: desc = "未激活"; break;
-                    case 1: desc = "在线"; break;
-                    case 3: desc = "离线"; break;
-                    case 8: desc = "禁用"; break;
-                }
-                return desc;
-            },
-            getAliColor: function(characteristics) {
-                console.log(JSON.stringify(characteristics));
-                if (!Util._isEmpty(characteristics)) {
-                    var hsv = characteristics["HSVColor"];
-                    var lightSwitch = characteristics["LightSwitch"];
-                    console.log(JSON.stringify(lightSwitch));
-                    if (lightSwitch["value"] == STATUS_ON) {
-                        console.log(Util.getDeviceRgb(hsv.value["Hue"], hsv.value["Saturation"], hsv.value["Value"]));
-                        return Util.getDeviceRgb(hsv.value["Hue"], hsv.value["Saturation"], hsv.value["Value"]);
-                    }
-
-                }
-                return "#6b6b6b";
-            },
-            getAliSwitch: function(characteristics) {
-                if(!Util._isEmpty(characteristics)) {
-                    var lightSwitch = characteristics["LightSwitch"];
-                    console.log(lightSwitch["value"]);
-                    if (lightSwitch["value"] == STATUS_ON) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            },
-            closeCloud: function(iotId, status) {
-                console.log(status);
-                espmesh.setAliDeviceProperties(JSON.stringify({"iotId":[iotId],"properties":{"LightSwitch":parseInt(status)}}));
-                this.setDeviceCloud(iotId, status);
-            },
-            setDeviceCloud: function(iotId, status) {
-                Util.setAliDeviceStatus(this, [iotId], {"LightSwitch": status})
             },
             onDelDevice: function(res) {
                 var self = this;
@@ -1179,7 +1069,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 wifi = JSON.parse(wifi);
                 if (wifi.connected) {
                     self.isWifiConnect = wifi.connected;
-                    wifi.ssid = decodeURIComponent(wifi.ssid);
+                    if (wifi.encode) {
+                        wifi.ssid = Util.Base64.decode(wifi.ssid);
+                    }
+
                     if (wifi.ssid == wifiInfo.ssid) {
                         return false;
                     }
@@ -1210,7 +1103,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 console.log(blue);
                 if (!Util._isEmpty(blue)) {
                     blue = JSON.parse(blue);
-                    if (blue.enable != "false" && (blue.enable || blue.enable == "true")) {
+                    if (blue.enable || blue.enable == "true") {
                         blue.enable = true;
                     } else {
                         blue.enable = false;
@@ -1220,10 +1113,11 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 }
             },
             onScanBLE: function (devices) {
+                console.log(devices);
                 var self = this,
                     scanList = [], rssiList = [], notExist = [],
                     rssiValue = self.$store.state.rssiInfo;
-                if (!Util._isEmpty(devices) && self.$store.state.showScanBle && self.showScanDevice && !self.loadShow && !self.localOrCloud) {
+                if (!Util._isEmpty(devices) && self.$store.state.showScanBle && self.showScanDevice && !self.loadShow) {
                     var conScanDeviceList = self.$store.state.conScanDeviceList;
                     devices = JSON.parse(devices);
                     $.each(devices, function(i, item) {
@@ -1293,7 +1187,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             },
             onDeviceScanned: function(devices) {
                var self = this;
-               console.log(devices);
                self.deviceList = self.$store.state.deviceList;
                if (!Util._isEmpty(devices)) {
                    devices = JSON.parse(devices);
@@ -1379,84 +1272,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             },
             onAddQueueTask: function() {
             },
-            onIsAliUserLogin: function(res) {
-                 console.log(res);
-                 if (!Util._isEmpty(res) && res != "{}") {
-                     res = JSON.parse(res);
-                     this.$store.commit("setIsLogin", res.isLogin);
-                     if (res.isLogin) {
-                         espmesh.getAliUserInfo();
-                     }
-                 }
-            },
-            onGetAliUserInfo: function(res) {
-                 console.log(res);
-                 if (!Util._isEmpty(res) && res != "{}") {
-                     res = JSON.parse(res);
-                     this.$store.commit("setUserInfo", res);
-                 }
-            },
-            onGetAliyunDeviceList: function(res) {
-                 var self = this;
-                 console.log(res);
-                 if (res) {
-                     res = JSON.parse(res);
-                     if (res.code == 200) {
-                         var iotIds = [];
-                         var data = res.data;
-                         $.each(data, function(i, item) {
-                             if (iotIds.indexOf(item.iotId) == -1) {
-                                 iotIds.push(item.iotId);
-                             }
-                         });
-                         console.log(JSON.stringify(iotIds));
-                         if (iotIds.length > 0) {
-                             self.aliDevices = data;
-                             espmesh.getAliDeviceProperties(JSON.stringify(iotIds));
-                         } else {
-                            if (this.localOrCloud) {
-                                setTimeout(function() {
-                                    self.loadShow = false;
-                                    self.pullLoad = false;
-                                    self.hideLoad();
-                                    self.$refs.loadmore.onTopLoaded();
-                                }, 1000)
-                            }
-                         }
-                     } else if (res.code == 401) {
-                         espmesh.aliUserLogout();
-                         this.$store.commit("setUserInfo", "");
-                         this.$store.commit("setIsLogin", false);
-                     }
-
-                 }
-            },
-            onGetAliDeviceProperties: function (res) {
-                var self = this;
-                console.log(res);
-                if (res) {
-                    res = JSON.parse(res);
-                    $.each(self.aliDevices, function(i, item) {
-                        $.each(res, function(j, itemSub) {
-                            if (item.iotId == itemSub.iotId) {
-                                item["characteristics"] = itemSub;
-                                self.aliDevices.splice(i, 1, item);
-                            }
-                        })
-                    });
-                    console.log(JSON.stringify(self.aliDevices));
-                    this.$store.commit("setAliDeviceList", self.aliDevices);
-                }
-                if (self.localOrCloud) {
-                    self.loadShow = false;
-                    self.pullLoad = false;
-                    self.hideLoad();
-                    self.$refs.loadmore.onTopLoaded();
-                }
-            },
-            onSetAliDeviceProperties: function(res) {
-            }
-
         },
         created: function () {
             window.onDeviceScanned = this.onDeviceScanned;
@@ -1474,18 +1289,12 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
             window.onBluetoothStateChanged = this.onBluetoothStateChanged;
             window.onAddQueueTask = this.onAddQueueTask;
             window.onCheckAppVersion = this.onCheckAppVersion;
-            window.onIsAliUserLogin = this.onIsAliUserLogin;
-            window.onGetAliUserInfo = this.onGetAliUserInfo;
-            window.onGetAliyunDeviceList = this.onGetAliyunDeviceList;
-            window.onGetAliDeviceProperties = this.onGetAliDeviceProperties;
-            window.onSetAliDeviceProperties = this.onSetAliDeviceProperties;
         },
         components: {
             "v-footer": footer,
             "v-resetDevice": resetDevice,
             "v-addGroup": addGroup,
             "v-operateDevice": operateDevice,
-            "v-operateCloudDevice": operateCloudDevice,
             "v-load": load,
             "v-aboutDevice": aboutDevice,
             "v-otaInfo": otaInfo,

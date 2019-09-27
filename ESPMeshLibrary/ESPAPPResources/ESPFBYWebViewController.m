@@ -11,9 +11,8 @@
 #import "ESPFBYBLEHelper.h"
 #import "ESPFBYBLECBPeripheral.h"
 
-#import "ESPAliyunSDKUse.h"
-#import "ESPAliyunSDKInit.h"
-#import "ESPDataConversion.h"
+#import "ESPFBYAliViewController.h"
+#import "ESPFBYColorPickerViewController.h"
 
 #define FBYDeviceWidth ([UIScreen mainScreen].bounds.size.width)
 #define FBYDeviceHeight ([UIScreen mainScreen].bounds.size.height)
@@ -40,13 +39,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.BLECBPeripheral = [ESPFBYBLECBPeripheral shared];
     self.bleHelper = [[ESPFBYBLEHelper alloc]init];
     [self.bleHelper initBle];
-    
-    ESPAliyunSDKInit *HandleToolInit = [[ESPAliyunSDKInit alloc]init];
-    [HandleToolInit LongLinksHandleToolInit];
     
     [self showViewUI];
 }
@@ -76,7 +73,7 @@
         [self.view addSubview:bluetoothBtn];
     }
     
-    NSArray *upgradesArr = @[@"登录",@"登出",@"设备列表"];
+    NSArray *upgradesArr = @[@"阿里测试",@"AWS 测试",@"色盘"];
     for (int i = 0; i < upgradesArr.count; i ++) {
         int count = FBYDeviceWidth*i/3;
         UIButton *upgradesBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-152, (FBYDeviceWidth-2)/3, 50)];
@@ -102,6 +99,7 @@
     }else if (sender.tag == 6001) {
         [self showMessage:@"停止扫描"];
         [self.bleHelper stopScan];
+//        [[ESPAliyunSDKUse sharedClient] aliStopDiscoveryDevice];
     }else if (sender.tag == 6002) {
         self.peripheralText.text = @"";
         [self showMessage:@"清空设备"];
@@ -122,38 +120,15 @@
 
 - (void)upgradesBtn:(UIButton *)sender {
     if (sender.tag == 8000) {
-        [self aliyunLogin];
+        ESPFBYAliViewController *avc = [[ESPFBYAliViewController alloc]init];
+        [self.navigationController pushViewController:avc animated:YES];
     }else if (sender.tag == 8001) {
-        [self aliyunLogout];
+        
     }else if (sender.tag == 8002) {
-        [[ESPAliyunSDKUse sharedClient] getAliyunDeviceList:^(NSDictionary * _Nonnull resultdeviceDic) {
-            NSLog(@"resultdeviceDic:%@",resultdeviceDic);
-        }];
+        ESPFBYColorPickerViewController *pvc = [[ESPFBYColorPickerViewController alloc]init];
+        [self.navigationController pushViewController:pvc animated:YES];
     }
 }
-
-- (void)aliyunLogin {
-    [[ESPAliyunSDKUse sharedClient] aliyunPresentLogin:self andSuccess:^(ALBBOpenAccountUser * _Nonnull dic) {
-//        NSString* paramjson=[ESPDataConversion jsonConfigureFromObject:dic];
-        NSString* paramjson = [NSString stringWithFormat:@"%@",dic];
-        NSLog(@"dic --> %@, %@",dic, paramjson);
-        [self showMessage:[NSString stringWithFormat:@"登录成功后的信息:%@",dic]];
-    } andFailure:^(NSString * _Nonnull errorMsg) {
-        NSLog(@"errorMsg --> %@",errorMsg);
-        [self showMessage:errorMsg];
-    }];
-}
-
-- (void)aliyunLogout {
-    if ([[ESPAliyunSDKUse sharedClient] isAliyunLogin]) {
-        [[ESPAliyunSDKUse sharedClient] aliyunLogout];
-        [self showMessage:@"已退出登录"];
-    }else {
-        [self showMessage:@"用户未登录"];
-    }
-}
-
-
 - (void)showMessage:(NSString *)message
 {
     self.peripheralText.text = [self.peripheralText.text stringByAppendingFormat:@"%@\n",message];

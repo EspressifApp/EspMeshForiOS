@@ -31,43 +31,27 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
                 isSelectedMacs: [],
                 showFooterInfo: true,
                 systemInfo: true,
-                localOrCloud: false,
-                isLogin: this.$store.state.isLogin
             }
         },
         computed: {
             list: function () {
-                var self = this, list = [], deviceList = [];
+                var self = this, list = [];
                 if (self.addFlag) {
                     self.scanDeviceList = self.$store.state.scanDeviceList;
-                    if (this.localOrCloud) {
-                        $.each(self.scanDeviceList, function(i, item) {
-                            if (item.beacon == BEACON_MAY) {
-                                deviceList.push(item);
-                            }
-                        })
-                    } else {
-                        $.each(self.scanDeviceList, function(i, item) {
-                            if (item.beacon != BEACON_MAY) {
-                                deviceList.push(item);
-                            }
-                        })
-                    }
                     if (Util._isEmpty(self.searchReset)) {
-                        $.each(deviceList, function(i, item) {
+                        $.each(self.scanDeviceList, function(i, item) {
                             if (item.rssi >= self.rssiValue) {
                                 list.push(item);
                             }
                         });
                     } else {
-                        $.each(deviceList, function(i, item) {
+                        $.each(self.scanDeviceList, function(i, item) {
                             if ((item.name.indexOf(self.searchReset) != -1 || item.position.indexOf(self.searchReset) != -1 )
                                 && item.rssi >= self.rssiValue) {
                                 list.push(item);
                             }
                         })
                     }
-
                     if (self.showFilter) {
                         var macList = [];
                         $.each(list, function(i, item) {
@@ -131,10 +115,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
                         self.showFooterInfo = false;
                     }
                 })
-                this.isLogin = this.$store.state.isLogin;
-            },
-            switchDevice: function(flag) {
-                this.localOrCloud = flag;
             },
             showFlag: function() {
                 this.flagUl = !this.flagUl;
@@ -360,7 +340,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
                     var name = item.name;
                     if(Util.isMesh(name, item.version, item.beacon)) {
                         var flag = true,
-                            obj = Util.assemblyObject(item, self);
+                            obj = Util.assemblyObject(item, self)
                         $.each(self.scanDeviceList, function(j, itemSub) {
                             if (item.mac == itemSub.mac) {
                                 if (item.rssi >= self.rssiValue) {

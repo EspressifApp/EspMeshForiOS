@@ -1,5 +1,5 @@
-define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/colorPicker", "../js/colorCloudPicker" ],
-    function(v, MINT, Util, operateDevice, colorPicker, colorCloudPicker) {
+define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/colorPicker" ],
+    function(v, MINT, Util, operateDevice, colorPicker) {
 
     var OperateDevice = v.extend({
 
@@ -23,7 +23,6 @@ define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/color
                 addFlag: false,
                 deviceMacs: "",
                 name: "",
-                isCloud: false,
                 operateType: RECENT_TYPE_DEVICE,
                 device: ""
             }
@@ -45,7 +44,7 @@ define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/color
                     self.deviceMacs = [self.device.mac];
                 }
                 self.addFlag = true;
-                setTimeout(function () {
+                setTimeout(function() {
                     self.$refs.color.show()
                 })
             },
@@ -56,8 +55,7 @@ define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "../js/color
             },
         },
         components: {
-            "v-color": colorPicker,
-            "v-colorCloud": colorCloudPicker
+            "v-color": colorPicker
         }
 
     });

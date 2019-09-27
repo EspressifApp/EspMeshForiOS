@@ -64,7 +64,7 @@
         
         return appResultsDict;
     }else {
-        return nil;
+        return @{};
     }
 }
 

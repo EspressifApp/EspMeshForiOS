@@ -40,10 +40,6 @@
                 </div>
 
             </div>
-            <div @click="hideFlag" v-show="isLogin" class="content-tab flex flex-ac">
-                <span @click="switchDevice(false)" class="flex-1 flex flex-ac flex-jcc" :class="{'active': !localOrCloud}">本地</span>
-                <span @click="switchDevice(true)" class="flex-1 flex flex-ac flex-jcc" :class="{'active': localOrCloud}">云端</span>
-            </div>
             <div @click="hideFlag" class="content-info scan-device flex-wrapper" :id="resetId" :class="{'height': showHeight}">
                 <div class="overflow-touch">
                     <div @click="selectMac(item.mac)" v-for="item in list" class="item">

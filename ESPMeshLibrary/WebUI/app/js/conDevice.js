@@ -57,20 +57,16 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                     scanDeviceList = self.$store.state.scanDeviceList,
                     scanMacs = [], rssi = -1000, rssiMac = "", version = -1;
                 espmesh.startBleScan();
-                self.setStartTimer();
+                self.setTimer();
                 self.success = true;
                 self.title = self.$t('connetDeviceTitle');
                 self.desc = self.$t('connetDeviceDesc');
-                var beacon = false;
                 setTimeout(function () {
                     espmesh.stopBleScan();
                     if (self.rssiList.length != 0) {
                         console.log(JSON.stringify(scanDeviceList))
                         $.each(scanDeviceList, function(i, item) {
                             scanMacs.push(item.bssid);
-                            if (item.beacon == BEACON_MAY) {
-                                beacon = true;
-                            }
                         });
                         $.each(self.rssiList, function(i, item) {
                             var itemRssi = item.rssi;
@@ -85,7 +81,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                             self.setFail(self.$t('farDeviceDesc'));
                             return false;
                         }
-                        var data = {"ble_addr": rssiMac, "beacon": beacon, "ssid": self.wifiName,"password": self.password,
+                        var data = {"ble_addr": rssiMac,"ssid": self.wifiName,"password": self.password,
                             "white_list": scanMacs, "bssid": self.wifiInfo.bssid, "mesh_id": self.convert(self.meshId),
                             "version": version};
                         data = Object.assign(data, self.moreObj)
@@ -98,35 +94,19 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                 }, 5000);
 
             },
-            setStartTimer: function() {
+            setTimer: function() {
                 var self = this;
                 self.timerId = setInterval(function() {
                     console.log("aaaaa");
                     if (!self.addFlag) {
                         clearInterval(self.timerId);
-                        self.timerId = '';
                     }
                     if (self.value < 5) {
                         self.value += 1;
                     } else {
                         clearInterval(self.timerId);
-                        self.timerId = '';
                     }
                 }, 1000)
-            },
-            setEndTimer: function() {
-                var self = this;
-                self.timerId = setInterval(function() {
-                    console.log("end" + self.value);
-                    if (!self.addFlag) {
-                        clearInterval(self.timerId);
-                    }
-                    if (self.value < 99) {
-                        self.value += 1;
-                    } else {
-                        clearInterval(self.timerId);
-                    }
-                }, 500)
             },
             convert: function(bssid) {
                 var strs = bssid.split(":"), meshIds = [];
@@ -156,11 +136,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                     if (self.textList.indexOf(config.message) < 0) {
                         self.textList.push(config.message);
                     }
-                    if (config.code == 307) {
-                        self.setEndTimer();
-                        console.log(config.code);
-                        espmesh.stopConfigureBlufi();
-                    }
                     window.onConfigureProgress = self.onConfigureProgress;
                 } else if (config.code == 300) {
                     self.value = config.progress;
@@ -172,15 +147,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                     espmesh.clearBleCache();
                     self.$store.commit("setScanDeviceList", []);
                     self.count = 0;
-                    MINT.Toast({
-                        message: self.$t('connetSuccessDesc'),
-                        position: 'bottom',
-                    });
                     setTimeout(function() {
                         self.hide();
                         self.$parent.hideParent();
-                        console.log("成功");
-                    }, 3000);
+                    }, 1000);
                 } else {
                     if (config.code == -20) {
                         self.setFail(config.message);

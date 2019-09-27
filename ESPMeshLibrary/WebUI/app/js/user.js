@@ -12,12 +12,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/user.html", "../js/footer", "../
             return {
                 user: "user",
                 wifi: "",
-                userInfo: ""
             }
         },
         mounted: function() {
             this.$store.commit("setUserName", "Guest");
-            window.onAliUserLogin = this.onAliUserLogin;
         },
         computed: {
             currentWifi: function () {
@@ -28,27 +26,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/user.html", "../js/footer", "../
                 } else {
                     return wifiInfo.ssid;
                 }
+
             },
-            currentUser: function() {
-                this.userInfo = this.$store.state.userInfo;
-                return this.userInfo != "" ? this.userInfo.mobile : "未登录" ;
-            }
         },
         methods:{
-            login: function() {
-                var self = this;
-                if(self.$store.state.isLogin) {
-                    MINT.MessageBox.confirm("您的账户已登录，确定退出重新登录吗？", "系统提示",{
-                                            confirmButtonText: self.$t('confirmBtn'), cancelButtonText: self.$t('cancelBtn')}).then(function(action) {
-                        espmesh.aliUserLogout();
-                        self.$store.commit("setUserInfo", "");
-                        self.$store.commit("setIsLogin", false);
-                        espmesh.aliUserLogin();
-                    });
-                } else {
-                    espmesh.aliUserLogin();
-                }
-            },
             setFun: function () {
                 this.$refs.set.show();
             },
@@ -82,6 +63,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/user.html", "../js/footer", "../
             scanFun: function () {
                 this.$refs.scan.show();
             },
+            changeCloud: function() {
+                espmesh.mainPageLoad("cloud");
+            },
             onBackUser: function() {
                 var startTime = 0;
                 var self = this;
@@ -100,15 +84,6 @@ define(["vue", "MINT", "Util", "txt!../../pages/user.html", "../js/footer", "../
                             startTime = new Date().getTime();
                         }
                     }
-                }
-            },
-            onAliUserLogin: function(res) {
-                console.log(res);
-                if (!Util._isEmpty(res) && res != "{}") {
-                    console.log(res);
-                    res = JSON.parse(res);
-                    this.$store.commit("setUserInfo", res);
-                    this.$store.commit("setIsLogin", true);
                 }
             }
         },

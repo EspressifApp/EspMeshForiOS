@@ -1,9 +1,9 @@
-define(["vue","MINT", "Util", "txt!../../pages/operateCloudDevice.html", "../js/colorCloudPicker" ],
-    function(v, MINT, Util, operateCloudDevice, colorCloudPicker) {
+define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "./colorPicker" ],
+    function(v, MINT, Util, operateDevice, colorPicker) {
 
-    var OperateCloudDevice = v.extend({
+    var OperateDevice = v.extend({
 
-        template: operateCloudDevice,
+        template: operateDevice,
         props: {
             colorId: {
                 type: String
@@ -51,10 +51,10 @@ define(["vue","MINT", "Util", "txt!../../pages/operateCloudDevice.html", "../js/
             },
         },
         components: {
-            "v-colorCloud": colorCloudPicker
+            "v-colorCloud": colorPicker
         }
 
     });
 
-    return OperateCloudDevice;
+    return OperateDevice;
 });

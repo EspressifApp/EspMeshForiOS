@@ -21,101 +21,60 @@
             <i class="icon-search"></i>
             <input v-model="searchName" type="search" class="form-control" :placeholder="$t('search')">
         </div>
-        <div v-show="isLoginFun" class="content-tab flex flex-ac">
-            <span @click="switchDevice(false)" class="flex-1 flex flex-ac flex-jcc" :class="{'active': !localOrCloud}">本地</span>
-            <span @click="switchDevice(true)" class="flex-1 flex flex-ac flex-jcc" :class="{'active': localOrCloud}">云端</span>
-        </div>
         <div class="content-info flex-wrapper no-padding-bottom" id="device-list">
-            <div  class="overflow-touch">
+            <div class="overflow-touch">
                 <mt-loadmore :top-method="loadTop" @top-status-change="handleTopChange" ref="loadmore">
                     {{list}}
-                    <div v-if="!localOrCloud">
-                        <div v-show="!showAdd" v-infinite-scroll="loadMoreList"
-                             infinite-scroll-disabled="loadMoreing"
-                             infinite-scroll-distance="30">
-                            <div v-for="item in loadList" :id="item.mac" :key="item.mac" v-longtap="{fn: showOperate, mac: item.mac}"
-                                 @click.self="operateItem(item)" class="item item-device">
-                                <div @click.stop="operateItem(item)" :class="getBxColor(item.layer, item.tsf_time)" class="item-icon-circle">
-                                    <i :class="getIcon(item.tid)"
-                                       :style="{'color': getColor(item.characteristics, item.tid)}"></i>
-                                    <span v-show="linkShow(item)"><i class="icon-link"></i></span>
-                                </div>
-                                <div @click.stop="operateItem(item)" class="item-name">
-                                    <span :class="{'cr-warning': getFlag(item.position)}">{{getPosition(item.position)}}</span>
-                                    <span v-show="!showDesc(item.name)">{{item.mac}}</span>
-                                    <span v-show="showDesc(item.name)"  :class="{'desc': showDesc(item.position)}">
+                    <div v-if="!showAdd" v-infinite-scroll="loadMoreList"
+                         infinite-scroll-disabled="loadMoreing"
+                         infinite-scroll-distance="30">
+                        <div v-for="item in loadList" :id="item.mac" :key="item.mac" v-longtap="{fn: showOperate, mac: item.mac}"
+                             @click.self="operateItem(item)" class="item item-device">
+                            <div @click.stop="operateItem(item)" :class="getBxColor(item.layer, item.tsf_time)" class="item-icon-circle">
+                                <i :class="getIcon(item.tid)"
+                                   :style="{'color': getColor(item.characteristics, item.tid)}"></i>
+                                <span v-show="linkShow(item)"><i class="icon-link"></i></span>
+                            </div>
+                            <div @click.stop="operateItem(item)" class="item-name">
+                                <span :class="{'cr-warning': getFlag(item.position)}">{{getPosition(item.position)}}</span>
+                                <span v-show="!showDesc(item.name)">{{item.mac}}</span>
+                                <span v-show="showDesc(item.name)"  :class="{'desc': showDesc(item.position)}">
                                     {{item.name}}
                                     <span v-show="showDesc(item.position)">({{item.version}})&nbsp;&nbsp;&nbsp;
                                         <img v-show="item.rssi <= 0" class="item-img" :src="getRssiIcon(item.rssi)"/>
                                     </span>
 
                                 </span>
-                                    <span class="desc" v-show="!showDesc(item.position)">
+                                <span class="desc" v-show="!showDesc(item.position)">
                                     {{item.version}}&nbsp;&nbsp;&nbsp;
                                     <img v-show="item.rssi <= 0" class="item-img" :src="getRssiIcon(item.rssi)"/>
                                 </span>
+                            </div>
+                            <div class="item-power">
+                                <div v-show="isLigth(item.tid)" class="switch-wrapper">
+                                    <span :class="{'active': !getStatus(item.characteristics)}" @click="close(item.mac, 0, $event)">OFF</span>
+                                    <span :class="{'active': getStatus(item.characteristics)}" @click="close(item.mac, 1, $event)">ON</span>
                                 </div>
-                                <div class="item-power">
-                                    <div v-show="isLigth(item.tid)" class="switch-wrapper">
-                                        <span :class="{'active': !getStatus(item.characteristics)}" @click="close(item.mac, 0, $event)">OFF</span>
-                                        <span :class="{'active': getStatus(item.characteristics)}" @click="close(item.mac, 1, $event)">ON</span>
-                                    </div>
-                                    <div v-show="isSensor(item.tid, item.characteristics)" class="sensor-wrapper">
-                                        <span class="desc">temp: {{getSensorTemperature(item.characteristics)}}℃</span>
-                                        <span class="desc">humi: {{getSensorHumidity(item.characteristics)}}%</span>
-                                        <span class="desc">lumi: {{getSensorLuminance(item.characteristics)}}cd</span>
-                                    </div>
+                                <div v-show="isSensor(item.tid, item.characteristics)" class="sensor-wrapper">
+                                    <span class="desc">temp: {{getSensorTemperature(item.characteristics)}}℃</span>
+                                    <span class="desc">humi: {{getSensorHumidity(item.characteristics)}}%</span>
+                                    <span class="desc">lumi: {{getSensorLuminance(item.characteristics)}}cd</span>
                                 </div>
                             </div>
-                        </div>
-                        <div v-show="showAdd || deviceList.lenght == 0" class="add-wrapper">
-                            <div class="add-icon-wrapper">
-                                <img class="add-image" src="images/no_light.png"/>
-                            </div>
-                            <div class="add-title">{{$t('noAddDeviceDesc')}}</div>
-                            <div class="add-desc">{{$t('listDesc')}}</div>
-                            <div  class="add-plus" @click="addDevice($event)">
-                                {{$t('addDevice')}}
-                            </div>
-                            <div class="add-desc">{{$t('videoDesc')}}&nbsp;<span @click="showVideo" class="blue">{{$t('clickVideoDesc')}}</span></div>
                         </div>
                     </div>
-                   <div v-else>
-                       <div class="">
-                           <div v-for="item in cloudList" :id="item.iotId" :key="item.iotId"
-                                @click.self="operateItemCloud(item)" class="item item-device">
-                               <div @click.stop="operateItemCloud(item)" class="item-icon-circle">
-                                   <i class="icon-light" :style="{'color': getAliColor(item.characteristics)}"></i>
-                               </div>
-                               <div @click.stop="operateItemCloud(item)" class="item-name">
-                                   <span >
-                                    {{item.deviceName}}
-                                    </span>
-                                   <span class="desc">
-                                    {{getAliStatus(item.status)}}&nbsp;&nbsp;&nbsp;
-                                   </span>
-                               </div>
-                               <div class="item-power">
-                                   <div v-show="item.status == 1" class="switch-wrapper">
-                                       <span :class="{'active': !getAliSwitch(item.characteristics)}" @click="closeCloud(item.iotId, 0)">OFF</span>
-                                       <span :class="{'active': getAliSwitch(item.characteristics)}" @click="closeCloud(item.iotId, 1)">ON</span>
-                                   </div>
-                               </div>
-                           </div>
-                       </div>
-                       <div v-show="cloudList.length == 0" class="add-wrapper">
-                           <div class="add-icon-wrapper">
-                               <img class="add-image" src="images/no_light.png"/>
-                           </div>
-                           <div class="add-title">{{$t('noAddDeviceDesc')}}</div>
-                           <div class="add-desc">{{$t('listDesc')}}</div>
-                           <div  class="add-plus" @click="addDevice($event)">
-                               {{$t('addDevice')}}
-                           </div>
-                           <div class="add-desc">{{$t('videoDesc')}}&nbsp;<span @click="showVideo" class="blue">{{$t('clickVideoDesc')}}</span></div>
-                       </div>
-                   </div>
 
+                    <div v-if="showAdd" class="add-wrapper">
+                        <div class="add-icon-wrapper">
+                            <img class="add-image" src="images/no_light.png"/>
+                        </div>
+                        <div class="add-title">{{$t('noAddDeviceDesc')}}</div>
+                        <div class="add-desc">{{$t('listDesc')}}</div>
+                        <div  class="add-plus" @click="addDevice($event)">
+                            {{$t('addDevice')}}
+                        </div>
+                        <div class="add-desc">{{$t('videoDesc')}}&nbsp;<span @click="showVideo" class="blue">{{$t('clickVideoDesc')}}</span></div>
+                    </div>
                     <div slot="top" class="mint-loadmore-top">
                         <span v-show="topStatus !== 'loading'" :class="{ 'rotate': topStatus === 'drop' }">↓</span>
                         <div v-show="topStatus === 'loading'" id="loader-wrapper-small">
@@ -166,8 +125,6 @@
                 :name="groupName" :addGroupId="addGroupId" ref="group"></v-addGroup>
     <v-operateDevice v-on:operateShow="onBackIndex" :isDevice="isDevice" :isRoom="false" :colorId="colorId" :temperatureId="temperatureId"
                      ref="operate"></v-operateDevice>
-    <v-operateCloudDevice v-on:operateCloudShow="onBackIndex" :isDevice="isDevice" :isRoom="false" :colorId="colorId" :temperatureId="temperatureId"
-                     ref="operateCloud"></v-operateCloudDevice>
     <v-aboutDevice v-on:aboutShow="onBackIndex" :deviceInfo="deviceInfo" v-if="deviceInfo" ref="aboutDevice"></v-aboutDevice>
     <v-otaInfo v-on:otaShow="onBackIndex" :otaId="otaDeviceId" :macs="otaMacs" v-if="deviceInfo" ref="ota"></v-otaInfo>
     <v-automation v-on:autoShow="onBackIndex" :deviceInfo="deviceInfo" :autoId="autoId"

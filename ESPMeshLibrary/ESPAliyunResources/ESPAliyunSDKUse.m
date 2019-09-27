@@ -10,6 +10,7 @@
 #import "IMSLifeClient.h"
 #import "ESPAliyunSDKInit.h"
 #import "ESPDataConversion.h"
+#import "IMSDeviceClient.h"
 
 NSString *const NET_WIFI_TYPE = @"NET_WIFI";
 NSString *const NET_CELLULAR_TYPE = @"NET_CELLULAR";
@@ -53,16 +54,6 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
         [uiService presentLoginViewController:baseViewController success:^(ALBBOpenAccountSession *currentSession) {
             // 登录成功，currentSession为当前会话信息
             ALBBOpenAccountUser *currentUser = [currentSession getUser];
-            
-//            ESPAliyunSDKInit *HandleToolInit = [[ESPAliyunSDKInit alloc]init];
-//            [HandleToolInit identityInit];
-            
-//            [session refreshSessionIDWithCallback:^(NSString *sid, NSError *err) {
-//                NSLog(@"sid ---> %@", sid);
-//            }];
-//            [session refreshSessionIDWithRefreshToken:[currentSession refreshToken] Callback:^(NSString *sid, NSError *err) {
-//                NSLog(@"sid ---> %@", sid);
-//            }];
             success(currentUser);
             
         } failure:^(NSError *error) {
@@ -136,11 +127,13 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
     }];
 }
 
-- (void)aliStartDiscoveryDevice:(startDiscoveryDevices)didFoundBlock {
+- (void)aliStartDiscoveryDeviceCount:(int)count withBlock:(startDiscoveryDevices)didFoundBlock {
     _startDiscoveryDevicesBlock = didFoundBlock;
     self.devicesArr = [NSMutableArray arrayWithCapacity:0];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"startDiscoveryDevice"];
-    [self startDiscoveryDevice];
+    [self startDiscoveryDevicewithType:count withBlock:^(NSArray * _Nonnull devices) {
+        
+    }];
     //        超时
 //    NSTimer* scanTimer=[NSTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(cancelDiscovery) userInfo:nil repeats:false];
 //    [[NSRunLoop currentRunLoop] addTimer:tmpTimer forMode:NSDefaultRunLoopMode];
@@ -158,7 +151,26 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
         [self.scanTimer invalidate];
         self.scanTimer=nil;
     }
-    [self aliStopDiscoveryDevice];
+    NSArray *allLanDevicesArray = [kLKLocalDeviceMgr getLanDevices];
+    NSLog(@"allLanDevicesArray ---> %@",allLanDevicesArray);
+    NSMutableArray *allDeviceArr = [NSMutableArray arrayWithCapacity:0];
+    if (ValidArray(allLanDevicesArray)) {
+        for (int i = 0; i < allLanDevicesArray.count; i ++) {
+            IMLCandDeviceModel *device = allLanDevicesArray[i];
+            NSMutableDictionary *deviceDic = [NSMutableDictionary dictionaryWithCapacity:0];
+            deviceDic[@"productKey"] = device.productKey;
+            deviceDic[@"deviceName"] = device.deviceName;
+            if (device.token) {
+                deviceDic[@"token"] = device.token;
+                [allDeviceArr addObject:deviceDic];
+                NSSet *set = [NSSet setWithArray:allDeviceArr];
+                NSArray *allArray = [set allObjects];
+                [ESPDataConversion fby_saveNSUserDefaults:allArray withKey:@"startDiscoveryAllDevice"];
+            }
+            
+        }
+    }
+//    [self aliStopDiscoveryDevice];
     NSArray *deviceArrs = [ESPDataConversion fby_getNSUserDefaults:@"startDiscoveryDevice"];
     if (ValidArray(deviceArrs)) {
         _startDiscoveryDevicesBlock(deviceArrs);
@@ -167,34 +179,45 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
     }
 }
 
-- (void)startDiscoveryDevice {
-    [[IMLLocalDeviceMgr sharedMgr] startDiscovery:^(NSArray *devices, NSError *err) {
-        NSLog(@"devices ---> %@",devices);
-        if (ValidArray(devices)) {
-            for (int i = 0; i < devices.count; i ++) {
-                IMLCandDeviceModel *device = devices[i];
-                NSMutableDictionary *deviceDic = [NSMutableDictionary dictionaryWithCapacity:0];
-                deviceDic[@"productKey"] = device.productKey;
-                deviceDic[@"deviceName"] = device.deviceName;
-                if (device.token) {
-                    deviceDic[@"token"] = device.token;
-                    NSString *tokenTwoStr = [device.token substringToIndex:2];
-                    if ([[tokenTwoStr lowercaseString] isEqualToString:@"ff"]) {
-                        [self.devicesArr addObject:deviceDic];
-                        NSSet *set = [NSSet setWithArray:self.devicesArr];
-                        NSArray *allArray = [set allObjects];
-                        [ESPDataConversion fby_saveNSUserDefaults:allArray withKey:@"startDiscoveryDevice"];
-                        [self cancelDiscovery];
+- (void)startDiscoveryDevicewithType:(int)type withBlock:(startDiscoveryDevices)didFoundBlock {
+    if (type == 0) {
+        NSArray *allDevices = [ESPDataConversion fby_getNSUserDefaults:@"startDiscoveryAllDevice"];
+        didFoundBlock(allDevices);
+    }else {
+        [[IMLLocalDeviceMgr sharedMgr] startDiscovery:^(NSArray *devices, NSError *err) {
+            NSLog(@"devices ---> %@",devices);
+            if (ValidArray(devices)) {
+                for (int i = 0; i < devices.count; i ++) {
+                    IMLCandDeviceModel *device = devices[i];
+                    NSMutableDictionary *deviceDic = [NSMutableDictionary dictionaryWithCapacity:0];
+                    deviceDic[@"productKey"] = device.productKey;
+                    deviceDic[@"deviceName"] = device.deviceName;
+                    NSLog(@"device.mac --> %@", device.mac);
+                    if (device.token) {
+                        deviceDic[@"token"] = device.token;
+                        NSString *tokenTwoStr = [device.token substringToIndex:2];
+                        if ([[tokenTwoStr lowercaseString] isEqualToString:@"ff"]) {
+                            NSArray *baseDeviceArr = @[deviceDic];
+                            [ESPDataConversion fby_saveNSUserDefaults:baseDeviceArr withKey:@"startDiscoveryDevice"];
+                            [self cancelDiscovery];
+                        }else {
+                            [self.devicesArr addObject:deviceDic];
+                            NSSet *set = [NSSet setWithArray:self.devicesArr];
+                            NSArray *allArray = [set allObjects];
+                            if (allArray.count == type) {
+                               [self cancelDiscovery];
+                            }
+                        }
                     }
+                    
                 }
-                
+            } else if (err) {
+                [ESPDataConversion fby_saveNSUserDefaults:_devicesArr withKey:@"startDiscoveryDevice"];
+                NSLog(@"本地发现设备出错: %@", err);
             }
-            
-        } else if (err) {
-            [ESPDataConversion fby_saveNSUserDefaults:_devicesArr withKey:@"startDiscoveryDevice"];
-            NSLog(@"本地发现设备出错: %@", err);
-        }
-    }];
+        }];
+    }
+    
 }
 
 - (void)aliStopDiscoveryDevice {
@@ -308,15 +331,26 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
     }];
 }
 
-- (void)unbindDeviceRequest:(NSString *)deviceIotId {
+- (void)unbindDeviceRequest:(NSString *)deviceIotId andBlock:(deviceUnbindBlock)deviceUnbindBlock {
     NSArray *deviceIotIdArr = [ESPDataConversion objectFromJsonString:deviceIotId];
+    NSMutableArray *unbindSuccessDeviceIotId = [NSMutableArray arrayWithCapacity:0];
+    __block NSUInteger iotIdCount = deviceIotIdArr.count;
     for (int i = 0; i < deviceIotIdArr.count; i ++) {
+        if ([ESPDataConversion isNull:deviceIotIdArr[i]]) {
+            iotIdCount --;
+            continue;
+        }
         [[IMSLifeClient sharedClient] unbindDeviceWithIotId:deviceIotIdArr[i] completionHandler:^(NSError *error) {
             if (error) {
                 NSLog(@"解绑失败%@", error.localizedDescription);
             } else {
+                [unbindSuccessDeviceIotId addObject:deviceIotIdArr[i]];
                 NSLog(@"解绑成功");
             }
+            if (iotIdCount == 1) {
+                deviceUnbindBlock(unbindSuccessDeviceIotId);
+            }
+            iotIdCount --;
         }];
     }
 }
@@ -342,14 +376,14 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
                 if (ValidDict(resultDic)) {
                     [deviceStatusArr addObject:resultDic];
                 }
-                if (iotIdCount == 1) {
-                    deviceStatus(deviceStatusArr);
-                }
-                iotIdCount --;
                 NSLog(@"获取设备状态:properties%@",properties);
             }else {
                 NSLog(@"获取状态失败");
             }
+            if (iotIdCount == 1) {
+                deviceStatus(deviceStatusArr);
+            }
+            iotIdCount --;
             //        [self showMessage:[NSString stringWithFormat:@"获取设备状态:properties%@",properties]];
             //格式如下：
             /* {
@@ -386,13 +420,13 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
                 if (ValidDict(resultDic)) {
                     [deviceStatusArr addObject:resultDic];
                 }
-                if (iotIdCount == 1) {
-                    deviceStatus(deviceStatusArr);
-                }
-                iotIdCount --;
             }else {
                 NSLog(@"获取属性失败");
             }
+            if (iotIdCount == 1) {
+                deviceStatus(deviceStatusArr);
+            }
+            iotIdCount --;
         }];
     }
 }
@@ -404,6 +438,7 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
     }
     NSDictionary *items = [deviceDic objectForKey:@"properties"];
     NSArray *iotIdArr = [deviceDic objectForKey:@"iotId"];
+    NSMutableArray *deviceStatusArr = [NSMutableArray arrayWithCapacity:0];
     __block NSUInteger iotIdCount = iotIdArr.count;
     for (int i = 0; i < iotIdArr.count; i ++) {
         if ([ESPDataConversion isNull:iotIdArr[i]]) {
@@ -416,18 +451,67 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
             
             if (response.success) {
                 NSLog(@"设置属性成功");
-                if (iotIdCount == 1) {
-                    NSString *deviceIotIdStr = [ESPDataConversion jsonConfigureFromObject:iotIdArr];
+                [deviceStatusArr addObject:iotIdArr[i]];
+            }else {
+                NSLog(@"设置属性失败");
+            }
+            if (iotIdCount == 1) {
+                if (ValidArray(deviceStatusArr)) {
+                    NSString *deviceIotIdStr = [ESPDataConversion jsonConfigureFromObject:deviceStatusArr];
                     [self getAliyunDeviceProperties:deviceIotIdStr andSuccess:^(NSArray * _Nonnull resultStatusArr) {
                         deviceStatus(resultStatusArr);
                     }];
                 }
-                iotIdCount --;
-            }else {
-                NSLog(@"设置属性失败");
             }
+            iotIdCount --;
         }];
     }
 }
 
+- (void)loadOTAUpgradeDeviceList:(deviceUpgradeListBlock)completionHandler {
+    [[IMSDeviceClient sharedClient] loadOTAUpgradeDeviceList:^(id  _Nonnull data, NSError * _Nonnull error) {
+        NSDictionary *resultDic = [self messageBlock:data withError:error];
+        completionHandler(resultDic);
+    }];
+}
+
+- (void)loadOTAIsUpgradingDeviceList:(deviceUpgradeListBlock)completionHandler {
+    [[IMSDeviceClient sharedClient] loadOTAIsUpgradingDeviceList:^(id  _Nonnull data, NSError * _Nonnull error) {
+        NSDictionary *resultDic = [self messageBlock:data withError:error];
+        completionHandler(resultDic);
+    }];
+}
+
+- (void)upgradeWifiDeviceFirmware:(NSArray<NSString *> *)iotIds completionHandler:(wifiDeviceUpgradeBlock)completionHandler {
+    [[IMSDeviceClient sharedClient] upgradeWifiDeviceFirmwareWithIotIds:iotIds completionHandler:^(NSDictionary * _Nonnull data, NSError * _Nonnull error) {
+        NSDictionary *resultDic = [self messageBlock:data withError:error];
+        completionHandler(resultDic);
+    }];
+}
+
+- (void)loadOTAFirmwareDetailAndUpgradeStatus:(NSString *)iotId completionHandler:(deviceUpgradeStatusBlock)completionHandler {
+    [[IMSDeviceClient sharedClient] loadOTAFirmwareDetailAndUpgradeStatusWithIotId:iotId completionHandler:^(id  _Nonnull data, NSError * _Nonnull error) {
+        NSDictionary *resultDic = [self messageBlock:data withError:error];
+        completionHandler(resultDic);
+    }];
+}
+
+- (void)queryProductsInfoWithIotId:(NSString *)iotId completionHandler:(queryProductsInfoBlock)completionHandler {
+    [[IMSDeviceClient sharedClient] queryProductInfoWithIotId:iotId completionHandler:^(id  _Nonnull data, NSError * _Nonnull error) {
+        NSDictionary *resultDic = [self messageBlock:data withError:error];
+        completionHandler(resultDic);
+    }];
+}
+
+- (NSDictionary *)messageBlock:(id)data withError:(NSError *)error {
+    NSMutableDictionary *resultDic = [NSMutableDictionary dictionaryWithCapacity:0];
+    if (error) {
+        resultDic[@"data"] = error.userInfo;
+        resultDic[@"code"] = @"8014";
+    } else {
+        resultDic[@"data"] = data;
+        resultDic[@"code"] = @"200";
+    }
+    return resultDic;
+}
 @end

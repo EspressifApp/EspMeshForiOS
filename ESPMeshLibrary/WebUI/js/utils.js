@@ -379,7 +379,7 @@ define(function(){
         },
         setAliDeviceStatus: function(self, macs, data) {
             var that = this, changeList = [], isStatus = false;
-            $.each(self.aliDeviceList, function(i, item){
+            $.each(self.deviceList, function(i, item){
                 if (macs.indexOf(item.iotId) > -1) {
                     var characteristics = item.characteristics;
                     if (!that._isEmpty(data["HSVColor"])) {
@@ -398,14 +398,44 @@ define(function(){
                     if (!that._isEmpty(data["LightMode"])) {
                         characteristics["LightMode"].value = data["LightMode"];
                     }
+                    if (!that._isEmpty(data["DeviceArray"])) {
+                        characteristics["DeviceArray"].value.push(data["DeviceArray"]) ;
+                    }
                     item.characteristics = characteristics;
                 }
                 changeList.push(item);
             });
-            self.aliDeviceList = changeList;
-            console.log(changeList);
-            self.$store.commit("setAliDeviceList", self.aliDeviceList);
+            self.deviceList = changeList;
+            self.$store.commit("setList", self.deviceList);
             return isStatus;
+        },
+        setDeviceGroup: function(characteristics, groups) {
+            if (!this._isEmpty(characteristics)) {
+                if (!this._isEmpty(characteristics["DeviceArray"])) {
+                    characteristics["DeviceArray"].value = groups;
+                }
+            }
+            return characteristics;
+        },
+        getAliStatus: function(status) {
+            var desc = "";
+            status = parseInt(status);
+            switch(status) {
+                case 0: desc = "未激活"; break;
+                case 1: desc = "在线"; break;
+                case 3: desc = "离线"; break;
+                case 8: desc = "禁用"; break;
+            }
+            return desc;
+        },
+        getAliGroup: function(characteristics) {
+            var groups = [];
+            if (!this._isEmpty(characteristics)) {
+                if (!this._isEmpty(characteristics["DeviceArray"])) {
+                    groups = characteristics["DeviceArray"].value;
+                }
+            }
+            return groups;
         },
         isExistGroup: function(groupList, name) {
             var groupNames = [], flag = false;
@@ -475,7 +505,7 @@ define(function(){
             var flag = false;
             if ((version == 0 || (version == -1 && !this._isEmpty(name) && name.indexOf("MESH_") != -1))) {
                 if (!this._isEmpty(beacon)) {
-                    if (beacon == BEACON_MDF || beacon == BEACON_MAY) {
+                    if (beacon == BEACON_MDF) {
                         flag = true;
                     }
                 } else {
@@ -488,6 +518,14 @@ define(function(){
             var flag = false;
             if ((version == 0 || (version == -1 && !this._isEmpty(name) && name.indexOf("MESH_") != -1))
                 && beacon == BEACON_MGW) {
+                flag = true;
+            }
+            return flag;
+        },
+        isCloud: function(name, version, beacon) {
+            var flag = false;
+            if ((version == 0 || (version == -1 && !this._isEmpty(name) && name.indexOf("MESH_") != -1))
+                && beacon == BEACON_MAY) {
                 flag = true;
             }
             return flag;

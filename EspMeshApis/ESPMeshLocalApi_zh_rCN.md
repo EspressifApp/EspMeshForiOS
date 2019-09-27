@@ -1,9 +1,12 @@
-# ESP-Mesh Api
+[[English]](ESPMeshLocalApi_en.md)
+
+# ESP-Mesh Local Api
 
 ## 一：简介
 
 ESPMesh是一款集蓝牙配网和Wi-Fi控制于一体的App，该App已在App Store上线。
 ESPMesh实现的主要功能有如下几点：
+
 * 基于蓝牙通道Wi-Fi 网络配置功能
 * 通过Wi-Fi 网络发送控制命令
 * 远程和本地设备OTA升级
@@ -11,22 +14,25 @@ ESPMesh实现的主要功能有如下几点：
 
 ## 二：接口目录
 
-1. 开启蓝牙扫描
-2. 关闭蓝牙扫描
-3. 获取蓝牙状态
-4. 蓝牙连接
-5. 发送自定义数据
-6. 设备协商加密
-7. 通知设备进入加密模式
-8. 蓝牙配网
-9. 蓝牙断开连接
-10. 开启UDP扫描
-11. 发送多个设备命令
-12. 设备升级
-13. 停止OTA升级
-14. 重启设备命令
+1. <a href="#1">开启蓝牙扫描</a>
+2. <a href="#2">关闭蓝牙扫描</a>
+3. <a href="#3">获取蓝牙状态</a>
+4. <a href="#4">蓝牙连接</a>
+5. <a href="#5">发送自定义数据</a>
+6. <a href="#6">设备协商加密</a>
+7. <a href="#7">通知设备进入加密模式</a>
+8. <a href="#8">蓝牙配网</a>
+9. <a href="#9">蓝牙断开连接</a>
+10. <a href="#10">开启UDP扫描</a>
+11. <a href="#11">发送多个设备命令</a>
+12. <a href="#12">设备升级</a>
+13. <a href="#13">停止OTA升级</a>
+14. <a href="#14">重启设备命令</a>
 
 ## 三：接口详情
+
+### 1. <a name="1">开启蓝牙扫描</a>
+
 ```
 /**
  开启蓝牙扫描
@@ -37,6 +43,8 @@ ESPMesh实现的主要功能有如下几点：
 - (void)startBleScanSuccess:(BleScanSuccessBlock)success andFailure:(void(^)(int fail))failure;
 ```
 
+### 2. <a name="2">关闭蓝牙扫描</a>
+
 ```
 /**
  关闭蓝牙扫描
@@ -44,10 +52,13 @@ ESPMesh实现的主要功能有如下几点：
 - (void)stopBleScan;
 ```
 
+### 3. <a name="3">获取蓝牙状态</a>
+
 ```
 // 蓝牙状态,通过<BleDelegate>实现下面代理方法
 - (void)bleUpdateStatusBlock:(CBCentralManager *)central;
 ```
+### 4. <a name="4">蓝牙连接</a>
 
 ```
 /**
@@ -60,6 +71,8 @@ ESPMesh实现的主要功能有如下几点：
 + (void)BleConnection:(NSDictionary *)deviceInfo andSuccess:(void(^)(NSDictionary *dic))success andFailure:(void(^)(NSDictionary *dic))failure;
 ```
 
+### 5. <a name="5">发送自定义数据</a>
+
 ```
 /**
  调用发送自定义数据
@@ -69,6 +82,8 @@ ESPMesh实现的主要功能有如下几点：
 - (void)sendMDFCustomDataToDevice:(NSData *)dataMessage;
 ```
 
+### 6. <a name="6">设备协商加密</a>
+
 ```
 /**
  发送设备协商加密数据
@@ -76,12 +91,16 @@ ESPMesh实现的主要功能有如下几点：
 - (void)sendDevicesNegotiatesEncryption;
 ```
 
+### 7. <a name="7">通知设备进入加密模式</a>
+
 ```
 /**
  通知设备进入加密模式
  */
 - (void)notifyDevicesToEnterEncryptionMode;
 ```
+
+### 8. <a name="8">蓝牙配网</a>
 
 ```
 /**
@@ -98,12 +117,16 @@ ESPMesh实现的主要功能有如下几点：
 - (void)startConfigureBlufi:(NSDictionary *)messageDic andSuccess:(void(^)(NSDictionary *dic))success andFailure:(void(^)(NSDictionary *dic))failure;
 ```
 
+### 9. <a name="9">蓝牙断开连接</a>
+
 ```
 /**
  蓝牙断开连接
  */
 - (void)stopConfigureBlufi;
 ```
+
+### 10. <a name="10">开启UDP扫描</a>
 
 ```
 /**
@@ -114,6 +137,8 @@ ESPMesh实现的主要功能有如下几点：
  */
 + (void)scanDevicesAsyncSuccess:(DevicesAsyncSuccessBlock)success andFailure:(void(^)(int fail))failure;
 ```
+
+### 11. <a name="11">发送多个设备命令</a>
 
 ```
 /**
@@ -134,6 +159,8 @@ ESPMesh实现的主要功能有如下几点：
 + (void)requestDevicesMulticastAsync:(NSDictionary *)messageDic andSuccess:(void(^)(NSDictionary *dic))success andFailure:(void(^)(NSDictionary *failureDic))failure;
 ```
 
+### 12. <a name="12">设备升级</a>
+
 ```
 /**
  设备升级
@@ -150,6 +177,8 @@ ESPMesh实现的主要功能有如下几点：
 - (void)startOTA:(NSDictionary *)messageDic Success:(startOTASuccessBlock)success andFailure:(void(^)(int fail))failure;
 ```
 
+### 13. <a name="13">停止OTA升级</a>
+
 ```
 /**
  停止OTA升级
@@ -160,6 +189,8 @@ ESPMesh实现的主要功能有如下几点：
  */
 - (void)stopOTA:(NSDictionary *)messageDic;
 ```
+
+### 14. <a name="14">重启设备命令</a>
 
 ```
 /**

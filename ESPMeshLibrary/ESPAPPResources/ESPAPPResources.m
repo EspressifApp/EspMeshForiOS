@@ -42,7 +42,7 @@
             deviceDic[@"only_beacon"] = @(device.onlyBeacon);
             success(deviceDic);
         } failblock:^(int code) {
-            
+            NSLog(@"蓝牙未打开");
         }];
     });
 }
@@ -94,7 +94,8 @@
 + (void)startBLEConfigure:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
     
     NSMutableDictionary *argsDic = [[NSMutableDictionary alloc]initWithDictionary:messageDic];
-
+    NSArray *whiteListArr = argsDic[@"white_list"];
+    int count = [[NSString stringWithFormat:@"%lu", (unsigned long)whiteListArr.count] intValue];
     //保存记录
     NSString* ssid=argsDic[@"ssid"];
     BOOL beacon=[argsDic[@"beacon"] boolValue];
@@ -109,7 +110,7 @@
         NSArray *messageArr = [msg componentsSeparatedByString:@":"];
         if ([messageArr[0] containsString:@"success"]) {
             if (beacon) {
-                [[ESPAliyunSDKUse sharedClient] aliStartDiscoveryDevice:^(NSArray * _Nonnull devices) {
+                [[ESPAliyunSDKUse sharedClient] aliStartDiscoveryDeviceCount:count withBlock:^(NSArray * _Nonnull devices) {
                     NSLog(@"devices ---> %@",devices);
                     if (ValidArray(devices)) {
                         for (int i = 0; i < devices.count; i ++) {

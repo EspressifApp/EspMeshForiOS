@@ -12,9 +12,13 @@
 		263384DD21CB7F6200E3EC90 /* ESPFBYBLEHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 263384DC21CB7F6200E3EC90 /* ESPFBYBLEHelper.m */; };
 		263384E021CB91A700E3EC90 /* ESPFBYBLEDataParsing.m in Sources */ = {isa = PBXBuildFile; fileRef = 263384DF21CB91A700E3EC90 /* ESPFBYBLEDataParsing.m */; };
 		2646CCE3220181F30074C296 /* ESPRootScanmDNS.m in Sources */ = {isa = PBXBuildFile; fileRef = 2646CCE2220181F30074C296 /* ESPRootScanmDNS.m */; };
+		2648F6DA23389FEF0092C2E4 /* ESPFBYColorPicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 2648F6D923389FEF0092C2E4 /* ESPFBYColorPicker.m */; };
+		2648F6DD2338A0910092C2E4 /* ESPFBYColorPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2648F6DC2338A0910092C2E4 /* ESPFBYColorPickerViewController.m */; };
+		2648F6FA2339FDA20092C2E4 /* FBYBallLoading.m in Sources */ = {isa = PBXBuildFile; fileRef = 2648F6F92339FDA20092C2E4 /* FBYBallLoading.m */; };
 		26497EB722EE9F670080FC15 /* ESPAliyunSDKUse.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */; };
 		26497EC022F131AE0080FC15 /* IMSLifeClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497EBE22F131AE0080FC15 /* IMSLifeClient.m */; };
 		26497ECF22F3E05C0080FC15 /* IMSOpenAccount.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */; };
+		264CD1F5232F5F180064EF50 /* ESPFBYAliViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 264CD1F4232F5F180064EF50 /* ESPFBYAliViewController.m */; };
 		264E417922DD71A00069139E /* bt_org_list.txt in Resources */ = {isa = PBXBuildFile; fileRef = 264E417822DD71A00069139E /* bt_org_list.txt */; };
 		264E417B22DD761C0069139E /* mac_org_list.txt in Resources */ = {isa = PBXBuildFile; fileRef = 264E417A22DD761B0069139E /* mac_org_list.txt */; };
 		264EAD0722D469EE00AD811C /* ESPSniffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 264EAD0622D469ED00AD811C /* ESPSniffer.m */; };
@@ -37,6 +41,9 @@
 		264F618322EB006C00E4E8DF /* ESPAliyunSDKInit.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */; };
 		2656240721DF312F0020F852 /* ESPCheckAppVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2656240621DF312F0020F852 /* ESPCheckAppVersion.m */; };
 		2656240A21DF43230020F852 /* ESPDataConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2656240921DF43230020F852 /* ESPDataConversion.m */; };
+		26585CCC231E5C3B007342EE /* ESPFBYLocalAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 26585CCB231E5C3B007342EE /* ESPFBYLocalAPI.m */; };
+		26585CCF231E702A007342EE /* ESPFBYAliyunAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 26585CCE231E702A007342EE /* ESPFBYAliyunAPI.m */; };
+		26588F3623265664000B8A14 /* IMSDeviceClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 26588F3523265664000B8A14 /* IMSDeviceClient.m */; };
 		26859DC6223F4DA3006FB122 /* NSString+URL.m in Sources */ = {isa = PBXBuildFile; fileRef = 26859DC5223F4DA3006FB122 /* NSString+URL.m */; };
 		268F061222278D2D00B54600 /* ESPAPPResources.m in Sources */ = {isa = PBXBuildFile; fileRef = 268F061122278D2D00B54600 /* ESPAPPResources.m */; };
 		26A25A4721D0B1E10028F66C /* ESPHomeService.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A25A4521D0B1E10028F66C /* ESPHomeService.m */; };
@@ -45,6 +52,18 @@
 		26A25AA121D4829B0028F66C /* ESPNewWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A25AA021D4829B0028F66C /* ESPNewWebViewController.m */; };
 		26A25AA721D5CBDF0028F66C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26A25AA621D5CBDF0028F66C /* Main.storyboard */; };
 		26B0751622817BD8001A4B7A /* ESPLoadHyperlinksViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0751522817BD8001A4B7A /* ESPLoadHyperlinksViewController.m */; };
+		26B48EB0232243F800A107D5 /* Documentation.html in Resources */ = {isa = PBXBuildFile; fileRef = 26B48E95232243F800A107D5 /* Documentation.html */; };
+		26B48EB1232243F800A107D5 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48E96232243F800A107D5 /* GCDAsyncUdpSocket.m */; };
+		26B48EB2232243F800A107D5 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48E97232243F800A107D5 /* GCDAsyncSocket.m */; };
+		26B48EB3232243F800A107D5 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48E9D232243F800A107D5 /* DDTTYLogger.m */; };
+		26B48EB4232243F800A107D5 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48EA0232243F800A107D5 /* DDASLLogger.m */; };
+		26B48EB5232243F800A107D5 /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48EA3232243F800A107D5 /* DDContextFilterLogFormatter.m */; };
+		26B48EB6232243F800A107D5 /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48EA4232243F800A107D5 /* DDDispatchQueueLogFormatter.m */; };
+		26B48EB7232243F800A107D5 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48EA7232243F800A107D5 /* DDMultiFormatter.m */; };
+		26B48EB8232243F800A107D5 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 26B48EA9232243F800A107D5 /* README.txt */; };
+		26B48EB9232243F800A107D5 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48EAA232243F800A107D5 /* DDLog.m */; };
+		26B48EBA232243F800A107D5 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48EAD232243F800A107D5 /* DDAbstractDatabaseLogger.m */; };
+		26B48EBB232243F800A107D5 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B48EAE232243F800A107D5 /* DDFileLogger.m */; };
 		26C92C70227E96C20017FA66 /* ESPFBYBLECBPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C92C6F227E96C20017FA66 /* ESPFBYBLECBPeripheral.m */; };
 		26C93A8221EF3D0900683553 /* js_rsa.c in Sources */ = {isa = PBXBuildFile; fileRef = 26C93A2A21EF3D0800683553 /* js_rsa.c */; };
 		26C93A8321EF3D0900683553 /* HGBRSAEncrytor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C93A7921EF3D0800683553 /* HGBRSAEncrytor.m */; };
@@ -141,20 +160,28 @@
 
 /* Begin PBXFileReference section */
 		04AA1E37D1E04C314608E74A /* Pods-ESPMeshLibrary.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ESPMeshLibrary.release.xcconfig"; path = "Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary.release.xcconfig"; sourceTree = "<group>"; };
-		263384D821CA30D300E3EC90 /* ESPFBYWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYWebViewController.h; sourceTree = "<group>"; };
-		263384D921CA30D300E3EC90 /* ESPFBYWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYWebViewController.m; sourceTree = "<group>"; };
+		263384D821CA30D300E3EC90 /* ESPFBYWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ESPFBYWebViewController.h; path = ../ESPFBYWebViewController.h; sourceTree = "<group>"; };
+		263384D921CA30D300E3EC90 /* ESPFBYWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ESPFBYWebViewController.m; path = ../ESPFBYWebViewController.m; sourceTree = "<group>"; };
 		263384DB21CB7F6200E3EC90 /* ESPFBYBLEHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYBLEHelper.h; sourceTree = "<group>"; };
 		263384DC21CB7F6200E3EC90 /* ESPFBYBLEHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYBLEHelper.m; sourceTree = "<group>"; };
 		263384DE21CB91A700E3EC90 /* ESPFBYBLEDataParsing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYBLEDataParsing.h; sourceTree = "<group>"; };
 		263384DF21CB91A700E3EC90 /* ESPFBYBLEDataParsing.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYBLEDataParsing.m; sourceTree = "<group>"; };
 		2646CCE1220181F30074C296 /* ESPRootScanmDNS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPRootScanmDNS.h; sourceTree = "<group>"; };
 		2646CCE2220181F30074C296 /* ESPRootScanmDNS.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPRootScanmDNS.m; sourceTree = "<group>"; };
+		2648F6D823389FEF0092C2E4 /* ESPFBYColorPicker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYColorPicker.h; sourceTree = "<group>"; };
+		2648F6D923389FEF0092C2E4 /* ESPFBYColorPicker.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYColorPicker.m; sourceTree = "<group>"; };
+		2648F6DB2338A0910092C2E4 /* ESPFBYColorPickerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ESPFBYColorPickerViewController.h; path = ../ESPFBYColorPickerViewController.h; sourceTree = "<group>"; };
+		2648F6DC2338A0910092C2E4 /* ESPFBYColorPickerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ESPFBYColorPickerViewController.m; path = ../ESPFBYColorPickerViewController.m; sourceTree = "<group>"; };
+		2648F6F82339FDA20092C2E4 /* FBYBallLoading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBYBallLoading.h; sourceTree = "<group>"; };
+		2648F6F92339FDA20092C2E4 /* FBYBallLoading.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FBYBallLoading.m; sourceTree = "<group>"; };
 		26497EB522EE9F670080FC15 /* ESPAliyunSDKUse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPAliyunSDKUse.h; sourceTree = "<group>"; };
 		26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPAliyunSDKUse.m; sourceTree = "<group>"; };
-		26497EBE22F131AE0080FC15 /* IMSLifeClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMSLifeClient.m; sourceTree = "<group>"; };
-		26497EBF22F131AE0080FC15 /* IMSLifeClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMSLifeClient.h; sourceTree = "<group>"; };
-		26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMSOpenAccount.h; sourceTree = "<group>"; };
-		26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMSOpenAccount.m; sourceTree = "<group>"; };
+		26497EBE22F131AE0080FC15 /* IMSLifeClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IMSLifeClient.m; path = ../IMSLifeClient.m; sourceTree = "<group>"; };
+		26497EBF22F131AE0080FC15 /* IMSLifeClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IMSLifeClient.h; path = ../IMSLifeClient.h; sourceTree = "<group>"; };
+		26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IMSOpenAccount.h; path = ../IMSOpenAccount.h; sourceTree = "<group>"; };
+		26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IMSOpenAccount.m; path = ../IMSOpenAccount.m; sourceTree = "<group>"; };
+		264CD1F3232F5F180064EF50 /* ESPFBYAliViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ESPFBYAliViewController.h; path = ../ESPFBYAliViewController.h; sourceTree = "<group>"; };
+		264CD1F4232F5F180064EF50 /* ESPFBYAliViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ESPFBYAliViewController.m; path = ../ESPFBYAliViewController.m; sourceTree = "<group>"; };
 		264E417822DD71A00069139E /* bt_org_list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bt_org_list.txt; sourceTree = "<group>"; };
 		264E417A22DD761B0069139E /* mac_org_list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mac_org_list.txt; sourceTree = "<group>"; };
 		264EAD0522D469ED00AD811C /* ESPSniffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPSniffer.h; sourceTree = "<group>"; };
@@ -176,12 +203,18 @@
 		264F616C22EAFF7F00E4E8DF /* ALBBOpenAccountPreFindPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountPreFindPwdViewController.xib; sourceTree = "<group>"; };
 		264F616D22EAFF7F00E4E8DF /* ALBBOpenAccountResetPwdViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountResetPwdViewController.xib; sourceTree = "<group>"; };
 		264F616E22EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountLoginLogViewController.xib; sourceTree = "<group>"; };
-		264F618122EB006C00E4E8DF /* ESPAliyunSDKInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPAliyunSDKInit.h; sourceTree = "<group>"; };
-		264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPAliyunSDKInit.m; sourceTree = "<group>"; };
+		264F618122EB006C00E4E8DF /* ESPAliyunSDKInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ESPAliyunSDKInit.h; path = ../ESPAliyunSDKInit.h; sourceTree = "<group>"; };
+		264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ESPAliyunSDKInit.m; path = ../ESPAliyunSDKInit.m; sourceTree = "<group>"; };
 		2656240521DF312F0020F852 /* ESPCheckAppVersion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPCheckAppVersion.h; sourceTree = "<group>"; };
 		2656240621DF312F0020F852 /* ESPCheckAppVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPCheckAppVersion.m; sourceTree = "<group>"; };
 		2656240821DF43230020F852 /* ESPDataConversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPDataConversion.h; sourceTree = "<group>"; };
 		2656240921DF43230020F852 /* ESPDataConversion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPDataConversion.m; sourceTree = "<group>"; };
+		26585CCA231E5C3B007342EE /* ESPFBYLocalAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYLocalAPI.h; sourceTree = "<group>"; };
+		26585CCB231E5C3B007342EE /* ESPFBYLocalAPI.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYLocalAPI.m; sourceTree = "<group>"; };
+		26585CCD231E702A007342EE /* ESPFBYAliyunAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYAliyunAPI.h; sourceTree = "<group>"; };
+		26585CCE231E702A007342EE /* ESPFBYAliyunAPI.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYAliyunAPI.m; sourceTree = "<group>"; };
+		26588F3423265664000B8A14 /* IMSDeviceClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IMSDeviceClient.h; path = ../IMSDeviceClient.h; sourceTree = "<group>"; };
+		26588F3523265664000B8A14 /* IMSDeviceClient.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = IMSDeviceClient.m; path = ../IMSDeviceClient.m; sourceTree = "<group>"; };
 		26859DC4223F4DA3006FB122 /* NSString+URL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+URL.h"; sourceTree = "<group>"; };
 		26859DC5223F4DA3006FB122 /* NSString+URL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+URL.m"; sourceTree = "<group>"; };
 		268F061022278D2D00B54600 /* ESPAPPResources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPAPPResources.h; sourceTree = "<group>"; };
@@ -198,6 +231,30 @@
 		26A25AA621D5CBDF0028F66C /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		26B0751422817BD8001A4B7A /* ESPLoadHyperlinksViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPLoadHyperlinksViewController.h; sourceTree = "<group>"; };
 		26B0751522817BD8001A4B7A /* ESPLoadHyperlinksViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPLoadHyperlinksViewController.m; sourceTree = "<group>"; };
+		26B48E95232243F800A107D5 /* Documentation.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = Documentation.html; sourceTree = "<group>"; };
+		26B48E96232243F800A107D5 /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncUdpSocket.m; sourceTree = "<group>"; };
+		26B48E97232243F800A107D5 /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncSocket.m; sourceTree = "<group>"; };
+		26B48E98232243F800A107D5 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
+		26B48E99232243F800A107D5 /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncSocket.h; sourceTree = "<group>"; };
+		26B48E9A232243F800A107D5 /* CocoaAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaAsyncSocket.h; sourceTree = "<group>"; };
+		26B48E9D232243F800A107D5 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
+		26B48E9E232243F800A107D5 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
+		26B48E9F232243F800A107D5 /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
+		26B48EA0232243F800A107D5 /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogger.m; sourceTree = "<group>"; };
+		26B48EA1232243F800A107D5 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
+		26B48EA3232243F800A107D5 /* DDContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDContextFilterLogFormatter.m; sourceTree = "<group>"; };
+		26B48EA4232243F800A107D5 /* DDDispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDDispatchQueueLogFormatter.m; sourceTree = "<group>"; };
+		26B48EA5232243F800A107D5 /* DDMultiFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDMultiFormatter.h; sourceTree = "<group>"; };
+		26B48EA6232243F800A107D5 /* DDContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDContextFilterLogFormatter.h; sourceTree = "<group>"; };
+		26B48EA7232243F800A107D5 /* DDMultiFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDMultiFormatter.m; sourceTree = "<group>"; };
+		26B48EA8232243F800A107D5 /* DDDispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDDispatchQueueLogFormatter.h; sourceTree = "<group>"; };
+		26B48EA9232243F800A107D5 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		26B48EAA232243F800A107D5 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		26B48EAB232243F800A107D5 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
+		26B48EAC232243F800A107D5 /* DDLog+LOGV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DDLog+LOGV.h"; sourceTree = "<group>"; };
+		26B48EAD232243F800A107D5 /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
+		26B48EAE232243F800A107D5 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
+		26B48EAF232243F800A107D5 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
 		26C92C6E227E96C20017FA66 /* ESPFBYBLECBPeripheral.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPFBYBLECBPeripheral.h; sourceTree = "<group>"; };
 		26C92C6F227E96C20017FA66 /* ESPFBYBLECBPeripheral.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPFBYBLECBPeripheral.m; sourceTree = "<group>"; };
 		26C93A2A21EF3D0800683553 /* js_rsa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = js_rsa.c; sourceTree = "<group>"; };
@@ -551,6 +608,7 @@
 		263384E521CCEF5700E3EC90 /* ESPThirdGit */ = {
 			isa = PBXGroup;
 			children = (
+				26B48E93232243F800A107D5 /* CocoaAsyncSocket */,
 				8D9BBAA020E108DB0061A3B8 /* IQKeyboardManager */,
 				8DD92A5820F7690D00D7CA89 /* QRCodeReaderViewController */,
 				8D37C5D820DBC26800C217AA /* ESPNetWork */,
@@ -568,6 +626,53 @@
 				26A25A4421D0B1CC0028F66C /* ESPHomeService */,
 			);
 			path = ESPResources;
+			sourceTree = "<group>";
+		};
+		2648F6D723389F5E0092C2E4 /* ESPFBYColorPicker */ = {
+			isa = PBXGroup;
+			children = (
+				2648F6EE2338DAF70092C2E4 /* ESPFBYDotLoading */,
+				2648F6D823389FEF0092C2E4 /* ESPFBYColorPicker.h */,
+				2648F6D923389FEF0092C2E4 /* ESPFBYColorPicker.m */,
+			);
+			path = ESPFBYColorPicker;
+			sourceTree = "<group>";
+		};
+		2648F6EE2338DAF70092C2E4 /* ESPFBYDotLoading */ = {
+			isa = PBXGroup;
+			children = (
+				2648F6F82339FDA20092C2E4 /* FBYBallLoading.h */,
+				2648F6F92339FDA20092C2E4 /* FBYBallLoading.m */,
+			);
+			path = ESPFBYDotLoading;
+			sourceTree = "<group>";
+		};
+		2648F6FB233B47E10092C2E4 /* ESPFBYAPPViewController */ = {
+			isa = PBXGroup;
+			children = (
+				263384D821CA30D300E3EC90 /* ESPFBYWebViewController.h */,
+				263384D921CA30D300E3EC90 /* ESPFBYWebViewController.m */,
+				264CD1F3232F5F180064EF50 /* ESPFBYAliViewController.h */,
+				264CD1F4232F5F180064EF50 /* ESPFBYAliViewController.m */,
+				2648F6DB2338A0910092C2E4 /* ESPFBYColorPickerViewController.h */,
+				2648F6DC2338A0910092C2E4 /* ESPFBYColorPickerViewController.m */,
+			);
+			path = ESPFBYAPPViewController;
+			sourceTree = "<group>";
+		};
+		2648F6FC233B48460092C2E4 /* ESPAliyunManager */ = {
+			isa = PBXGroup;
+			children = (
+				26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */,
+				26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */,
+				26497EBF22F131AE0080FC15 /* IMSLifeClient.h */,
+				26497EBE22F131AE0080FC15 /* IMSLifeClient.m */,
+				26588F3423265664000B8A14 /* IMSDeviceClient.h */,
+				26588F3523265664000B8A14 /* IMSDeviceClient.m */,
+				264F618122EB006C00E4E8DF /* ESPAliyunSDKInit.h */,
+				264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */,
+			);
+			path = ESPAliyunManager;
 			sourceTree = "<group>";
 		};
 		264F615F22EAFF7F00E4E8DF /* xib */ = {
@@ -596,14 +701,11 @@
 		264F618022EB002200E4E8DF /* ESPAliyunResources */ = {
 			isa = PBXGroup;
 			children = (
-				26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */,
-				26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */,
-				26497EBF22F131AE0080FC15 /* IMSLifeClient.h */,
-				26497EBE22F131AE0080FC15 /* IMSLifeClient.m */,
-				264F618122EB006C00E4E8DF /* ESPAliyunSDKInit.h */,
-				264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */,
+				2648F6FC233B48460092C2E4 /* ESPAliyunManager */,
 				26497EB522EE9F670080FC15 /* ESPAliyunSDKUse.h */,
 				26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */,
+				26585CCD231E702A007342EE /* ESPFBYAliyunAPI.h */,
+				26585CCE231E702A007342EE /* ESPFBYAliyunAPI.m */,
 			);
 			path = ESPAliyunResources;
 			sourceTree = "<group>";
@@ -624,11 +726,13 @@
 		268F060F22278AE500B54600 /* ESPAPPResources */ = {
 			isa = PBXGroup;
 			children = (
+				2648F6FB233B47E10092C2E4 /* ESPFBYAPPViewController */,
+				2648F6D723389F5E0092C2E4 /* ESPFBYColorPicker */,
 				2656240421DF30CB0020F852 /* ESPFBYBLEHelper */,
-				263384D821CA30D300E3EC90 /* ESPFBYWebViewController.h */,
-				263384D921CA30D300E3EC90 /* ESPFBYWebViewController.m */,
 				268F061022278D2D00B54600 /* ESPAPPResources.h */,
 				268F061122278D2D00B54600 /* ESPAPPResources.m */,
+				26585CCA231E5C3B007342EE /* ESPFBYLocalAPI.h */,
+				26585CCB231E5C3B007342EE /* ESPFBYLocalAPI.m */,
 			);
 			path = ESPAPPResources;
 			sourceTree = "<group>";
@@ -672,6 +776,69 @@
 				26B0751522817BD8001A4B7A /* ESPLoadHyperlinksViewController.m */,
 			);
 			path = ESPMeshViews;
+			sourceTree = "<group>";
+		};
+		26B48E93232243F800A107D5 /* CocoaAsyncSocket */ = {
+			isa = PBXGroup;
+			children = (
+				26B48E94232243F800A107D5 /* GCD */,
+				26B48E9A232243F800A107D5 /* CocoaAsyncSocket.h */,
+				26B48E9B232243F800A107D5 /* Vendor */,
+			);
+			path = CocoaAsyncSocket;
+			sourceTree = "<group>";
+		};
+		26B48E94232243F800A107D5 /* GCD */ = {
+			isa = PBXGroup;
+			children = (
+				26B48E95232243F800A107D5 /* Documentation.html */,
+				26B48E96232243F800A107D5 /* GCDAsyncUdpSocket.m */,
+				26B48E97232243F800A107D5 /* GCDAsyncSocket.m */,
+				26B48E98232243F800A107D5 /* GCDAsyncUdpSocket.h */,
+				26B48E99232243F800A107D5 /* GCDAsyncSocket.h */,
+			);
+			path = GCD;
+			sourceTree = "<group>";
+		};
+		26B48E9B232243F800A107D5 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				26B48E9C232243F800A107D5 /* CocoaLumberjack */,
+			);
+			path = Vendor;
+			sourceTree = "<group>";
+		};
+		26B48E9C232243F800A107D5 /* CocoaLumberjack */ = {
+			isa = PBXGroup;
+			children = (
+				26B48E9D232243F800A107D5 /* DDTTYLogger.m */,
+				26B48E9E232243F800A107D5 /* DDLog.h */,
+				26B48E9F232243F800A107D5 /* DDAbstractDatabaseLogger.h */,
+				26B48EA0232243F800A107D5 /* DDASLLogger.m */,
+				26B48EA1232243F800A107D5 /* DDFileLogger.h */,
+				26B48EA2232243F800A107D5 /* Extensions */,
+				26B48EAA232243F800A107D5 /* DDLog.m */,
+				26B48EAB232243F800A107D5 /* DDTTYLogger.h */,
+				26B48EAC232243F800A107D5 /* DDLog+LOGV.h */,
+				26B48EAD232243F800A107D5 /* DDAbstractDatabaseLogger.m */,
+				26B48EAE232243F800A107D5 /* DDFileLogger.m */,
+				26B48EAF232243F800A107D5 /* DDASLLogger.h */,
+			);
+			path = CocoaLumberjack;
+			sourceTree = "<group>";
+		};
+		26B48EA2232243F800A107D5 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				26B48EA3232243F800A107D5 /* DDContextFilterLogFormatter.m */,
+				26B48EA4232243F800A107D5 /* DDDispatchQueueLogFormatter.m */,
+				26B48EA5232243F800A107D5 /* DDMultiFormatter.h */,
+				26B48EA6232243F800A107D5 /* DDContextFilterLogFormatter.h */,
+				26B48EA7232243F800A107D5 /* DDMultiFormatter.m */,
+				26B48EA8232243F800A107D5 /* DDDispatchQueueLogFormatter.h */,
+				26B48EA9232243F800A107D5 /* README.txt */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		26C93A2921EF3D0800683553 /* RSA */ = {
@@ -1008,10 +1175,10 @@
 		8D83CC0A20DA48F700DD632E /* ESPMeshLibrary */ = {
 			isa = PBXGroup;
 			children = (
+				26A25A4C21D1E79B0028F66C /* ESPMeshLibrary.entitlements */,
 				264F618022EB002200E4E8DF /* ESPAliyunResources */,
 				264F615F22EAFF7F00E4E8DF /* xib */,
 				268F060F22278AE500B54600 /* ESPAPPResources */,
-				26A25A4C21D1E79B0028F66C /* ESPMeshLibrary.entitlements */,
 				263384FA21CCEFE400E3EC90 /* ESPResources */,
 				263384E521CCEF5700E3EC90 /* ESPThirdGit */,
 				8D9C131E20ECCFB60002D331 /* WebUI */,
@@ -1321,6 +1488,7 @@
 				26A25AA721D5CBDF0028F66C /* Main.storyboard in Resources */,
 				264E417922DD71A00069139E /* bt_org_list.txt in Resources */,
 				264F617A22EAFF8000E4E8DF /* ALBBOpenAccountLoginHistoryTableViewCell.xib in Resources */,
+				26B48EB0232243F800A107D5 /* Documentation.html in Resources */,
 				264F617922EAFF8000E4E8DF /* ALBBOpenAccountEmailFindPwdViewController.xib in Resources */,
 				8D0AEDF420DBCACE00D3EB87 /* LICENSE in Resources */,
 				8D83CC1B20DA48F800DD632E /* LaunchScreen.storyboard in Resources */,
@@ -1341,6 +1509,7 @@
 				264F617322EAFF8000E4E8DF /* ALBBOpenAccountFindPwdViewController.xib in Resources */,
 				264F617222EAFF8000E4E8DF /* ALBBOpenAccountRegisterViewController.xib in Resources */,
 				264F617022EAFF8000E4E8DF /* ALBBOpenAccountOneStepRegisterVC.xib in Resources */,
+				26B48EB8232243F800A107D5 /* README.txt in Resources */,
 				264F617B22EAFF8000E4E8DF /* ALBBOpenAccountPreFindPwdViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1406,21 +1575,28 @@
 				8D0AEE0020DCAA0900D3EB87 /* EspHttpResponse.m in Sources */,
 				8D0AEE0A20DCAA6B00D3EB87 /* EspBlockingQueue.m in Sources */,
 				8DD92A6720F7690D00D7CA89 /* QRCodeReaderView.m in Sources */,
+				26B48EB9232243F800A107D5 /* DDLog.m in Sources */,
 				8D83CCD120DA567100DD632E /* ESPBLEHelper.m in Sources */,
 				8D83CD7F20DB8B2B00DD632E /* EspDevice.m in Sources */,
+				26B48EB4232243F800A107D5 /* DDASLLogger.m in Sources */,
 				8D83CCC520DA53EC00DD632E /* BabySpeaker.m in Sources */,
 				8D9BBACE20E108DB0061A3B8 /* IQUIView+IQKeyboardToolbar.m in Sources */,
 				264F618322EB006C00E4E8DF /* ESPAliyunSDKInit.m in Sources */,
 				8DD92A6620F7690D00D7CA89 /* QRCodeReaderViewController.m in Sources */,
+				2648F6DA23389FEF0092C2E4 /* ESPFBYColorPicker.m in Sources */,
 				26A25A4B21D0B2C80028F66C /* ESPDocumentsPath.m in Sources */,
+				26B48EB3232243F800A107D5 /* DDTTYLogger.m in Sources */,
+				26B48EBA232243F800A107D5 /* DDAbstractDatabaseLogger.m in Sources */,
 				8D9BBA9920E0E2F00061A3B8 /* EspRomQueryResult.m in Sources */,
 				26A25A4721D0B1E10028F66C /* ESPHomeService.m in Sources */,
 				8D83CC0D20DA48F700DD632E /* AppDelegate.m in Sources */,
 				8D37C5DB20DBC29300C217AA /* PacketCommand.m in Sources */,
+				26B48EB5232243F800A107D5 /* DDContextFilterLogFormatter.m in Sources */,
 				8DD9271F20F48D9100D7CA89 /* FMDatabaseAdditions.m in Sources */,
 				2656240A21DF43230020F852 /* ESPDataConversion.m in Sources */,
 				26497ECF22F3E05C0080FC15 /* IMSOpenAccount.m in Sources */,
 				8D9BBAD720E108DB0061A3B8 /* IQUIViewController+Additions.m in Sources */,
+				26B48EB7232243F800A107D5 /* DDMultiFormatter.m in Sources */,
 				8D0AEE0720DCAA5E00D3EB87 /* EspTextUtil.m in Sources */,
 				26C93A8321EF3D0900683553 /* HGBRSAEncrytor.m in Sources */,
 				8DD9271E20F48D9100D7CA89 /* FMDatabaseQueue.m in Sources */,
@@ -1455,7 +1631,10 @@
 				8D83CCC320DA53EC00DD632E /* BabyPeripheralManager.m in Sources */,
 				26497EC022F131AE0080FC15 /* IMSLifeClient.m in Sources */,
 				8DD9272320F48D9100D7CA89 /* YTKKeyValueStore.m in Sources */,
+				26585CCF231E702A007342EE /* ESPFBYAliyunAPI.m in Sources */,
+				264CD1F5232F5F180064EF50 /* ESPFBYAliViewController.m in Sources */,
 				264EAD0722D469EE00AD811C /* ESPSniffer.m in Sources */,
+				2648F6DD2338A0910092C2E4 /* ESPFBYColorPickerViewController.m in Sources */,
 				8D9BBAD520E108DB0061A3B8 /* IQUIScrollView+Additions.m in Sources */,
 				8D5F307520E0E04500B9BCCD /* EspConstants.m in Sources */,
 				26C92C70227E96C20017FA66 /* ESPFBYBLECBPeripheral.m in Sources */,
@@ -1469,24 +1648,31 @@
 				8D37C5D620DBAF5C00C217AA /* ESPNetWorking.m in Sources */,
 				8D5F307C20E0E12100B9BCCD /* EspJsonUtils.m in Sources */,
 				8D9BBA9C20E0E3130061A3B8 /* EspNetUtils.m in Sources */,
+				26588F3623265664000B8A14 /* IMSDeviceClient.m in Sources */,
+				26B48EB1232243F800A107D5 /* GCDAsyncUdpSocket.m in Sources */,
 				8D9BBAD120E108DB0061A3B8 /* IQKeyboardManager.m in Sources */,
 				8D5F306F20E0DF2200B9BCCD /* EspActionDevice.m in Sources */,
 				8D0AEDFB20DCA9F700D3EB87 /* EspHttpUtils.m in Sources */,
 				8D9BBACF20E108DB0061A3B8 /* IQPreviousNextView.m in Sources */,
 				8D37C5D120DBAF2400C217AA /* AFURLRequestSerialization.m in Sources */,
 				8D9BBAD820E108DB0061A3B8 /* IQKeyboardReturnKeyHandler.m in Sources */,
+				26585CCC231E5C3B007342EE /* ESPFBYLocalAPI.m in Sources */,
 				8D37C5DE20DBC2A700C217AA /* RSAObject.m in Sources */,
 				8D9BBAD320E108DB0061A3B8 /* IQUIWindow+Hierarchy.m in Sources */,
 				8D83CCE020DB7A7B00DD632E /* ESPTools.m in Sources */,
 				8D83CCC020DA53EC00DD632E /* BabyToy.m in Sources */,
+				26B48EBB232243F800A107D5 /* DDFileLogger.m in Sources */,
 				2646CCE3220181F30074C296 /* ESPRootScanmDNS.m in Sources */,
 				8D0AEDF820DBCF7A00D3EB87 /* DH_AES.m in Sources */,
 				8DD92A6820F7690D00D7CA89 /* QRCodeReader.m in Sources */,
 				26497EB722EE9F670080FC15 /* ESPAliyunSDKUse.m in Sources */,
 				268F061222278D2D00B54600 /* ESPAPPResources.m in Sources */,
+				2648F6FA2339FDA20092C2E4 /* FBYBallLoading.m in Sources */,
 				8DD92A6420F7690D00D7CA89 /* QRToggleTorchButton.m in Sources */,
 				263384E021CB91A700E3EC90 /* ESPFBYBLEDataParsing.m in Sources */,
+				26B48EB2232243F800A107D5 /* GCDAsyncSocket.m in Sources */,
 				8D9BBACB20E108DB0061A3B8 /* IQToolbar.m in Sources */,
+				26B48EB6232243F800A107D5 /* DDDispatchQueueLogFormatter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

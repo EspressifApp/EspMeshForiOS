@@ -1,4 +1,26 @@
+
+[[简体中文]](updatelog-zh-rCN.md)
 # Update Log
+
+## V 1.1.0:
+
+1. Project reconstruction resource integration modularization, Module is divided into: ESPAliyunResources Ali cloud device module, ESPAPPResources Local device module, ESPResources General function resource module, ESPThirdGit Third-party resource module
+2. Add ali cloud user login function
+3. Add ali cloud user login information function
+4. Add ali cloud judge whether the user login function
+5. Add ali cloud user logout function
+6. Add ali cloud access binding device list function
+7. Add ali cloud discovery device functions
+8. Add ali cloud stop discovery device function
+9. Add ali cloud device binding function
+10. Add ali cloud device unbind function
+11. Add ali cloud access device status function
+12. Add ali cloud access device attributes
+13. Add ali cloud modify device attributes function
+14. Add ali cloud access to upgrade equipment information list function
+15. Add ali cloud access to upgrade device information list function
+16. Add ali cloud upgrade wi-fi device function
+17. Add inquiry device firmware information, upgrade progress function
 
 ## V 1.0.2:
 1. UDP scanning problem fixed

@@ -12,7 +12,7 @@
 #import "EspBlockingQueue.h"
 #import "ESPDataConversion.h"
 
-static const NSTimeInterval TIMEOUT = 3;
+static const NSTimeInterval TIMEOUT = 5;
 
 @implementation EspHttpUtils
 
