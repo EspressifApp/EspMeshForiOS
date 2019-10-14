@@ -39,6 +39,8 @@
 		264F617C22EAFF8000E4E8DF /* ALBBOpenAccountResetPwdViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616D22EAFF7F00E4E8DF /* ALBBOpenAccountResetPwdViewController.xib */; };
 		264F617D22EAFF8000E4E8DF /* ALBBOpenAccountLoginLogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264F616E22EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogViewController.xib */; };
 		264F618322EB006C00E4E8DF /* ESPAliyunSDKInit.m in Sources */ = {isa = PBXBuildFile; fileRef = 264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */; };
+		26510F78234D898F00C09C2E /* ESPTaobaoBindViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26510F77234D898F00C09C2E /* ESPTaobaoBindViewController.m */; };
+		26510F7B234D8DDB00C09C2E /* IMSTmallSpeakerApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 26510F79234D8DDB00C09C2E /* IMSTmallSpeakerApi.m */; };
 		2656240721DF312F0020F852 /* ESPCheckAppVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2656240621DF312F0020F852 /* ESPCheckAppVersion.m */; };
 		2656240A21DF43230020F852 /* ESPDataConversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2656240921DF43230020F852 /* ESPDataConversion.m */; };
 		26585CCC231E5C3B007342EE /* ESPFBYLocalAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 26585CCB231E5C3B007342EE /* ESPFBYLocalAPI.m */; };
@@ -205,6 +207,10 @@
 		264F616E22EAFF7F00E4E8DF /* ALBBOpenAccountLoginLogViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ALBBOpenAccountLoginLogViewController.xib; sourceTree = "<group>"; };
 		264F618122EB006C00E4E8DF /* ESPAliyunSDKInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ESPAliyunSDKInit.h; path = ../ESPAliyunSDKInit.h; sourceTree = "<group>"; };
 		264F618222EB006C00E4E8DF /* ESPAliyunSDKInit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ESPAliyunSDKInit.m; path = ../ESPAliyunSDKInit.m; sourceTree = "<group>"; };
+		26510F76234D898F00C09C2E /* ESPTaobaoBindViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPTaobaoBindViewController.h; sourceTree = "<group>"; };
+		26510F77234D898F00C09C2E /* ESPTaobaoBindViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPTaobaoBindViewController.m; sourceTree = "<group>"; };
+		26510F79234D8DDB00C09C2E /* IMSTmallSpeakerApi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMSTmallSpeakerApi.m; sourceTree = "<group>"; };
+		26510F7A234D8DDB00C09C2E /* IMSTmallSpeakerApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IMSTmallSpeakerApi.h; sourceTree = "<group>"; };
 		2656240521DF312F0020F852 /* ESPCheckAppVersion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPCheckAppVersion.h; sourceTree = "<group>"; };
 		2656240621DF312F0020F852 /* ESPCheckAppVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPCheckAppVersion.m; sourceTree = "<group>"; };
 		2656240821DF43230020F852 /* ESPDataConversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESPDataConversion.h; sourceTree = "<group>"; };
@@ -663,6 +669,8 @@
 		2648F6FC233B48460092C2E4 /* ESPAliyunManager */ = {
 			isa = PBXGroup;
 			children = (
+				26510F7A234D8DDB00C09C2E /* IMSTmallSpeakerApi.h */,
+				26510F79234D8DDB00C09C2E /* IMSTmallSpeakerApi.m */,
 				26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */,
 				26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */,
 				26497EBF22F131AE0080FC15 /* IMSLifeClient.h */,
@@ -701,6 +709,7 @@
 		264F618022EB002200E4E8DF /* ESPAliyunResources */ = {
 			isa = PBXGroup;
 			children = (
+				26510F75234D858C00C09C2E /* ESPAliyunViewController */,
 				2648F6FC233B48460092C2E4 /* ESPAliyunManager */,
 				26497EB522EE9F670080FC15 /* ESPAliyunSDKUse.h */,
 				26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */,
@@ -708,6 +717,15 @@
 				26585CCE231E702A007342EE /* ESPFBYAliyunAPI.m */,
 			);
 			path = ESPAliyunResources;
+			sourceTree = "<group>";
+		};
+		26510F75234D858C00C09C2E /* ESPAliyunViewController */ = {
+			isa = PBXGroup;
+			children = (
+				26510F76234D898F00C09C2E /* ESPTaobaoBindViewController.h */,
+				26510F77234D898F00C09C2E /* ESPTaobaoBindViewController.m */,
+			);
+			path = ESPAliyunViewController;
 			sourceTree = "<group>";
 		};
 		2656240421DF30CB0020F852 /* ESPFBYBLEHelper */ = {
@@ -1429,6 +1447,7 @@
 				8D83CC0520DA48F700DD632E /* Frameworks */,
 				8D83CC0620DA48F700DD632E /* Resources */,
 				A975F1E94449B36156B906F6 /* [CP] Copy Pods Resources */,
+				9B11D6A1C418938874B4D767 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1517,6 +1536,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		9B11D6A1C418938874B4D767 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ESPMeshLibrary/Pods-ESPMeshLibrary-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		A975F1E94449B36156B906F6 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1601,6 +1637,7 @@
 				26C93A8321EF3D0900683553 /* HGBRSAEncrytor.m in Sources */,
 				8DD9271E20F48D9100D7CA89 /* FMDatabaseQueue.m in Sources */,
 				8D83CCC620DA53EC00DD632E /* BabyRhythm.m in Sources */,
+				26510F78234D898F00C09C2E /* ESPTaobaoBindViewController.m in Sources */,
 				8D9BBACC20E108DB0061A3B8 /* IQTitleBarButtonItem.m in Sources */,
 				8DD9272220F48D9100D7CA89 /* FMResultSet.m in Sources */,
 				8D37C5CE20DBAF2400C217AA /* AFURLResponseSerialization.m in Sources */,
@@ -1633,6 +1670,7 @@
 				8DD9272320F48D9100D7CA89 /* YTKKeyValueStore.m in Sources */,
 				26585CCF231E702A007342EE /* ESPFBYAliyunAPI.m in Sources */,
 				264CD1F5232F5F180064EF50 /* ESPFBYAliViewController.m in Sources */,
+				26510F7B234D8DDB00C09C2E /* IMSTmallSpeakerApi.m in Sources */,
 				264EAD0722D469EE00AD811C /* ESPSniffer.m in Sources */,
 				2648F6DD2338A0910092C2E4 /* ESPFBYColorPickerViewController.m in Sources */,
 				8D9BBAD520E108DB0061A3B8 /* IQUIScrollView+Additions.m in Sources */,
@@ -1810,10 +1848,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = NO;
 				CODE_SIGN_ENTITLEMENTS = ESPMeshLibrary/ESPMeshLibrary.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 0.2.3;
 				DEVELOPMENT_TEAM = QWXF6GB4AV;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -1834,13 +1874,14 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl",
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
+				MARKETING_VERSION = 1.1.1;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "$(inherited)";
 				PODS_ROOT = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.espressif.ESPMeshLibrary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1850,10 +1891,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = NO;
 				CODE_SIGN_ENTITLEMENTS = ESPMeshLibrary/ESPMeshLibrary.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 0.2.3;
 				DEVELOPMENT_TEAM = QWXF6GB4AV;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -1874,12 +1917,13 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl",
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
+				MARKETING_VERSION = 1.1.1;
 				OTHER_LDFLAGS = "$(inherited)";
 				PODS_ROOT = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.espressif.ESPMeshLibrary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

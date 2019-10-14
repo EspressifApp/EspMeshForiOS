@@ -142,6 +142,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
             onConScanBLE: function (devices) {
                 var self = this, list = [];
                 devices = JSON.parse(devices);
+                devices = Util.blueNameDecode(self, devices);
                 $.each(devices, function(i, item) {
                     if (Util.isMesh(item.name, item.version, item.beacon)) {
                         list.push(item);

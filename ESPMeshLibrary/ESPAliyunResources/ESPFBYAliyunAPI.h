@@ -52,6 +52,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)aliUpgradeWifiDevice:(NSString *)message;
 // 查询设备固件信息、升级进度
 - (void)aliQueryDeviceUpgradeStatus:(NSString *)message;
+// 用户绑定淘宝Id
+- (void)aliUserBindTaobaoId;
+// 查询用户绑定的淘宝Id
+- (void)getAliUserId:(NSString *)message;
+// 用户解绑淘宝Id
+- (void)aliUserUnbindId:(NSString *)message;
 @end
 
 @interface ESPFBYAliyunAPI : NSObject

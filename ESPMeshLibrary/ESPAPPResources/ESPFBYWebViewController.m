@@ -47,7 +47,6 @@
     
     [self showViewUI];
 }
-
 - (void)showViewUI {
     NSArray *bleArr = @[@"扫描设备",@"停止扫描",@"清空数据"];
     for (int i = 0; i < bleArr.count; i ++) {
@@ -129,6 +128,7 @@
         [self.navigationController pushViewController:pvc animated:YES];
     }
 }
+
 - (void)showMessage:(NSString *)message
 {
     self.peripheralText.text = [self.peripheralText.text stringByAppendingFormat:@"%@\n",message];

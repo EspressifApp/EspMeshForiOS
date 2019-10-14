@@ -11,6 +11,8 @@
 #import "ESPAliyunSDKInit.h"
 #import "ESPDataConversion.h"
 #import "IMSDeviceClient.h"
+#import "IMSTmallSpeakerApi.h"
+#import "ESPTaobaoBindViewController.h"
 
 NSString *const NET_WIFI_TYPE = @"NET_WIFI";
 NSString *const NET_CELLULAR_TYPE = @"NET_CELLULAR";
@@ -21,7 +23,7 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
 
 #define ValidDict(f) (f!=nil && [f isKindOfClass:[NSDictionary class]])
 #define ValidArray(f) (f!=nil && [f isKindOfClass:[NSArray class]] && [f count]>0)
-@interface ESPAliyunSDKUse ()
+@interface ESPAliyunSDKUse ()<ESPFBYTaobaoBindDelegate>
 
 @property (nonatomic, strong) NSDictionary *deviceInfo;
 @property (strong, nonatomic)NSTimer *timer;
@@ -503,6 +505,36 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
     }];
 }
 
+- (void)userBindTaobaoIdWithParams:(UIViewController *)viewController completionHandler:(userBindTaobaoIdBlock)completionHandler {
+//    [IMSTmallSpeakerApi bindTaobaoIdWithParams:para completion:^(NSError * _Nonnull error, NSDictionary * _Nonnull info) {
+//        NSDictionary *resultDic = [self messageBlock:info withError:error];
+//        completionHandler(resultDic);
+//    }];
+    _userBindTaobaoIdBlock = completionHandler;
+    ESPTaobaoBindViewController *tbvc = [[ESPTaobaoBindViewController alloc]init];
+    tbvc.delegate = self;
+    [viewController.navigationController pushViewController:tbvc animated:YES];
+}
+
+- (void)userTaobaoBindWithResult:(NSDictionary *)result error:(NSError *)err {
+    NSDictionary *resultDic = [self messageBlock:result withError:err];
+    _userBindTaobaoIdBlock(resultDic);
+}
+
+- (void)userUnbindTaobaoIdWithParams:(NSDictionary *)para completionHandler:(userUnbindTaobaoIdBlock)completionHandler {
+    [IMSTmallSpeakerApi unbindTaobaoIdWithParams:para completion:^(NSError * _Nonnull error, NSDictionary * _Nonnull info) {
+        NSDictionary *resultDic = [self messageBlock:info withError:error];
+        completionHandler(resultDic);
+    }];
+}
+
+- (void)getUserTaobaoIdWithParams:(NSDictionary *)para ccompletionHandler:(getUserTaobaoIdBlock)completionHandler {
+    [IMSTmallSpeakerApi getTaobaoIdWithParams:para completion:^(NSError * _Nonnull error, NSDictionary * _Nonnull info) {
+        NSDictionary *resultDic = [self messageBlock:info withError:error];
+        completionHandler(resultDic);
+    }];
+}
+
 - (NSDictionary *)messageBlock:(id)data withError:(NSError *)error {
     NSMutableDictionary *resultDic = [NSMutableDictionary dictionaryWithCapacity:0];
     if (error) {
@@ -514,4 +546,5 @@ NSString *const NET_OTHER_TYPE = @"NET_OTHER";
     }
     return resultDic;
 }
+
 @end

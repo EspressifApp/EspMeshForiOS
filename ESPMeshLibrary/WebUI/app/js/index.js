@@ -1120,6 +1120,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/index.html", "../js/footer", "./
                 if (!Util._isEmpty(devices) && self.$store.state.showScanBle && self.showScanDevice && !self.loadShow) {
                     var conScanDeviceList = self.$store.state.conScanDeviceList;
                     devices = JSON.parse(devices);
+                    devices = Util.blueNameDecode(self, devices);
                     $.each(devices, function(i, item) {
                         if (item.rssi >= rssiValue && Util.isMesh(item.name, item.version, item.beacon)) {
                             rssiList.push(item);

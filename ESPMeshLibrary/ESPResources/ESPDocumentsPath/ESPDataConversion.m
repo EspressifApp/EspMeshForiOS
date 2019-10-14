@@ -781,4 +781,23 @@
 //        [self sendMsg:@"onWifiStateChanged" param:paramjson];
     }
 }
+
+//设置状态栏背景颜色和字体颜色
++ (void)setSystemStatusBar:(id)message {
+    if (!ValidDict(message)) {
+        return;
+    }
+    if ([message objectForKey:@"defaultStyle"]) {
+        [UIApplication sharedApplication].statusBarStyle =  UIStatusBarStyleLightContent;
+    }else {
+        [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
+    }
+    NSArray *bgArr = [message objectForKey:@"background"];
+    CGFloat r = [bgArr[0] floatValue] / 255.0;
+    CGFloat g = [bgArr[1] integerValue] / 255.0;
+    CGFloat b = [bgArr[2] integerValue] / 255.0;
+    CGFloat a = [bgArr[3] integerValue] / 255.0;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"statusBarBackgroundColor" object:[UIColor colorWithRed:r green:g blue:b alpha:a]];
+}
+
 @end

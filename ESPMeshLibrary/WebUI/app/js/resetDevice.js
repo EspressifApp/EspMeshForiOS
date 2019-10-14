@@ -361,6 +361,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
             onConScanBLE: function (devices) {
                 var self = this;
                 devices = JSON.parse(devices);
+                devices = Util.blueNameDecode(self, devices);
                 self.setScanList(devices);
                 if (self.$refs.import.importFlag) {
                     self.$refs.import.onBackImport();

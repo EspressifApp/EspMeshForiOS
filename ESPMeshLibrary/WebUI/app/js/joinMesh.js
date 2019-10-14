@@ -315,6 +315,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/joinMesh.html", "./importDevice"
                 var self = this;
                 devices = JSON.parse(devices);
                 self.setScanList(devices);
+                devices = Util.blueNameDecode(self, devices);
                 window.onBackPressed = self.hide;
             }
 

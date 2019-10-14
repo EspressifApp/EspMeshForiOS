@@ -35,10 +35,10 @@
 }
 
 - (void)showViewUI {
-    NSArray *bleArr = @[@"设备详情",@"停止扫描",@"清空数据"];
+    NSArray *bleArr = @[@"绑定ID",@"查询绑定",@"解绑ID",@""];
     for (int i = 0; i < bleArr.count; i ++) {
-        int count = FBYDeviceWidth*i/3;
-        UIButton *scanBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-50, (FBYDeviceWidth-2)/3, 50)];
+        int count = FBYDeviceWidth*i/4;
+        UIButton *scanBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-50, (FBYDeviceWidth-3)/4, 50)];
         scanBtn.backgroundColor = [UIColor whiteColor];
         [scanBtn setTitleColor:[UIColor lightGrayColor] forState:0];
         scanBtn.tag = 6000 + i;
@@ -47,10 +47,10 @@
         [self.view addSubview:scanBtn];
     }
     
-    NSArray *bluetoothArr = @[@"查询设备",@"升级设备",@"升级进度"];
+    NSArray *bluetoothArr = @[@"查询设备",@"升级设备",@"升级进度",@"设备详情"];
     for (int i = 0; i < bluetoothArr.count; i ++) {
-        int count = FBYDeviceWidth*i/3;
-        UIButton *bluetoothBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-101, (FBYDeviceWidth-2)/3, 50)];
+        int count = FBYDeviceWidth*i/4;
+        UIButton *bluetoothBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-101, (FBYDeviceWidth-3)/4, 50)];
         bluetoothBtn.backgroundColor = [UIColor whiteColor];
         [bluetoothBtn setTitleColor:[UIColor lightGrayColor] forState:0];
         bluetoothBtn.tag = 7000 + i;
@@ -59,10 +59,10 @@
         [self.view addSubview:bluetoothBtn];
     }
     
-    NSArray *upgradesArr = @[@"登录",@"登出",@"设备列表"];
+    NSArray *upgradesArr = @[@"登录",@"登出",@"设备列表",@""];
     for (int i = 0; i < upgradesArr.count; i ++) {
-        int count = FBYDeviceWidth*i/3;
-        UIButton *upgradesBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-152, (FBYDeviceWidth-2)/3, 50)];
+        int count = FBYDeviceWidth*i/4;
+        UIButton *upgradesBtn = [[UIButton alloc]initWithFrame:CGRectMake(count, FBYDeviceHeight-152, (FBYDeviceWidth-3)/4, 50)];
         upgradesBtn.backgroundColor = [UIColor whiteColor];
         [upgradesBtn setTitleColor:[UIColor lightGrayColor] forState:0];
         upgradesBtn.tag = 8000 + i;
@@ -78,21 +78,20 @@
 - (void)scanBtn:(UIButton *)sender {
     
     if (sender.tag == 6000) {
-        [self showMessage:@"升级设备详情"];
-        if (ValidArray(_iotDeviceArr)) {
-            for (int i = 0; i < _iotDeviceArr.count; i ++) {
-                [[ESPAliyunSDKUse sharedClient] queryProductsInfoWithIotId:_iotDeviceArr[i] completionHandler:^(NSDictionary * _Nonnull queryProductsInfoResult) {
-                    NSLog(@"升级设备详情：%@", queryProductsInfoResult);
-                    [self showMessage:[NSString stringWithFormat:@"升级设备详情：%@", queryProductsInfoResult]];
-                }];
-            }
-        }
+        [self showMessage:@"绑定ID"];
+        [[ESPAliyunSDKUse sharedClient] userBindTaobaoIdWithParams:self completionHandler:^(NSDictionary * _Nonnull userBindTaobaoIdResult) {
+            NSLog(@"绑定结果%@",userBindTaobaoIdResult);
+        }];
     }else if (sender.tag == 6001) {
-        [self showMessage:@"停止扫描"];
-        
+        [self showMessage:@"查询绑定"];
+        [[ESPAliyunSDKUse sharedClient] getUserTaobaoIdWithParams:@{@"accountType":@"TAOBAO"} ccompletionHandler:^(NSDictionary * _Nonnull getUserTaobaoIdResult) {
+            NSLog(@"查询绑定%@",getUserTaobaoIdResult);
+        }];
     }else if (sender.tag == 6002) {
-        self.peripheralText.text = @"";
-        [self showMessage:@"清空设备"];
+        [self showMessage:@"解绑ID"];
+        [[ESPAliyunSDKUse sharedClient] userUnbindTaobaoIdWithParams:@{@"accountType":@"TAOBAO"} completionHandler:^(NSDictionary * _Nonnull userUnbindTaobaoIdResult) {
+            NSLog(@"解绑结果%@",userUnbindTaobaoIdResult);
+        }];
     }
     
 }
@@ -130,6 +129,16 @@
                     NSString* json=[ESPDataConversion jsonConfigureFromObject:deviceStatusResult];
                     NSLog(@"设备升级进度：%@", json);
                     [self showMessage:[NSString stringWithFormat:@"设备升级进度：%@", deviceStatusResult]];
+                }];
+            }
+        }
+    }else if (sender.tag == 7003) {
+        [self showMessage:@"升级设备详情"];
+        if (ValidArray(_iotDeviceArr)) {
+            for (int i = 0; i < _iotDeviceArr.count; i ++) {
+                [[ESPAliyunSDKUse sharedClient] queryProductsInfoWithIotId:_iotDeviceArr[i] completionHandler:^(NSDictionary * _Nonnull queryProductsInfoResult) {
+                    NSLog(@"升级设备详情：%@", queryProductsInfoResult);
+                    [self showMessage:[NSString stringWithFormat:@"升级设备详情：%@", queryProductsInfoResult]];
                 }];
             }
         }

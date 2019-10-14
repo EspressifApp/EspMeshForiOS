@@ -665,6 +665,12 @@
     [self.delegate webViewLoadMainPage:message];
 }
 
+//设置状态栏背景颜色和字体颜色
+- (void)setStatusBar:(NSString *)message {
+    id msg=[ESPDataConversion objectFromJsonString:message];
+    [ESPDataConversion setSystemStatusBar:msg];
+}
+
 //设备状态变化上报
 -(void)sendDeviceStatusChanged:(NSString*)mac{
     if (isUDPScan) {

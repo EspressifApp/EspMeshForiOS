@@ -20,6 +20,9 @@
 14. <a href="#14">升级Wi-Fi设备</a>
 15. <a href="#15">设备升级进度查询</a>
 16. <a href="#16">查询正在升级的设备信息列表</a>
+17. <a href="#17">用户绑定淘宝Id</a>
+18. <a href="#18">查询用户绑定的淘宝Id</a>
+19. <a href="#19">用户解绑淘宝Id</a>
 
 ## 二：接口详情
 
@@ -399,8 +402,67 @@
 }
 ```
 
+### 17. <a name="17">用户绑定淘宝Id</a>
 
+```
+// 用户绑定淘宝Id
+- (void)aliUserBindTaobaoId;
+```
 
+返回方法名：onAliUserBindTaobaoId，返回参数格式
+
+```
+{
+	"data": {
+		"accountId": "2518246212",
+		"accountType": "TAOBAO",
+		"linkIdentityIds": [
+			"50cbop901db40de4a**********f89728bf80584"
+			]
+	},
+	"code": "200"
+}
+```
+
+### 18. <a name="18">查询用户绑定的淘宝Id</a>
+
+```
+// 查询用户绑定的淘宝Id 此处message = {"accountType":"TAOBAO"}
+- (void)getAliUserId:(NSString *)message;
+```
+
+返回方法名：onGetAliUserId，返回参数格式
+
+```
+{
+	"data": {
+		"accountId": "795255212",
+		"accountType": "TAOBAO",
+		"linkIdentityIds": "50cbop901db40de4a**********f89728bf80584"
+	},
+	"accountType": "TAOBAO",
+	"code": "200"
+}
+```
+
+### 19. <a name="19">用户解绑淘宝Id</a>
+
+```
+// 用户解绑淘宝Id 此处message = {"accountType":"TAOBAO"}
+- (void)aliUserUnbindId:(NSString *)message;
+```
+
+返回方法名：onAliUserUnbindId，返回参数格式
+
+```
+{
+	"data": {
+		"message": "remove account link success!"
+	},
+	"accountType": "TAOBAO",
+	"code": "200"
+}
+```
 
 
 

@@ -117,6 +117,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/groupColor.html", "../js/colorPi
             hide: function () {
                 this.$emit("groupColorShow");
                 this.showFlag = false;
+                Util.setStatusBarBlue();
                 this.$refs.color.hideColor();
             },
             showDesc: function(position) {
@@ -465,9 +466,12 @@ define(["vue", "MINT", "Util", "txt!../../pages/groupColor.html", "../js/colorPi
                 var self = this;
                 self.groupMacs = self.getMacs();
                 if (id == 1) {
+                    Util.setStatusBarBLack();
                     setTimeout(function() {
                         self.$refs.color.show();
                     }, 200)
+                } else {
+                    Util.setStatusBarBlue();
                 }
                 self.operateCurrent = id;
             },

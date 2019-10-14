@@ -121,17 +121,18 @@ define(["vue", "MINT", "Util", "txt!../../pages/group.html", "../js/footer", "./
                 var groupNames = [], group = {};
                 $.each(list, function(i, item) {
                     var characteristics = item.characteristics;
-                    var groups = characteristics["DeviceArray"];
-                    if (!Util._isEmpty(groups)) {
-                        console.log(JSON.stringify(groups));
-                        groups = groups['value'];
-                        for (var k = 0; k < groups.length; k++) {
-                            var name = groups[k];
-                            if (groupNames.indexOf(name) != -1) {
-                                group[name].push(item.iotId);
-                            } else {
-                                groupNames.push(name);
-                                group[name] = [item.iotId]
+                    if (!Util._isEmpty(characteristics)) {
+                        if (!Util._isEmpty(characteristics["DeviceArray"])) {
+                            var groups = characteristics["DeviceArray"];
+                            groups = groups['value'];
+                            for (var k = 0; k < groups.length; k++) {
+                                var name = groups[k];
+                                if (groupNames.indexOf(name) != -1) {
+                                    group[name].push(item.iotId);
+                                } else {
+                                    groupNames.push(name);
+                                    group[name] = [item.iotId]
+                                }
                             }
                         }
                     }

@@ -128,6 +128,9 @@ typedef void(^sendDeviceStatusBlock)(NSDictionary *statusResultDic);
  @param wifiSuccess Wi-Fi状态回调
  */
 + (void)sendAPPWifiStatus:(void(^)(NSString *message))wifiSuccess;
+
+//设置状态栏背景颜色和字体颜色
++ (void)setSystemStatusBar:(id)message;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -40,6 +40,11 @@ typedef void(^deviceUpgradeListBlock)(NSDictionary *deviceListResult);
 typedef void(^deviceUpgradeStatusBlock)(NSDictionary *deviceStatusResult);
 typedef void(^queryProductsInfoBlock)(NSDictionary *queryProductsInfoResult);
 
+typedef void(^userBindTaobaoIdBlock)(NSDictionary *userBindTaobaoIdResult);
+@property (nonatomic, copy)userBindTaobaoIdBlock userBindTaobaoIdBlock;
+
+typedef void(^userUnbindTaobaoIdBlock)(NSDictionary *userUnbindTaobaoIdResult);
+typedef void(^getUserTaobaoIdBlock)(NSDictionary *getUserTaobaoIdResult);
 
 + (instancetype)sharedClient;
 
@@ -166,6 +171,18 @@ typedef void(^queryProductsInfoBlock)(NSDictionary *queryProductsInfoResult);
  */
 - (void)queryProductsInfoWithIotId:(NSString *)iotId
                 completionHandler:(queryProductsInfoBlock)completionHandler;
+
+// 用户绑定淘宝Id 此处para = @{@"authCode":@"xxxx"}，其中xxxx为网页回调的code，具体查看登录成功后的回调处理步骤。
+- (void)userBindTaobaoIdWithParams:(UIViewController *)viewController
+                    completionHandler:(userBindTaobaoIdBlock)completionHandler;
+
+// 用户解绑淘宝Id 此处para = @{@"accountType":@"TAOBAO"}
+- (void)userUnbindTaobaoIdWithParams:(NSDictionary *)para
+                      completionHandler:(userUnbindTaobaoIdBlock)completionHandler;
+
+// 查询用户绑定的淘宝Id 此处para = @{@"accountType":@"TAOBAO"}
+- (void)getUserTaobaoIdWithParams:(NSDictionary *)para
+                   ccompletionHandler:(getUserTaobaoIdBlock)completionHandler;
 
 @end
 

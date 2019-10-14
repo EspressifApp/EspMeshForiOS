@@ -9,7 +9,7 @@
 #import "ESPMeshManager.h"
 #import "ESPTools.h"
 #import "ESPNetWorking.h"
-
+#import <CoreLocation/CoreLocation.h>
 
 
 @protocol ChildrenDelegate <NSObject>
@@ -21,6 +21,7 @@
 @implementation ESPMeshManager{
     ESPBLEIO* curPairIO;
     NSDate* starPairDate;
+    CLLocationManager *_locationManagerSystem;
 }
 
 //单例模式
@@ -40,10 +41,34 @@
     return self;
 }
 
-
+- (BOOL)getUserLocationAuth {
+    BOOL result = NO;
+    switch ([CLLocationManager authorizationStatus]) {
+        case kCLAuthorizationStatusNotDetermined:
+            break;
+        case kCLAuthorizationStatusRestricted:
+            break;
+        case kCLAuthorizationStatusDenied:
+            break;
+        case kCLAuthorizationStatusAuthorizedAlways:
+            result = YES;
+            break;
+        case kCLAuthorizationStatusAuthorizedWhenInUse:
+            result = YES;
+            break;
+            
+        default:
+            break;
+    }
+    return result;
+}
 
 //获取当前Wi-Fi名
 -(nullable NSString *)getCurrentWiFiSsid{
+    if (![self getUserLocationAuth]) {
+        _locationManagerSystem = [[CLLocationManager alloc]init];
+        [_locationManagerSystem requestWhenInUseAuthorization];
+    }
     return ESPTools.getCurrentWiFiSsid;
 }
 //获取当前BSSID

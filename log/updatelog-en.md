@@ -2,7 +2,13 @@
 [[简体中文]](updatelog-zh-rCN.md)
 # Update Log
 
-## V 1.1.0:
+## V1.1.1:
+
+1. Optimization of iOS 13.1.2 version wi-fi information acquisition failure problem
+2. Add location permissions, wi-fi information acquisition needs
+
+
+## V1.1.0:
 
 1. Project reconstruction resource integration modularization, Module is divided into: ESPAliyunResources Ali cloud device module, ESPAPPResources Local device module, ESPResources General function resource module, ESPThirdGit Third-party resource module
 2. Add ali cloud user login function

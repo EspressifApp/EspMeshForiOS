@@ -1,5 +1,17 @@
 define(function(){
     var Utils = {
+        setStatusBarBLack: function() {
+            this.setStatusBar(17, 20, 29, 255, true);
+        },
+        setStatusBarBlue: function() {
+            this.setStatusBar(62, 194, 252, 255, true);
+        },
+        setStatusBarWhite: function() {
+            this.setStatusBar(255, 255, 255, 255, false);
+        },
+        setStatusBar: function(r, g, b, a, flag) {
+            espmesh.setStatusBar(JSON.stringify({"background": [r, g, b, a], "defaultStyle": flag}))
+        },
         Base64: {
             _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
             encode: function(e) {
@@ -533,6 +545,16 @@ define(function(){
         assemblyObject: function(item, self) {
             return {mac: item.mac, name: item.name, rssi: item.rssi, bssid: item.bssid,
                 position: self.getPairInfo(item.mac), tid: item.tid, beacon: item.beacon, only_beacon: item.only_beacon};
+        },
+        blueNameDecode: function(self, blueDevices) {
+            var that = this;
+            if (self.$store.state.systemInfo == "Android") {
+                $.each(blueDevices, function(i, item) {
+                    item.name = that.Base64.decode(item.name);
+                    blueDevices.splice(i, 1, item)
+                })
+            }
+            return blueDevices;
         },
         stringToBytes: function (str) {
             var ch, st, re = [];

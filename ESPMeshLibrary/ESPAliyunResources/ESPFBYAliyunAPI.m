@@ -161,4 +161,34 @@
         [self.delegate sendAliyunMsg:@"onAliQueryDeviceUpgradeStatus" param:json];
     }];
 }
+
+// 用户绑定淘宝Id
+- (void)aliUserBindTaobaoId {
+    [[ESPAliyunSDKUse sharedClient] userBindTaobaoIdWithParams:_aliyunViewController completionHandler:^(NSDictionary * _Nonnull userBindTaobaoIdResult) {
+        NSString* json=[ESPDataConversion jsonConfigureFromObject:userBindTaobaoIdResult];
+        [self.delegate sendAliyunMsg:@"onAliUserBindTaobaoId" param:json];
+    }];
+}
+
+// 查询用户绑定的淘宝Id
+- (void)getAliUserId:(NSString *)message {
+    NSDictionary *msg=[ESPDataConversion objectFromJsonString:message];
+    [[ESPAliyunSDKUse sharedClient] getUserTaobaoIdWithParams:msg ccompletionHandler:^(NSDictionary * _Nonnull getUserTaobaoIdResult) {
+        NSMutableDictionary *resultDic = [NSMutableDictionary dictionaryWithDictionary:getUserTaobaoIdResult];
+        [resultDic addEntriesFromDictionary:msg];
+        NSString* json=[ESPDataConversion jsonConfigureFromObject:resultDic];
+        [self.delegate sendAliyunMsg:@"onGetAliUserId" param:json];
+    }];
+}
+
+// 用户解绑淘宝Id
+- (void)aliUserUnbindId:(NSString *)message {
+    NSDictionary *msg=[ESPDataConversion objectFromJsonString:message];
+    [[ESPAliyunSDKUse sharedClient] userUnbindTaobaoIdWithParams:msg completionHandler:^(NSDictionary * _Nonnull userUnbindTaobaoIdResult) {
+        NSMutableDictionary *resultDic = [NSMutableDictionary dictionaryWithDictionary:userUnbindTaobaoIdResult];
+        [resultDic addEntriesFromDictionary:msg];
+        NSString* json=[ESPDataConversion jsonConfigureFromObject:resultDic];
+        [self.delegate sendAliyunMsg:@"onAliUserUnbindId" param:json];
+    }];
+}
 @end

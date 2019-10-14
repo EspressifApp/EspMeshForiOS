@@ -1,4 +1,5 @@
 @CHARSET "UTF-8";
+
 ul {
 	padding: 0;
 	margin: 0;
@@ -577,8 +578,8 @@ ul {
 }
 .add-ul {
 	position: absolute;
-	top: 50px;
-	right: 8px;
+	top: 44px;
+	right: 4px;
 	width: 140px;
 	list-style: none;
 	background: #3ec2fc;

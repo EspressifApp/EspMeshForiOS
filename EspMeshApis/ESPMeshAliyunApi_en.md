@@ -20,6 +20,9 @@
 14. <a href="#14">Upgrade wi-fi device</a>
 15. <a href="#15">Device upgrade progress query</a>
 16. <a href="#16">Query the list of device information being upgraded</a>
+17. <a href="#17">Users bind taobao Id</a>
+18. <a href="#18">Query the user binding taobao Id</a>
+19. <a href="#19">User unbind taobao Id</a>
 
 ## Two: details of the interface
 
@@ -397,8 +400,66 @@ Return method name: onGetAliOTAIsUpgradingDeviceList, Parameter format:
 }
 ```
 
+### 17. <a name="17">Users bind taobao Id</a>
 
+```
+- (void)aliUserBindTaobaoId;
+```
 
+Return method name: onAliUserBindTaobaoId, Parameter format:
+
+```
+{
+	"data": {
+		"accountId": "2518246212",
+		"accountType": "TAOBAO",
+		"linkIdentityIds": [
+			"50cbop901db40de4a**********f89728bf80584"
+			]
+	},
+	"code": "200"
+}
+```
+
+### 18. <a name="18">Query the user binding taobao Id</a>
+
+```
+// Parameter message = {"accountType":"TAOBAO"}
+- (void)getAliUserId:(NSString *)message;
+```
+
+Return method name: onGetAliUserId, Parameter format:
+
+```
+{
+	"data": {
+		"accountId": "795255212",
+		"accountType": "TAOBAO",
+		"linkIdentityIds": "50cbop901db40de4a**********f89728bf80584"
+	},
+	"accountType": "TAOBAO",
+	"code": "200"
+}
+```
+
+### 19. <a name="19">User unbind taobao Id</a>
+
+```
+// Parameter message = {"accountType":"TAOBAO"}
+- (void)aliUserUnbindId:(NSString *)message;
+```
+
+Return method name: onAliUserUnbindId，Parameter format:
+
+```
+{
+	"data": {
+		"message": "remove account link success!"
+	},
+	"accountType": "TAOBAO",
+	"code": "200"
+}
+```
 
 
 

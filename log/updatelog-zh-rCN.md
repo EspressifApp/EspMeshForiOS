@@ -3,7 +3,12 @@
 
 # 更新记录
 
-## V 1.1.0:
+## V1.1.1:
+
+1. 优化iOS 13.1.2版本wi-fi信息获取失败问题
+2. 添加定位权限，wi-fi信息获取需要
+
+## V1.1.0:
 
 1. 项目重构资源整合模块化，模块分为：ESPAliyunResources 阿里云云设备模块、ESPAPPResources 本地设备模块、ESPResources 通用功能资源模块、ESPThirdGit 第三方资源模块
 2. 新增阿里云用户登录功能

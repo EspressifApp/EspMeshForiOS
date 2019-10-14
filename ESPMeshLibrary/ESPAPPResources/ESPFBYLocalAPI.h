@@ -133,6 +133,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)scanQRCode;
 //本地 (app) 和阿里云 (cloud) 页面加载
 - (void)mainPageLoad:(NSString *)message;
+//设置状态栏背景颜色和字体颜色
+- (void)setStatusBar:(NSString *)message;
 @end
 
 @interface ESPFBYLocalAPI : NSObject

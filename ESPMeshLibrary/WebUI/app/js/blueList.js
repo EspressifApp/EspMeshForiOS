@@ -72,6 +72,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/blueList.html", "../js/blueConne
                 onConScanBLE: function(devices) {
                     var self = this;
                     devices = JSON.parse(devices);
+                    devices = Util.blueNameDecode(self, devices);
                     $.each(devices, function(i, item) {
                         var name = item.name;
                         if(Util.isBeacon(name, item.version, item.beacon)) {

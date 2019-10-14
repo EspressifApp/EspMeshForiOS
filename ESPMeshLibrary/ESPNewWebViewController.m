@@ -19,7 +19,7 @@
     NSString* username;
     BabyBluetooth *babys;
 }
-@property (weak,nonatomic) UIWebView *webView;
+
 @property (strong,nonatomic) JSContext *context;
 @property (strong, nonatomic)JSValue *callbacks;
 
@@ -42,17 +42,23 @@
     ESPFBYAliyunAPI *espAliyunAPI = [ESPFBYAliyunAPI share];
     espAliyunAPI.delegate = self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(layOutControllerViews) name:UIApplicationDidChangeStatusBarFrameNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statusBarBackgroundColor:) name:@"statusBarBackgroundColor" object:nil];
     //设备状态变化监视
     [espLocalAPI deviceStatusChangeMonitoring];
 }
 
 - (void)layOutControllerViews {
     NSString *htmlName = @"WebUI/app";
+    
     NSString *pageName = [ESPDataConversion fby_getNSUserDefaults:@"mainPageLoad"];
     if (![ESPDataConversion isNull:pageName]) {
         htmlName = [NSString stringWithFormat:@"WebUI/%@",pageName];
     }
     [self webViewLoadingVC:htmlName];
+}
+
+- (void)statusBarBackgroundColor:(NSNotification *)notifi {
+    _webView.backgroundColor = notifi.object;
 }
 
 #pragma mark - 自定义方法
@@ -78,12 +84,12 @@
     }else {
         webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
     }
-    webView.backgroundColor = [UIColor colorWithRed:62/255.0 green:194/255.0 blue:252/255.0 alpha:1];
     webView.delegate = self;
     webView.scrollView.bounces=false;
     [self.view addSubview:webView];
     [_webView removeFromSuperview];
     _webView=webView;
+    _webView.backgroundColor = [UIColor colorWithRed:62/255.0 green:194/255.0 blue:252/255.0 alpha:1];
     _webView.scrollView.scrollEnabled = NO;
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:htmlName ofType:@"html"]]]];
     [FBYBallLoading showInView:self.view];
@@ -147,7 +153,7 @@
 }
 -(void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
-    [self.navigationController.navigationBar setHidden:false];
+//    [self.navigationController.navigationBar setHidden:false];
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

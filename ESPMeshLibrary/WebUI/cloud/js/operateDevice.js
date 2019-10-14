@@ -41,11 +41,13 @@ define(["vue","MINT", "Util", "txt!../../pages/operateDevice.html", "./colorPick
                 console.log();
                 setTimeout(function () {
                     self.$refs.colorCloud.show()
+                    Util.setStatusBarBlack();
                 })
                 self.addFlag = true;
             },
             hide: function () {
                 this.addFlag = false;
+                Util.setStatusBarBlue();
                 this.$store.commit("setShowScanBle", true);
                 this.$emit("operateCloudShow");
             },

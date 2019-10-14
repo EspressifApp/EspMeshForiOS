@@ -10,4 +10,5 @@
 
 @interface ESPNewWebViewController : UIViewController
 
+@property (weak,nonatomic) UIWebView *webView;
 @end

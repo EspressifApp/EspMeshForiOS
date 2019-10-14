@@ -309,6 +309,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/joinDevice.html"],
             onConScanBLE: function (devices) {
                 var self = this;
                 devices = JSON.parse(devices);
+                devices = Util.blueNameDecode(self, devices);
                 self.setScanList(devices);
                 window.onBackPressed = self.hide;
             }

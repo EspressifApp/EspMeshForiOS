@@ -76,6 +76,16 @@ a{
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+.icon-quotedbl:before {
+    content: "\e959";
+}
+.icon-tm:before {
+  content: "\e958";
+  font-weight: bold;
+}
+.icon-texiao:before {
+  content: "\e957";
+}
 .icon-jia:before {
     content: "\e955";
 }

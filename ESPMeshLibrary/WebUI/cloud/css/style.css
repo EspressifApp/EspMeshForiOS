@@ -9,6 +9,9 @@ ul {
 .color-white {
 	color: #fff;
 }
+.color-danger {
+	color: rgba(255, 0, 0, .4) !important;
+}
 .bx-red {
 	border: 1px solid rgba(255, 0, 0, .4) !important;
 	box-shadow: 0 0 8px rgba(255, 0, 0, .4) !important;
@@ -580,8 +583,8 @@ ul {
 }
 .add-ul {
 	position: absolute;
-	top: 50px;
-	right: 8px;
+	top: 44px;
+	right: 4px;
 	width: 140px;
 	list-style: none;
 	background: #3ec2fc;
@@ -3590,6 +3593,48 @@ operate-bg .group-wrapper .operate-way-info {
 	width: 60px;
 	text-align: center;
 	margin-right: -5px;
+}
+.tm-logo {
+	margin-top: 0;
+	background: #fff;
+	text-align: center;
+}
+.tm-logo span {
+	font-size: 120px;
+	color: #3ec2fc;
+}
+.tm-bind {
+	margin-top: 15px;
+	padding: 15px 0;
+	background: #fff;
+	text-align: center;
+	color: #3ec2fc;
+}
+.tm-device,
+.tm-command {
+	margin-top: 10px;
+	color: #999;
+}
+.tm-device p,
+.tm-command p {
+	padding-left: 10px;
+}
+.tm-device-info,
+.tm-command-info {
+	margin-top: 10px;
+	padding: 15px 0 15px 10px;
+	background: #fff;
+}
+.tm-command-info {
+	color: #333;
+}
+.tm-command-info h3 {
+	font-size: 16px;
+	font-weight: bold;
+}
+.tm-command-info p {
+	padding-left: 0;
+	line-height: 30px;
 }
 @media (max-height: 615px){
 	.content-wrapper {
