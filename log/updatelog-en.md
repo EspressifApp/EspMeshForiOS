@@ -6,6 +6,9 @@
 
 1. Optimization of iOS 13.1.2 version wi-fi information acquisition failure problem
 2. Add location permissions, wi-fi information acquisition needs
+3. Add ali cloud user binding taobao ID function
+4. Add query user binding taobao ID status
+5. Add user unbind taobao ID function
 
 
 ## V1.1.0:
