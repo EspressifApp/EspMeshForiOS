@@ -787,7 +787,8 @@
     if (!ValidDict(message)) {
         return;
     }
-    if ([message objectForKey:@"defaultStyle"]) {
+    NSString *style = [NSString stringWithFormat:@"%@",[message objectForKey:@"defaultStyle"]];
+    if ([style intValue] == 1) {
         [UIApplication sharedApplication].statusBarStyle =  UIStatusBarStyleLightContent;
     }else {
         [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
