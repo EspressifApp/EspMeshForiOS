@@ -96,7 +96,7 @@ NSString* idString;
     }else{
         _HasSendNegotiateDataWithNewDevice = true;
     }
-    [self performSelector:@selector(loadData) withObject:nil afterDelay:1.5];
+    [self loadData];
 }
 
 -(void)loadData{
@@ -144,12 +144,11 @@ NSString* idString;
     
     //设置设备连接成功的委托,同一个baby对象，使用不同的channel切换委托回调
     [baby setBlockOnConnectedAtChannel:idString block:^(CBCentralManager *central, CBPeripheral *peripheral) {
-        if (![idString isEqualToString:peripheral.identifier.UUIDString]) {
-            return ;
-        }
+
         //取消自动回连功能(连接成功后必须清除自动回连,否则会崩溃)
         [weakSelf AutoReconnectCancel:weakSelf.currPeripheral];
         [weakSelf bleUpdateMessage:[NSString stringWithFormat:@"blemsg:ble connect successful:%d",BleConnectSuccessful]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"deviceBleconnectSuccess" object:peripheral.identifier.UUIDString];
         
     }];
     weakSelf.ESP32data=NULL;
