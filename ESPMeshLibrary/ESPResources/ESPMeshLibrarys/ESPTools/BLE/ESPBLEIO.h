@@ -58,10 +58,11 @@ typedef void(^BLEIOCallBackBlock)(NSString *msg);
  蓝牙连接
 
  @param device 连接蓝牙的设备信息
+ @param bleConnect 是否需要蓝牙连接
  @param BleCallBackBlock 蓝牙连接回调
  @return self
  */
-- (instancetype)init:(EspDevice*)device callBackBlock:(BLEIOCallBackBlock)BleCallBackBlock;
+- (instancetype)init:(EspDevice *)device withIsBleConnect:(BOOL)bleConnect callBackBlock:(BLEIOCallBackBlock)BleCallBackBlock;
 
 /**
  断开蓝牙连接

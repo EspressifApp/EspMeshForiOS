@@ -84,10 +84,9 @@
     [[ESPBLEHelper share] cancelScan];
 }
 //开始蓝牙Wi-Fi配网
--(void)starBLEPair:(EspDevice *)device callBackBlock:(BLEIOCallBackBlock)callBackBlock{
+-(void)starBLEPair:(EspDevice *)device withIsBleConnect:(BOOL)bleConnect callBackBlock:(BLEIOCallBackBlock)callBackBlock{
     [self cancelScanBLE];
-//    curPairIO=[[ESPBLEIO alloc] init:device pairInfo:info timeOut:timeOut callBackBlock:callBackBlock];
-    curPairIO = [[ESPBLEIO alloc] init:device callBackBlock:callBackBlock];
+    curPairIO = [[ESPBLEIO alloc] init:device withIsBleConnect:bleConnect callBackBlock:callBackBlock];
 }
 
 

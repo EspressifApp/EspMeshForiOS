@@ -62,7 +62,7 @@
         EspDevice* tmpDevice = deviceInfo[@"device"];
         static int pairProgress = 5;
         
-        [[ESPMeshManager share] starBLEPair:tmpDevice callBackBlock:^(NSString *msg) {
+        [[ESPMeshManager share] starBLEPair:tmpDevice withIsBleConnect:YES callBackBlock:^(NSString *msg) {
             NSLog(@"msg:::::::%@",msg);
             NSDictionary* logMsg;
             if (pairProgress >= 70) {

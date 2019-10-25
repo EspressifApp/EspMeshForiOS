@@ -46,35 +46,42 @@
     NSMutableArray *sendTypeArr;
     NSMutableArray *sendLengthArr;
     
-    //传入的原始数据
-    EspDevice* originalDevice;
-    //NSMutableDictionary* originalInfo;
     NSTimer* outTimer;
     NSInteger timeout;
     bool canSendMsg;
     bool canSendDeviceMsg;
+    BOOL isBleConnect;
 }
 NSString* idString;
-- (instancetype)init:(EspDevice *)device callBackBlock:(BLEIOCallBackBlock)BleCallBackBlock {
+- (instancetype)init:(EspDevice *)device withIsBleConnect:(BOOL)bleConnect callBackBlock:(BLEIOCallBackBlock)BleCallBackBlock {
     self = [super init];
     if (self) {
         canSendMsg=true;
-        originalDevice=device;
         idString=device.uuidBle;
         
         _BleCallBackBlock=BleCallBackBlock;
         //初始化BabyBluetooth 蓝牙库
         baby = [BabyBluetooth shareBabyBluetooth];
-        [baby cancelAllPeripheralsConnection];
         [self babyDelegate];//设置蓝牙委托
-        [self restarPair];
+        requireWifiState=YES;
+        _HasSendNegotiateDataWithDevice=false;
+        self.ESP32data=[NSMutableData data];
+        self.length=0;
+        Device=device;
+        if ([Device.version isEqualToString:[NSString stringWithFormat:@"-1"]]) {
+            _HasSendNegotiateDataWithNewDevice = false;
+        }else{
+            _HasSendNegotiateDataWithNewDevice = true;
+        }
+        isBleConnect = bleConnect;
+        
+        [self loadData];
     }
     return self;
     
 }
 //断开链接
 - (void)disconnectBLE{
-    //[baby cancelNotify:self.currPeripheral characteristic:readCharacteristic];
     [baby AutoReconnectCancel:self.currPeripheral];
     [baby cancelAllPeripheralsConnection];
 }
@@ -83,36 +90,22 @@ NSString* idString;
     [baby AutoReconnectCancel:peripheral];
 }
 
-//开始配网
--(void)restarPair{
-    [self disconnectBLE];
-    requireWifiState=YES;
-    _HasSendNegotiateDataWithDevice=false;
-    self.ESP32data=[NSMutableData data];
-    self.length=0;
-    Device=originalDevice;
-    if ([Device.version isEqualToString:[NSString stringWithFormat:@"-1"]]) {
-        _HasSendNegotiateDataWithNewDevice = false;
-    }else{
-        _HasSendNegotiateDataWithNewDevice = true;
-    }
-    [self loadData];
-}
-
 -(void)loadData{
     
     if (baby.centralManager.state==CBCentralManagerStatePoweredOn) {
 
+        NSLog(@"idString----> %@",idString);
         self.currPeripheral=[baby retrievePeripheralWithUUIDString:idString];//获取外设
         if (self.currPeripheral==nil) {
             [self bleUpdateMessage:[NSString stringWithFormat:@"bleerror:retrieve Peripheral With UUID String failed:%d",RetrievePeripheralFailed]];
             return;
         }
         
+        if (isBleConnect) {
+            [baby AutoReconnect:self.currPeripheral];
+        baby.having(self.currPeripheral).and.channel(idString).then.connectToPeripherals().discoverServices().discoverCharacteristics().readValueForCharacteristic().discoverDescriptorsForCharacteristic().readValueForDescriptors().begin();
+        }
         
-      [baby AutoReconnect:self.currPeripheral];
-    baby.having(self.currPeripheral).and.channel(idString).then.connectToPeripherals().discoverServices().discoverCharacteristics().readValueForCharacteristic().discoverDescriptorsForCharacteristic().readValueForDescriptors().begin();
- 
         switch (self.currPeripheral.state) {//初始化设备状态
             case CBPeripheralStateConnected:
                 [self bleUpdateMessage:[NSString stringWithFormat:@"blemsg:CB Peripheral State Connected:%d",PeripheralStateConnected]];
@@ -142,13 +135,15 @@ NSString* idString;
         [weakSelf loadData];
     }];
     
+    NSLog(@"block1 idString----> %@",idString);
     //设置设备连接成功的委托,同一个baby对象，使用不同的channel切换委托回调
     [baby setBlockOnConnectedAtChannel:idString block:^(CBCentralManager *central, CBPeripheral *peripheral) {
-
+        
         //取消自动回连功能(连接成功后必须清除自动回连,否则会崩溃)
         [weakSelf AutoReconnectCancel:weakSelf.currPeripheral];
         [weakSelf bleUpdateMessage:[NSString stringWithFormat:@"blemsg:ble connect successful:%d",BleConnectSuccessful]];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"deviceBleconnectSuccess" object:peripheral.identifier.UUIDString];
+        NSLog(@"蓝牙连接成功回调");
         
     }];
     weakSelf.ESP32data=NULL;
@@ -281,7 +276,7 @@ NSString* idString;
     if (canSendMsg) {
         self.BleCallBackBlock(message);
         NSArray *messageArr = [message componentsSeparatedByString:@":"];
-        if([messageArr[0] containsString:@"bleerror"]||[messageArr[0] containsString:@"blesuccess"]||[messageArr[0] containsString:@"blecode"]){
+        if([messageArr[0] containsString:@"blePairError"]||[messageArr[0] containsString:@"blecode"]){
             canSendMsg=false;
             [self disconnectBLE];
         }
@@ -468,14 +463,14 @@ NSString* idString;
             Byte opMode = dataByte[0];
             NSLog(@"OP Mode %d", opMode);
             if (opMode != STAOpmode) {
-                [self bleUpdateMessage:[NSString stringWithFormat:@"bleerror:Wifi opmode %d:%d", opMode, WiFiOpmodeFailed]];
+                [self bleUpdateMessage:[NSString stringWithFormat:@"blePairError:Wifi opmode %d:%d", opMode, WiFiOpmodeFailed]];
                 return;
             }
             Byte stationConn = dataByte[1];
             NSLog(@"Wifi state %d", stationConn);
             BOOL connectWifi = stationConn == 0;
             if (!connectWifi) {
-                [self bleUpdateMessage:[NSString stringWithFormat:@"bleerror:Device connect wifi failed:%d",DeviceConnectWiFiFailed]];
+                [self bleUpdateMessage:[NSString stringWithFormat:@"blePairError:Device connect wifi failed:%d",DeviceConnectWiFiFailed]];
                 return;
             }
             [self updateMessage:[NSString stringWithFormat:@"msg:Device connected wifi successful:%d",DeviceConnectWIFISuccessful]];
@@ -486,7 +481,7 @@ NSString* idString;
        
             NSLog(@"%@",data);
             if (data.length==0) {
-                [self bleUpdateMessage:[NSString stringWithFormat:@"bleerror:notify data failed:%d",NotifyDataFailed]];
+                [self bleUpdateMessage:[NSString stringWithFormat:@"blePairError:notify data failed:%d",NotifyDataFailed]];
             } else  {
                 [self bleUpdateMessage:[NSString stringWithFormat:@"blecode:notify code:%d", dataByte[0]]];
             }

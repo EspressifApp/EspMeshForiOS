@@ -41,9 +41,10 @@ typedef void (^MeshManagerCallBack)(NSString *msg);
  设备蓝牙连接
 
  @param device 连接蓝牙的设备信息
+ @param bleConnect 是否需要蓝牙连接
  @param callBackBlock 蓝牙连接回调
  */
--(void)starBLEPair:(EspDevice*)device callBackBlock:(BLEIOCallBackBlock)callBackBlock;
+-(void)starBLEPair:(EspDevice*)device withIsBleConnect:(BOOL)bleConnect callBackBlock:(BLEIOCallBackBlock)callBackBlock;
 /**
  断开蓝牙连接
  */
