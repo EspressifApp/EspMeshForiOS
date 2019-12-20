@@ -278,7 +278,6 @@ NSString* idString;
         NSArray *messageArr = [message componentsSeparatedByString:@":"];
         if([messageArr[0] containsString:@"blePairError"]||[messageArr[0] containsString:@"blecode"]){
             canSendMsg=false;
-            [self disconnectBLE];
         }
     }
 }
@@ -286,9 +285,6 @@ NSString* idString;
     if (canSendDeviceMsg) {
         self.CallBackBlock(message);
         NSArray *messageArr = [message componentsSeparatedByString:@":"];
-        if([messageArr[0] containsString:@"msg"]){
-            [self disconnectBLE];
-        }
         if([messageArr[0] containsString:@"success"]){
             canSendDeviceMsg=false;
         }
