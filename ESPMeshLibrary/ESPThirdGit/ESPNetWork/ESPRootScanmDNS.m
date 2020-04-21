@@ -10,6 +10,9 @@
 #include <arpa/inet.h>
 
 #define ValidArray(f) (f!=nil && [f isKindOfClass:[NSArray class]] && [f count]>0)
+#define MDNS_TYPE_HTTP @"_mesh-http._tcp."
+#define MDNS_TYPE_HTTPS @"_mesh-https._tcp."
+#define MDNS_TYPE_LOCAL @"local."
 @interface ESPRootScanmDNS()<NSNetServiceBrowserDelegate,NSNetServiceDelegate>
 
 {
@@ -76,7 +79,7 @@
         self.browser.delegate = self;
         self.services = [NSMutableArray array];
     }
-    [self.browser searchForServicesOfType:@"_mesh-http._tcp." inDomain:@"local."];
+    [self.browser searchForServicesOfType:MDNS_TYPE_HTTP inDomain:MDNS_TYPE_LOCAL];
 }
 
 /*
@@ -117,9 +120,9 @@
     NSString *addressStr = [self IPFromData:addressData];
     NSDictionary *attrs = [NSNetService dictionaryFromTXTRecordData:[sender TXTRecordData]];
     NSString *type = sender.type;
-    if ([type isEqualToString:[NSString stringWithFormat:@"_mesh-http._tcp."]]) {
+    if ([type isEqualToString:[NSString stringWithFormat:MDNS_TYPE_HTTP]]) {
         type = @"http";
-    }else if ([type isEqualToString:[NSString stringWithFormat:@"_mesh-https._tcp."]]) {
+    }else if ([type isEqualToString:[NSString stringWithFormat:MDNS_TYPE_HTTPS]]) {
         type = @"https";
     }else {
         return;

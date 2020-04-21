@@ -20,6 +20,7 @@
 @end
 #define udpPort 1025
 #define udpHost @"255.255.255.255"
+#define UDP_SEND_DATA @"Are You Espressif IOT Smart Device?"
 
 @implementation ESPRootScanUDP
 
@@ -89,7 +90,7 @@
 
 
 - (void) sendMsg {
-    NSString *s = @"Are You Espressif IOT Smart Device?";
+    NSString *s = UDP_SEND_DATA;
     NSLog(@"%@", s);
     NSData *data = [s dataUsingEncoding:NSUTF8StringEncoding];
     [_udpCLientSoket sendData:data toHost:udpHost port:udpPort withTimeout:-1 tag:0];
