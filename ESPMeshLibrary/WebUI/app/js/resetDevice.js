@@ -306,6 +306,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/resetDevice.html", "./addDevice"
                 return flag;
             },
             selectAllDevice: function (e) {
+                getElementById
                 var doc = $(e.currentTarget).find("span.span-radio")[0];
                 if ($(doc).hasClass("active")) {
                     this.selected = 0;

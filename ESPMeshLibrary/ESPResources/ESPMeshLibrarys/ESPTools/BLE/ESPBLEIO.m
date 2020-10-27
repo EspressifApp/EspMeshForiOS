@@ -545,9 +545,10 @@ NSString* idString;
             Byte data[1] = {0};
             [sendData appendBytes:data length:1];
         }else {
-            length[0] = lengthStr.length;
+            NSData *data = [lengthStr dataUsingEncoding:NSUTF8StringEncoding];
+            length[0] = data.length;
             [sendData appendData:[[NSData alloc]initWithBytes:length length:sizeof(length)]];
-            [sendData appendData:[lengthStr dataUsingEncoding:NSUTF8StringEncoding]];
+            [sendData appendData:data];
         }
         
         

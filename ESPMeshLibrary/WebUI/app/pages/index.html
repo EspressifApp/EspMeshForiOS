@@ -43,7 +43,6 @@
                                     <span v-show="showDesc(item.position)">({{item.version}})&nbsp;&nbsp;&nbsp;
                                         <img v-show="item.rssi <= 0" class="item-img" :src="getRssiIcon(item.rssi)"/>
                                     </span>
-
                                 </span>
                                 <span class="desc" v-show="!showDesc(item.position)">
                                     {{item.version}}&nbsp;&nbsp;&nbsp;
