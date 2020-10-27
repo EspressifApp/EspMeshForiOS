@@ -638,15 +638,17 @@ NSString* idString;
     
     type[0] = 0x01;
     [sendData appendData:[[NSData alloc]initWithBytes:type length:sizeof(type)]];
-    length[0] = ssid.length;
+    NSData *ssidData = [ssid dataUsingEncoding:NSUTF8StringEncoding];
+    length[0] = ssidData.length;
     [sendData appendData:[[NSData alloc]initWithBytes:length length:sizeof(length)]];
-    [sendData appendData:[ssid dataUsingEncoding:NSUTF8StringEncoding]];
+    [sendData appendData:ssidData];
     
     type[0] = 0x02;
     [sendData appendData:[[NSData alloc]initWithBytes:type length:sizeof(type)]];
-    length[0] = password.length;
+    NSData *passwordData = [password dataUsingEncoding:NSUTF8StringEncoding];
+    length[0] = passwordData.length;
     [sendData appendData:[[NSData alloc]initWithBytes:length length:sizeof(length)]];
-    [sendData appendData:[password dataUsingEncoding:NSUTF8StringEncoding]];
+    [sendData appendData:passwordData];
     
     NSLog(@"meshID---send-->%@",meshID);
     type[0] = 0x03;
