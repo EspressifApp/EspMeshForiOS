@@ -29,7 +29,7 @@
 // 设备
 #import <IMSThingCapability/IMSThingCapability.h>
 
-#import "IMSOpenAccount.h"
+//#import "IMSOpenAccount.h"
 
 static NSString *const kIMSMobileChannelLaunchLogTag = @"MobileChannelDemo";
 NSString * _Nonnull const IMSNotificationAccountLogin1 = @"IMSNotificationAccountLogin";
@@ -125,9 +125,9 @@ NSString * _Nonnull const IMSNotificationAccountLogout1 = @"IMSNotificationAccou
 //身份认证初始化
 - (void)identityInit {
     IMSAccountService *accountService = [IMSAccountService sharedService];
-    IMSOpenAccount *openAccount = [IMSOpenAccount sharedInstance];
-    accountService.sessionProvider = openAccount;
-    accountService.accountProvider = openAccount;
+//    IMSOpenAccount *openAccount = [IMSOpenAccount sharedInstance];
+//    accountService.sessionProvider = openAccount;
+//    accountService.accountProvider = openAccount;
     // sessionProvider 需要开发者实现遵守IMSAccountProtocol协议的class 实例
 //    accountService.sessionProvider = self;
     [IMSCredentialManager initWithAccountProtocol:accountService.sessionProvider];

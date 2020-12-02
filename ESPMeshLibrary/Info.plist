@@ -31,8 +31,15 @@
 	<string>请允许APP使用蓝牙</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>是否允许使用蓝牙</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_mesh-http._tcp.</string>
+		<string>_mesh-https._tcp.</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>请允许打开相机进行扫码</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>本应用程序将可以发现和连接到您所有网络上的设备</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>请允许APP始终访问位置</string>
 	<key>NSLocationAlwaysUsageDescription</key>

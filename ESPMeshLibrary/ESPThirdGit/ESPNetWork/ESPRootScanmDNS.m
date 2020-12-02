@@ -45,11 +45,19 @@
     _failBlock=failBlock;
     deviceArr = [NSMutableArray arrayWithCapacity:0];
     
-    self.netService = [[NSNetService alloc]init];
-    self.netService.delegate = self;
-//    [self.netService publish];
-    
-    [self performSelector:@selector(getSevices) withObject:nil afterDelay:1];
+    NSOperationQueue* op=[NSOperationQueue mainQueue];
+    [op addOperationWithBlock:^{
+        
+        self.netService = [[NSNetService alloc]initWithDomain:@"local." type:@"_mesh-http._tcp." name:@"" port:0];
+        self.netService.delegate = self;
+        
+        [self performSelector:@selector(getSevices) withObject:nil afterDelay:1];
+        
+        NSArray *deviceArrs=[[NSUserDefaults standardUserDefaults] valueForKey:@"LastScanRootDevicemDNS"];
+        //        超时
+        NSTimer* tmpTimer=[NSTimer scheduledTimerWithTimeInterval:deviceArrs? 3:4 target:self selector:@selector(cancelmDNSScan) userInfo:nil repeats:false];
+        [[NSRunLoop currentRunLoop] addTimer:tmpTimer forMode:NSDefaultRunLoopMode];
+    }];
     
 }
 
@@ -106,7 +114,7 @@
 {
     _service = service;
     self.service.delegate = self;
-    [self.service resolveWithTimeout:1];
+    [self.service resolveWithTimeout:5];
 }
 /*
  * 解析成功
@@ -144,24 +152,11 @@
         NSString* lastDeviceInfo=[NSString stringWithFormat:@"lastDeviceInfo---->%@:%@:%@:%@",device.mac,device.host,device.httpType,device.port];
         [deviceArr addObject:lastDeviceInfo];
         
-        BOOL isbool = NO;
-        for (int i = 0; i < deviceArr.count; i ++) {
-            NSArray *macArr=[deviceArr[i] componentsSeparatedByString:@":"];
-            if ([macArr[0] isEqual:mac]) {
-                isbool = YES;
-            }
-        }
-        if (!isbool) {
-            [self cancelmDNSScan];
-        }
-        if (_successBlock&&_successBlock!=NULL&&hasSended==false) {
-            hasSended=true;
-            _successBlock(deviceArr);
-            _successBlock=nil;
-            [[NSUserDefaults standardUserDefaults] setObject:deviceArr forKey:@"LastScanRootDevicemDNS"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-            [self.netService stop];
-        }
+        NSSet *set = [NSSet setWithArray:deviceArr];
+        NSArray *deviceAllArray = [set allObjects];
+        [[NSUserDefaults standardUserDefaults] setObject:deviceAllArray forKey:@"LastScanRootDevicemDNS"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
         
     }
 }
@@ -201,3 +196,4 @@
 
 
 @end
+

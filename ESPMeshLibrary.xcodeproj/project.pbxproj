@@ -17,7 +17,6 @@
 		2648F6FA2339FDA20092C2E4 /* FBYBallLoading.m in Sources */ = {isa = PBXBuildFile; fileRef = 2648F6F92339FDA20092C2E4 /* FBYBallLoading.m */; };
 		26497EB722EE9F670080FC15 /* ESPAliyunSDKUse.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */; };
 		26497EC022F131AE0080FC15 /* IMSLifeClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497EBE22F131AE0080FC15 /* IMSLifeClient.m */; };
-		26497ECF22F3E05C0080FC15 /* IMSOpenAccount.m in Sources */ = {isa = PBXBuildFile; fileRef = 26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */; };
 		264CD1F5232F5F180064EF50 /* ESPFBYAliViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 264CD1F4232F5F180064EF50 /* ESPFBYAliViewController.m */; };
 		264E417922DD71A00069139E /* bt_org_list.txt in Resources */ = {isa = PBXBuildFile; fileRef = 264E417822DD71A00069139E /* bt_org_list.txt */; };
 		264E417B22DD761C0069139E /* mac_org_list.txt in Resources */ = {isa = PBXBuildFile; fileRef = 264E417A22DD761B0069139E /* mac_org_list.txt */; };
@@ -180,8 +179,6 @@
 		26497EB622EE9F670080FC15 /* ESPAliyunSDKUse.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESPAliyunSDKUse.m; sourceTree = "<group>"; };
 		26497EBE22F131AE0080FC15 /* IMSLifeClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IMSLifeClient.m; path = ../IMSLifeClient.m; sourceTree = "<group>"; };
 		26497EBF22F131AE0080FC15 /* IMSLifeClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IMSLifeClient.h; path = ../IMSLifeClient.h; sourceTree = "<group>"; };
-		26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IMSOpenAccount.h; path = ../IMSOpenAccount.h; sourceTree = "<group>"; };
-		26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IMSOpenAccount.m; path = ../IMSOpenAccount.m; sourceTree = "<group>"; };
 		264CD1F3232F5F180064EF50 /* ESPFBYAliViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ESPFBYAliViewController.h; path = ../ESPFBYAliViewController.h; sourceTree = "<group>"; };
 		264CD1F4232F5F180064EF50 /* ESPFBYAliViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ESPFBYAliViewController.m; path = ../ESPFBYAliViewController.m; sourceTree = "<group>"; };
 		264E417822DD71A00069139E /* bt_org_list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bt_org_list.txt; sourceTree = "<group>"; };
@@ -671,8 +668,6 @@
 			children = (
 				26510F7A234D8DDB00C09C2E /* IMSTmallSpeakerApi.h */,
 				26510F79234D8DDB00C09C2E /* IMSTmallSpeakerApi.m */,
-				26497ECD22F3E05B0080FC15 /* IMSOpenAccount.h */,
-				26497ECE22F3E05C0080FC15 /* IMSOpenAccount.m */,
 				26497EBF22F131AE0080FC15 /* IMSLifeClient.h */,
 				26497EBE22F131AE0080FC15 /* IMSLifeClient.m */,
 				26588F3423265664000B8A14 /* IMSDeviceClient.h */,
@@ -1630,7 +1625,6 @@
 				26B48EB5232243F800A107D5 /* DDContextFilterLogFormatter.m in Sources */,
 				8DD9271F20F48D9100D7CA89 /* FMDatabaseAdditions.m in Sources */,
 				2656240A21DF43230020F852 /* ESPDataConversion.m in Sources */,
-				26497ECF22F3E05C0080FC15 /* IMSOpenAccount.m in Sources */,
 				8D9BBAD720E108DB0061A3B8 /* IQUIViewController+Additions.m in Sources */,
 				26B48EB7232243F800A107D5 /* DDMultiFormatter.m in Sources */,
 				8D0AEE0720DCAA5E00D3EB87 /* EspTextUtil.m in Sources */,
@@ -1853,7 +1847,7 @@
 				CODE_SIGN_ENTITLEMENTS = ESPMeshLibrary/ESPMeshLibrary.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.2.3;
+				CURRENT_PROJECT_VERSION = 0.3.1;
 				DEVELOPMENT_TEAM = QWXF6GB4AV;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -1864,7 +1858,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = ESPMeshLibrary/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1874,14 +1868,14 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl",
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 2.0.1;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "$(inherited)";
 				PODS_ROOT = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.espressif.ESPMeshLibrary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -1896,7 +1890,7 @@
 				CODE_SIGN_ENTITLEMENTS = ESPMeshLibrary/ESPMeshLibrary.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.2.3;
+				CURRENT_PROJECT_VERSION = 0.3.1;
 				DEVELOPMENT_TEAM = QWXF6GB4AV;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -1907,7 +1901,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = ESPMeshLibrary/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1917,13 +1911,13 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl",
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 2.0.1;
 				OTHER_LDFLAGS = "$(inherited)";
 				PODS_ROOT = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.espressif.ESPMeshLibrary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

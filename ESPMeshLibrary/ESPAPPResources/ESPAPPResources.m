@@ -155,27 +155,27 @@
 //开启UDP扫描
 + (void)scanDevicesAsyncSuccess:(DevicesAsyncSuccessBlock)success andFailure:(void (^)(int))failure {
     NSMutableArray *scanUDPArr = [NSMutableArray arrayWithCapacity:0];
-    dispatch_queue_t queueT = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);//一个并发队列
+    dispatch_queue_t queueT = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_group_t grpupT = dispatch_group_create();//一个线程组
-    dispatch_group_enter(grpupT);
+    
     dispatch_group_async(grpupT, queueT, ^{
+        dispatch_group_enter(grpupT);
         [[ESPMeshManager share] starScanRootUDP:^(NSArray *devixe) {
             [scanUDPArr addObjectsFromArray:devixe];
+            dispatch_group_leave(grpupT);
         } failblock:^(int code) {
-            
+            dispatch_group_leave(grpupT);
         }];
     });
+    
     dispatch_group_async(grpupT, queueT, ^{
+        dispatch_group_enter(grpupT);
         [[ESPMeshManager share] starScanRootmDNS:^(NSArray * _Nonnull devixe) {
             [scanUDPArr addObjectsFromArray:devixe];
+            dispatch_group_leave(grpupT);
         } failblock:^(int code) {
-            
+            dispatch_group_leave(grpupT);
         }];
-    });
-    dispatch_group_async(grpupT, queueT, ^{
-        sleep(2);
-        //        [[ESPMeshManager share] cancelScanRootUDP];
-        [[ESPMeshManager share] cancelScanRootmDNS];
     });
     dispatch_group_notify(grpupT, queueT, ^{
         NSSet *set = [NSSet setWithArray:scanUDPArr];
@@ -221,6 +221,7 @@
                 NSArray *allArray = [set allObjects];
                 NSMutableDictionary *deviceScanning = [NSMutableDictionary dictionaryWithCapacity:0];
                 deviceScanning[@"onDeviceScanningResult"] = allArray;
+                NSLog(@"基本信息获取");
                 success(deviceScanning);
             }else{
                 failure(8010);
@@ -264,13 +265,13 @@
                 [defaults synchronize];
                 
                 success(DevicesOfScanUDP);
+                NSLog(@"详细信息回调");
                 
             }else {
                 failure(8011);
             }
         }];
     });
-    dispatch_group_leave(grpupT);
 }
 //发送多个设备命令
 + (void)requestDevicesMulticastAsync:(NSDictionary *)messageDic andSuccess:(void (^)(NSDictionary * _Nonnull))success andFailure:(void (^)(NSDictionary * _Nonnull))failure {
@@ -278,6 +279,10 @@
     NSString *requestStr = [msg objectForKey:@"request"];
     NSString *callbackStr = [msg objectForKey:@"callback"];
     NSArray *groupArr = [msg objectForKey:@"group"];
+    NSString *callbackMacStr = nil;
+    if ([requestStr isEqualToString:@"get_event"]) {
+        callbackMacStr = [msg objectForKey:@"mac"];
+    }
     // 区别请求是异步还是队列
     BOOL isSendQueue = [[msg objectForKey:@"isSendQueue"] boolValue];
     // 区别请求是多设备(NO)还是单设备(YES)
@@ -391,6 +396,9 @@
                             if (tag) {
                                 jsonDic[@"tag"] = tag;
                             }
+                            if (callbackMacStr != nil) {
+                                jsonDic[@"mac"] = callbackMacStr;
+                            }
                             success(jsonDic);
                         }else {
                             if (taskInt > 1) {
@@ -404,6 +412,9 @@
                                 jsonDic[@"callbackStr"] = callbackStr;
                                 if (tag) {
                                     jsonDic[@"tag"] = tag;
+                                }
+                                if (callbackMacStr != nil) {
+                                    jsonDic[@"mac"] = callbackMacStr;
                                 }
                                 success(jsonDic);
                             }
@@ -434,6 +445,9 @@
                             if (tag) {
                                 jsonDic[@"tag"] = tag;
                             }
+                            if (callbackMacStr != nil) {
+                                jsonDic[@"mac"] = callbackMacStr;
+                            }
                             success(jsonDic);
                         }else {
                             if (taskInt > 1) {
@@ -447,6 +461,9 @@
                                 jsonDic[@"callbackStr"] = callbackStr;
                                 if (tag) {
                                     jsonDic[@"tag"] = tag;
+                                }
+                                if (callbackMacStr != nil) {
+                                    jsonDic[@"mac"] = callbackMacStr;
                                 }
                                 success(jsonDic);
                             }
@@ -797,3 +814,4 @@
 }
 
 @end
+

@@ -79,7 +79,7 @@
 - (void)webViewLoadingVC:(NSString *)htmlName {
     CGRect rectOfStatusbar = [[UIApplication sharedApplication] statusBarFrame];
     UIWebView * webView;
-    if (rectOfStatusbar.size.height == 44) {
+    if (rectOfStatusbar.size.height > 20) {
         webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height-34)];
     }else {
         webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];

@@ -550,9 +550,6 @@ NSString* idString;
             [sendData appendData:[[NSData alloc]initWithBytes:length length:sizeof(length)]];
             [sendData appendData:data];
         }
-        
-        
-        
     }
     type[0] = 3;
     length[0] = bssID.length;
