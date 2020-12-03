@@ -83,17 +83,14 @@
     [baby setBlockOnDiscoverToPeripherals:^(CBCentralManager *central, CBPeripheral *peripheral, NSDictionary *advertisementData, NSNumber *RSSI) {
         
         NSString *ouiStr = @"";
-        NSString *versionStr = nil;
-        NSString *tid = nil;
+        NSString *versionStr = @"-1";
+        NSString *tid = @"0";
         NSString *bssid = nil;
         NSData *ManufacturerData = nil;
-        BOOL onlyBeacon;
+        BOOL onlyBeacon = NO;
         if (ValidDict(advertisementData)) {
             ManufacturerData = [advertisementData objectForKey:@"kCBAdvDataManufacturerData"];//没有这个字段
-            if (ManufacturerData.length == 14) {
-                NSData *macDataoui = [ManufacturerData subdataWithRange:NSMakeRange(2, 3)];
-                ouiStr  =[[NSString alloc] initWithData:macDataoui encoding:NSUTF8StringEncoding];
-            }else if (ManufacturerData.length == 12) {
+            if (ManufacturerData.length >= 12) {
                 NSData *macDataoui = [ManufacturerData subdataWithRange:NSMakeRange(2, 3)];
                 ouiStr  =[[NSString alloc] initWithData:macDataoui encoding:NSUTF8StringEncoding];
             }
@@ -106,16 +103,10 @@
             } else if (mac.length == 4) {
                 mac=[NSString stringWithFormat:@"00000000%@",mac];
             }
-            versionStr = @"-1";
             bssid = mac;
-            tid = @"0";
-            onlyBeacon = false;
         }else{
             
             Byte *testByte = (Byte *)[ManufacturerData bytes];
-//            for (int i = 0; i < [ManufacturerData length]; i ++) {
-//                NSLog(@"testByte---->%d\n",testByte[i]);
-//            }
             NSString *hexStr=@"";
             for(int i=0;i<[ManufacturerData length];i++)
             {
@@ -125,11 +116,12 @@
                 else
                     hexStr = [NSString stringWithFormat:@"%@%@",hexStr,newHexStr];
             }
-//            NSLog(@"bytes 的16进制数为:%@",[hexStr substringWithRange:NSMakeRange(12, 12)]);
             bssid = [hexStr substringWithRange:NSMakeRange(12, 12)].lowercaseString;
             versionStr = [NSString stringWithFormat:@"%d",testByte[5] & 3];
             onlyBeacon = (testByte[5] & 16) != 0;
-            tid = [NSString stringWithFormat:@"%d",testByte[12] | testByte[13] << 8];
+            if (ManufacturerData.length >= 14) {
+                tid = [NSString stringWithFormat:@"%d",testByte[12] | testByte[13] << 8];
+            }
         }
         EspDevice* device=[[EspDevice alloc] init];
         device.uuidBle=peripheral.identifier.UUIDString;
