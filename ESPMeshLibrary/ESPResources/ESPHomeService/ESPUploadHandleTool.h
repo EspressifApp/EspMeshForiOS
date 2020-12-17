@@ -15,7 +15,7 @@ typedef void(^ProgressBackBlock)(float Progress);
 /**
  上传进度
  */
-@property(assign,nonatomic)ProgressBackBlock Progress;
+@property(nonatomic)ProgressBackBlock Progress;
 
 - (void)sendSessionInit;
 /**

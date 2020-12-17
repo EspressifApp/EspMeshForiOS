@@ -15,10 +15,10 @@
     NSTimer* BLETimer;
     NSMutableDictionary* ScanBLEDevices;
     BOOL isSendQueue;
-    NSTimer *OTATimer;
     NSURLSessionTask *sessionTask;
 }
 @property (strong, nonatomic)UIViewController *localViewController;
+@property (strong, nonatomic)NSTimer *OTATimer;
 @end
 
 @implementation ESPFBYLocalAPI
@@ -112,18 +112,10 @@
 }
 - (void)bleUpdateStatusBlock:(CBCentralManager *)central {
     NSDictionary *bleResultDic;
-    if (@available(iOS 10.0, *)) {
-        if (central.state != CBManagerStatePoweredOn) {
-            bleResultDic = @{@"enable":@false};
-        }else if (central.state != CBManagerStatePoweredOff) {
-            bleResultDic = @{@"enable":@true};
-        }
-    } else {
-        if (central.state != CBCentralManagerStatePoweredOn) {
-            bleResultDic = @{@"enable":@false};
-        }else if (central.state != CBCentralManagerStatePoweredOn) {
-            bleResultDic = @{@"enable":@true};
-        }
+    if (central.state != CBManagerStatePoweredOn) {
+        bleResultDic = @{@"enable":@false};
+    }else if (central.state != CBManagerStatePoweredOff) {
+        bleResultDic = @{@"enable":@true};
     }
     if (ValidDict(bleResultDic)) {
         [self appBleStateCallBack:bleResultDic];
@@ -465,16 +457,15 @@
         NSString* json=[ESPDataConversion jsonFromObject:startOTAArr];
         [self.delegate sendLocalMsg:@"onOTAProgressChanged" param:json];
         if (type == 0) {
-            sleep(3);
-            dispatch_queue_t queue = dispatch_queue_create("my.concurrentQueue", DISPATCH_QUEUE_CONCURRENT);
-            dispatch_async(queue, ^{
-                if (OTATimer) {
-                    [OTATimer invalidate];
-                    OTATimer=nil;
+            NSOperationQueue* op = [NSOperationQueue mainQueue];
+            [op addOperationWithBlock:^{
+                if (self.OTATimer) {
+                    [self.OTATimer invalidate];
+                    self.OTATimer = nil;
                 }
-                OTATimer=[NSTimer scheduledTimerWithTimeInterval:10 target:self selector:@selector(requestOTAProgress) userInfo:nil repeats:true];
-                [[NSRunLoop mainRunLoop] addTimer:OTATimer forMode:NSDefaultRunLoopMode];
-            });
+                self.OTATimer = [NSTimer scheduledTimerWithTimeInterval:7 target:self selector:@selector(requestOTAProgress) userInfo:nil repeats:true];
+                [[NSRunLoop mainRunLoop] addTimer:self.OTATimer forMode:NSDefaultRunLoopMode];
+            }];
         }
     } andFailure:^(int fail) {
         NSString* json=[ESPDataConversion jsonFromObject:@[]];
@@ -491,17 +482,16 @@
             [self.delegate sendLocalMsg:@"onOTAProgressChanged" param:json];
         }else if (type == 1) {
             [self.delegate sendLocalMsg:@"onOTAResult" param:json];
+            [self.OTATimer invalidate];
         }
-        [self->OTATimer invalidate];
     } andFailure:^(int fail) {
         if (fail == 8010) {
             NSString* json=[ESPDataConversion jsonFromObject:@[]];
-            [self.delegate sendLocalMsg:@"onOTAResult" param:json];
-        }else if (fail == 8011) {
+            [self.delegate sendLocalMsg:@"onOTAResult" param:json];        }else if (fail == 8011) {
             NSString* json=[ESPDataConversion jsonFromObject:@[]];
             [self.delegate sendLocalMsg:@"onOTAResult" param:json];
-            [self->OTATimer invalidate];
         }
+        [self.OTATimer invalidate];
     }];
     
 }

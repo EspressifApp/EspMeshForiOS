@@ -699,7 +699,7 @@
         }
         if (macArr.count == 1) {
             NSDictionary *resultDic = resultArr[0];
-            if ([[resultDic objectForKey:@"code"] isEqualToString:[NSString stringWithFormat:@"200"]]) {
+            if ([[resultDic objectForKey:@"status_msg"] isEqualToString:[NSString stringWithFormat:@"MDF_OK"]]) {
                 float totalSize = [[resultDic objectForKey:@"total_size"] floatValue];
                 float writtenSize = [[resultDic objectForKey:@"total_size"] floatValue];
                 int Progress = writtenSize/totalSize;
