@@ -542,7 +542,7 @@ NSString* idString;
         }else if ([lengthStr isEqual:@(YES)]) {
             length[0] = 1;
             [sendData appendData:[[NSData alloc]initWithBytes:length length:sizeof(length)]];
-            Byte data[1] = {0};
+            Byte data[1] = {1};
             [sendData appendBytes:data length:1];
         }else {
             NSData *data = [lengthStr dataUsingEncoding:NSUTF8StringEncoding];
