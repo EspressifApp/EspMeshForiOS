@@ -2,6 +2,14 @@
 [[简体中文]](updatelog-zh-rCN.md)
 # Update Log
 
+## V2.1.0:
+
+1. Fix OTA upgrade function
+
+## V2.0.1:
+
+1. Add NSLocalNetworkUsageDescription permission
+
 ## V1.1.1:
 
 1. Optimization of iOS 13.1.2 version wi-fi information acquisition failure problem

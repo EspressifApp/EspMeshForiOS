@@ -3,6 +3,14 @@
 
 # 更新记录
 
+## V2.1.0:
+
+1. 修复 OTA 升级功能
+
+## V2.0.1:
+
+1. 添加 NSLocalNetworkUsageDescription 权限
+
 ## V1.1.1:
 
 1. 优化iOS 13.1.2版本wi-fi信息获取失败问题
