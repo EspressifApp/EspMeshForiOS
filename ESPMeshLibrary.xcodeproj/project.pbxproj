@@ -1868,7 +1868,7 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl",
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.1.1;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "$(inherited)";
 				PODS_ROOT = "$(inherited)";
@@ -1911,7 +1911,7 @@
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/openssl",
 					"$(PROJECT_DIR)/ESPMeshLibrary/ESPResources/ESPMeshLibrarys/ESPTools/BLE/RSA/lib",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.1.1;
 				OTHER_LDFLAGS = "$(inherited)";
 				PODS_ROOT = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.espressif.ESPMeshLibrary;
