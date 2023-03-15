@@ -56,6 +56,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                 var self = this,
                     scanDeviceList = self.$store.state.scanDeviceList,
                     scanMacs = [], rssi = -1000, rssiMac = "", version = -1;
+                Util.setStatusBarBlue();
                 espmesh.startBleScan();
                 self.setStartTimer();
                 self.success = true;
@@ -72,6 +73,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                                 beacon = true;
                             }
                         });
+                        console.log(JSON.stringify(self.rssiList));
                         $.each(self.rssiList, function(i, item) {
                             var itemRssi = item.rssi;
                             if (itemRssi != 0 && itemRssi > rssi && scanMacs.indexOf(item.bssid) != -1 &&
@@ -142,9 +144,12 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
             onConScanBLE: function (devices) {
                 var self = this, list = [];
                 devices = JSON.parse(devices);
-                devices = Util.blueNameDecode(self, devices);
                 $.each(devices, function(i, item) {
-                    if (Util.isMesh(item.name, item.version, item.beacon)) {
+                    var name = item.name;
+                    if (self.$store.state.systemInfo == "Android") {
+                        name = Util.Base64.decode(name);
+                    }
+                    if (Util.isCloud(name, item.version, item.beacon)) {
                         list.push(item);
                     }
                 })
@@ -221,6 +226,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/conDevice.html"], function(v, MI
                 self.desc = msg;
                 self.value = 0;
                 self.count = 0;
+                if (!self.success) {
+                    Util.setStatusBarGray();
+                }
                 self.textList = [];
                 window.onConfigureProgress = self.onConfigureProgress;
             },

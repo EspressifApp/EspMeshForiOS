@@ -25,7 +25,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/blueList.html", "../js/blueConne
                     window.onScanBLE = self.onConScanBLE;
                     window.onMeshBLEDeviceConnectionChanged = self.onMeshBLEDeviceConnectionChanged;
                     setTimeout(function() {
-                        MINT.Indicator.open("设备扫描中...");
+                        MINT.Indicator.open(self.$t("scanning"));
                         window.onBackPressed = self.hide;
                         self.startBleScan();
                     });
@@ -40,7 +40,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/blueList.html", "../js/blueConne
                 showBlue: function(item) {
                     var self = this;
                     self.blueInfo = item;
-                    MINT.Indicator.open("设备连接中...");
+                    MINT.Indicator.open(self.$t("connetDeviceDesc"));
                     setTimeout(function() {
                         self.connectBlue(item);
                     }, 100)
@@ -101,27 +101,15 @@ define(["vue", "MINT", "Util", "txt!../../pages/blueList.html", "../js/blueConne
                     if (!Util._isEmpty(res)) {
                         res = JSON.parse(res);
                         if (res.connected) {
-                            MINT.Toast({
-                                message: "连接成功",
-                                position: 'bottom',
-                                duration: 2000
-                            });
+                            Util.toast(MINT, self.$t("connetSuccessDesc"))
                             setTimeout(function() {
                                 self.$refs.blueConnect.show();
                             }, 100)
                         } else {
-                            MINT.Toast({
-                                message: "连接失败",
-                                position: 'bottom',
-                                duration: 2000
-                            });
+                           Util.toast(MINT, self.$t("connetFailDesc"))
                         }
                     } else {
-                        MINT.Toast({
-                            message: "连接失败",
-                            position: 'bottom',
-                            duration: 2000
-                        });
+                        Util.toast(MINT, self.$t("connetFailDesc"))
                     }
 
                 }

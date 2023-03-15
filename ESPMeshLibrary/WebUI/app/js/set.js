@@ -1,5 +1,5 @@
-define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../js/newVersion"],
-    function(v, MINT, Util, set, aboutUs, newVersion) {
+define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../js/newVersion", "../js/privacyPolicy"],
+    function(v, MINT, Util, set, aboutUs, newVersion, privacyPolicy) {
 
     var Set = v.extend({
 
@@ -11,6 +11,7 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
                 isNewVersion: false,
                 time: 0,
                 rootMac: "",
+                playRelease: true
             }
         },
         computed: {
@@ -25,6 +26,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
         methods:{
             show: function () {
                 this.hideThis();
+                var appInfo = this.$store.state.appInfo;
+                if (appInfo.play_release) {
+                    this.playRelease = false;
+                }
                 window.onCheckAppVersion = this.onCheckAppVersion;
                 window.onGetTsfTime = this.onGetTsfTime;
                 this.flag = true;
@@ -36,16 +41,12 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
             },
             showDelay: function() {
                 var self= this;
-                MINT.MessageBox.prompt("请输入新的延时时间", "延时设置",
+                MINT.MessageBox.prompt(self.$t("enterDelay"), self.$t("delaySet"),
                     {inputValue: this.time, inputType: 'number',
                     confirmButtonText: self.$t('confirmBtn'), cancelButtonText: self.$t('cancelBtn')}).then(function(obj)  {
                     var deviceList = self.$store.state.deviceList, rootMac = "";
                     if (deviceList.length == 0) {
-                        MINT.Toast({
-                            message: "延时设置失败",
-                            position: 'bottom',
-                            duration: 2000
-                        });
+                        Util.toast(MINT, self.$t('saveFailDesc'));
                         return false;
                     }
                     self.time = parseInt(obj.value);
@@ -77,6 +78,9 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
             showAboutUs: function () {
                 this.$refs.aboutUs.show();
             },
+            showPrivacyPolicy: function() {
+                this.$refs.privacyPolicy.show();
+            },
             hideThis: function () {
                 window.onBackPressed = this.hide;
             },
@@ -89,18 +93,10 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
                     console.log(this.time);
                     this.$store.commit("setDelayTime", this.time);
                     this.$store.commit("setTsfTime", new Date().getTime() * 1000 - parseInt(res.result.tsf_time));
-                    MINT.Toast({
-                        message: "延时设置成功",
-                        position: 'bottom',
-                        duration: 2000
-                    });
+                    Util.toast(MINT, this.$t('saveSuccessDesc'));
                 } else {
                     this.time = this.$store.state.delayTime;
-                    MINT.Toast({
-                        message: "延时设置失败",
-                        position: 'bottom',
-                        duration: 2000
-                    });
+                    Util.toast(MINT, this.$t('saveFailDesc'));
                 }
             },
             onCheckAppVersion: function(res) {
@@ -124,7 +120,8 @@ define(["vue", "MINT", "Util", "txt!../../pages/set.html", "../js/aboutUs", "../
         },
         components: {
             "v-aboutUs": aboutUs,
-            "v-newVersion": newVersion
+            "v-newVersion": newVersion,
+            "v-privacyPolicy": privacyPolicy
         }
     });
     return Set;
